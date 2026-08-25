@@ -4,7 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ $title ?? config('app.name', 'DevQuestGamify') }}</title>
+        @php $appSettings = \App\Models\AppSetting::current(); @endphp
+
+        <title>{{ $title ?? $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}</title>
 
         @fonts
 
@@ -13,8 +15,11 @@
         @livewireStyles
     </head>
     <body class="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">
-            {{ config('app.name', 'DevQuestGamify') }}
+        <div class="mb-6 flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100">
+            @if ($appSettings->logo_path)
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-8 w-auto">
+            @endif
+            {{ $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}
         </div>
 
         @if (session('status'))

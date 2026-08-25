@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             BoardColumnSeeder::class,
             TaskCategorySeeder::class,
             TaskEventRuleSeeder::class,
+            TaskPriorityRuleSeeder::class,
             AchievementSeeder::class,
             TitleSeeder::class,
             ChallengeSeeder::class,

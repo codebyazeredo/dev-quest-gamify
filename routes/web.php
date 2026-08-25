@@ -5,7 +5,10 @@ use App\Livewire\Admin\Achievements as AdminAchievements;
 use App\Livewire\Admin\Categories;
 use App\Livewire\Admin\Challenges as AdminChallenges;
 use App\Livewire\Admin\EventRules;
+use App\Livewire\Admin\PriorityRules;
+use App\Livewire\Admin\Settings as AdminSettings;
 use App\Livewire\Admin\Titles as AdminTitles;
+use App\Livewire\Admin\Users as AdminUsers;
 use App\Livewire\Board\Index as BoardIndex;
 use App\Livewire\Board\Show as BoardShow;
 use App\Livewire\Checkin\History as CheckinHistory;
@@ -15,9 +18,10 @@ use App\Livewire\Gamification\Challenges;
 use App\Livewire\Gamification\Ranking;
 use App\Livewire\Gamification\Titles;
 use App\Livewire\Task\Show as TaskShow;
+use App\Models\Board;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', fn () => auth()->check() ? redirect(Board::landingUrl()) : redirect()->route('login'))->name('home');
 
 Route::get('/admin', AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.index');
 
@@ -33,6 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkin', CheckinHistory::class)->name('checkin');
 });
 
+Route::get('/admin/users', AdminUsers::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.users');
+
 Route::get('/admin/categories', Categories::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.categories');
@@ -40,6 +48,10 @@ Route::get('/admin/categories', Categories::class)
 Route::get('/admin/event-rules', EventRules::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.event-rules');
+
+Route::get('/admin/priority-rules', PriorityRules::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.priority-rules');
 
 Route::get('/admin/achievements', AdminAchievements::class)
     ->middleware(['auth', 'role:admin'])
@@ -52,5 +64,9 @@ Route::get('/admin/titles', AdminTitles::class)
 Route::get('/admin/challenges', AdminChallenges::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.challenges');
+
+Route::get('/admin/settings', AdminSettings::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.settings');
 
 require __DIR__.'/auth.php';
