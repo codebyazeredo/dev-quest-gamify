@@ -135,7 +135,7 @@ class Achievements extends Component
         $this->authorize('delete', $achievement);
 
         if ($achievement->userAchievements()->exists()) {
-            $this->addError('delete', 'Cannot delete an achievement that users have already unlocked.');
+            $this->addError('delete', 'Não é possível excluir uma conquista que usuários já desbloquearam.');
 
             return;
         }

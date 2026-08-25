@@ -10,8 +10,8 @@ enum ChallengeType: int
     public function label(): string
     {
         return match ($this) {
-            self::TASKS_COMPLETED => 'Tasks completed',
-            self::BUGS_RESOLVED => 'Bugs resolved',
+            self::TASKS_COMPLETED => 'Tarefas concluídas',
+            self::BUGS_RESOLVED => 'Bugs resolvidos',
         };
     }
 }

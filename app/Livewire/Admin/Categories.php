@@ -91,7 +91,7 @@ class Categories extends Component
         $this->authorize('delete', $category);
 
         if ($category->tasks()->exists()) {
-            $this->addError('delete', 'Cannot delete a category that still has tasks.');
+            $this->addError('delete', 'Não é possível excluir uma categoria que ainda possui tarefas.');
 
             return;
         }

@@ -80,7 +80,7 @@ class AchievementService
                     $achievement->xp_reward,
                     XpSourceType::ACHIEVEMENT,
                     $achievement->id,
-                    "Achievement unlocked - {$achievement->name}",
+                    "Conquista desbloqueada - {$achievement->name}",
                 );
             }
 

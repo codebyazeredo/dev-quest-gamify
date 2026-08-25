@@ -12,10 +12,10 @@ enum AchievementConditionType: int
     public function label(): string
     {
         return match ($this) {
-            self::BUGS_RESOLVED => 'Bugs resolved',
-            self::DEPLOYS_MADE => 'Deploys made',
-            self::TASKS_COMPLETED_IN_A_DAY => 'Tasks completed in a day',
-            self::TASKS_COMPLETED_TOTAL => 'Tasks completed',
+            self::BUGS_RESOLVED => 'Bugs resolvidos',
+            self::DEPLOYS_MADE => 'Deploys realizados',
+            self::TASKS_COMPLETED_IN_A_DAY => 'Tarefas concluídas em um dia',
+            self::TASKS_COMPLETED_TOTAL => 'Tarefas concluídas',
         };
     }
 }

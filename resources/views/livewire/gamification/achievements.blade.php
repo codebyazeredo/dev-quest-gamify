@@ -1,5 +1,5 @@
 <div>
-    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Achievements</h1>
+    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Conquistas</h1>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($achievements as $row)
@@ -21,7 +21,7 @@
                 </div>
 
                 <p class="mt-2 text-xs {{ $unlocked ? 'font-semibold text-amber-600 dark:text-amber-300' : 'text-gray-400' }}">
-                    {{ $unlocked ? 'Unlocked' : '+'.$achievement->xp_reward.' XP' }}
+                    {{ $unlocked ? 'Desbloqueada' : '+'.$achievement->xp_reward.' XP' }}
                 </p>
             </div>
         @endforeach

@@ -16,14 +16,14 @@ enum XpSourceType: int
     public function label(): string
     {
         return match ($this) {
-            self::TASK => 'Task completion',
-            self::TASK_EVENT => 'Task event',
-            self::ACHIEVEMENT => 'Achievement',
+            self::TASK => 'Conclusão de tarefa',
+            self::TASK_EVENT => 'Evento de tarefa',
+            self::ACHIEVEMENT => 'Conquista',
             self::CHECKIN => 'Check-in',
-            self::CHALLENGE => 'Challenge',
-            self::BONUS => 'Bonus',
-            self::PENALTY => 'Penalty',
-            self::ADMIN_ADJUSTMENT => 'Admin adjustment',
+            self::CHALLENGE => 'Desafio',
+            self::BONUS => 'Bônus',
+            self::PENALTY => 'Penalidade',
+            self::ADMIN_ADJUSTMENT => 'Ajuste administrativo',
         };
     }
 }

@@ -33,7 +33,7 @@ class GrantXpListener
             $rule->xp_reward,
             XpSourceType::TASK_EVENT,
             $taskEvent->id,
-            "{$taskEvent->type->label()} - Task #{$task->id}",
+            "{$taskEvent->type->label()} - Tarefa #{$task->id}",
         );
     }
 }

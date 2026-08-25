@@ -15,11 +15,11 @@ enum TaskStatus: int
     {
         return match ($this) {
             self::BACKLOG => 'Backlog',
-            self::TODO => 'To Do',
-            self::DOING => 'Doing',
-            self::REVIEW => 'Review',
-            self::TESTING => 'Testing',
-            self::DONE => 'Done',
+            self::TODO => 'A Fazer',
+            self::DOING => 'Em Andamento',
+            self::REVIEW => 'Em Revisão',
+            self::TESTING => 'Em Teste',
+            self::DONE => 'Concluído',
         };
     }
 }

@@ -4,7 +4,7 @@
     <livewire:checkin.button />
 
     <div class="mt-6">
-        <h2 class="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-100">Last 14 days</h2>
+        <h2 class="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-100">Últimos 14 dias</h2>
 
         <div class="grid grid-cols-7 gap-2">
             @foreach ($days as $day)

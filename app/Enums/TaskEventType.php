@@ -15,13 +15,13 @@ enum TaskEventType: int
     public function label(): string
     {
         return match ($this) {
-            self::STARTED => 'Started',
-            self::DEVELOPMENT_COMPLETED => 'Development completed',
-            self::REVIEW_COMPLETED => 'Review completed',
-            self::TEST_COMPLETED => 'Test completed',
-            self::HOMOLOGATION_COMPLETED => 'Homologation completed',
-            self::DEPLOYED => 'Deploy',
-            self::COMPLETED => 'Completed',
+            self::STARTED => 'Iniciado',
+            self::DEVELOPMENT_COMPLETED => 'Desenvolvimento concluído',
+            self::REVIEW_COMPLETED => 'Revisão concluída',
+            self::TEST_COMPLETED => 'Teste concluído',
+            self::HOMOLOGATION_COMPLETED => 'Homologação concluída',
+            self::DEPLOYED => 'Implantado',
+            self::COMPLETED => 'Concluído',
         };
     }
 }

@@ -105,7 +105,7 @@ class Titles extends Component
         $this->authorize('delete', $title);
 
         if ($title->userTitles()->exists()) {
-            $this->addError('delete', 'Cannot delete a title that users have already unlocked.');
+            $this->addError('delete', 'Não é possível excluir um título que usuários já desbloquearam.');
 
             return;
         }

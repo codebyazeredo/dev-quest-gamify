@@ -6,7 +6,7 @@
             <thead class="bg-gray-50 text-left text-gray-500 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
                     <th class="px-4 py-2">#</th>
-                    <th class="px-4 py-2">Name</th>
+                    <th class="px-4 py-2">Nome</th>
                     <th class="px-4 py-2">XP</th>
                 </tr>
             </thead>

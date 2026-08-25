@@ -48,7 +48,7 @@ class ChallengeService
                         $challenge->xp_reward,
                         XpSourceType::CHALLENGE,
                         $challenge->id,
-                        "Challenge completed - {$challenge->name}",
+                        "Desafio concluído - {$challenge->name}",
                     );
                 }
 

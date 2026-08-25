@@ -146,7 +146,7 @@ class Challenges extends Component
         $this->authorize('delete', $challenge);
 
         if ($challenge->userChallenges()->exists()) {
-            $this->addError('delete', 'Cannot delete a challenge that users have already made progress on.');
+            $this->addError('delete', 'Não é possível excluir um desafio no qual usuários já fizeram progresso.');
 
             return;
         }

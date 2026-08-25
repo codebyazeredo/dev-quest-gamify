@@ -39,7 +39,7 @@ class CheckinService
                 'streak_count' => $streakCount,
             ]);
 
-            $this->xpService->grant($user, self::DAILY_XP, XpSourceType::CHECKIN, $checkin->id, 'Daily check-in');
+            $this->xpService->grant($user, self::DAILY_XP, XpSourceType::CHECKIN, $checkin->id, 'Check-in diário');
 
             if ($streakCount % self::STREAK_BONUS_INTERVAL === 0) {
                 $this->xpService->grant(
@@ -47,7 +47,7 @@ class CheckinService
                     self::STREAK_BONUS_AMOUNT,
                     XpSourceType::CHECKIN,
                     $checkin->id,
-                    "{$streakCount}-day streak bonus",
+                    "Bônus de sequência de {$streakCount} dias",
                 );
 
                 event(new StreakBonusEarned($user, $streakCount, self::STREAK_BONUS_AMOUNT));

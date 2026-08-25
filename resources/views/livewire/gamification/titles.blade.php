@@ -1,8 +1,8 @@
 <div>
-    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Titles</h1>
+    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Títulos</h1>
 
     @if ($unlockedTitles->isEmpty())
-        <p class="text-sm text-gray-400">You haven't unlocked any titles yet.</p>
+        <p class="text-sm text-gray-400">Você ainda não desbloqueou nenhum título.</p>
     @else
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($unlockedTitles as $title)
@@ -16,11 +16,11 @@
 
                     @if ($selectedTitleId === $title->id)
                         <button type="button" wire:click="clearTitle" class="text-xs text-gray-500 hover:underline">
-                            Clear
+                            Remover
                         </button>
                     @else
                         <button type="button" wire:click="selectTitle({{ $title->id }})" class="rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white hover:bg-indigo-500">
-                            Select
+                            Selecionar
                         </button>
                     @endif
                 </div>

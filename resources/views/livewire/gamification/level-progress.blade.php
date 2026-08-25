@@ -7,9 +7,9 @@
     @if ($nextLevel)
         <x-progress-bar :value="$xpIntoLevel" :max="$xpForNext" />
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ number_format(max(0, $nextLevel->xp_required - $totalXp)) }} XP to Level {{ $nextLevel->level }}
+            {{ number_format(max(0, $nextLevel->xp_required - $totalXp)) }} XP para o Nível {{ $nextLevel->level }}
         </p>
     @else
-        <p class="text-xs text-gray-500 dark:text-gray-400">Max level reached.</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Nível máximo atingido.</p>
     @endif
 </div>

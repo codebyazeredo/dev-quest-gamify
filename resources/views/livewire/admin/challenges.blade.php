@@ -1,16 +1,16 @@
 <div>
-    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Challenges</h1>
+    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Desafios</h1>
 
     <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-left text-gray-500 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
-                    <th class="px-4 py-2">Name</th>
-                    <th class="px-4 py-2">Type</th>
-                    <th class="px-4 py-2">Target</th>
+                    <th class="px-4 py-2">Nome</th>
+                    <th class="px-4 py-2">Tipo</th>
+                    <th class="px-4 py-2">Meta</th>
                     <th class="px-4 py-2">XP</th>
-                    <th class="px-4 py-2">Window</th>
-                    <th class="px-4 py-2">Active</th>
+                    <th class="px-4 py-2">Janela</th>
+                    <th class="px-4 py-2">Ativo</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -42,8 +42,8 @@
                                 <input type="checkbox" wire:model="editingActive" class="rounded border-gray-300">
                             </td>
                             <td class="px-4 py-2 text-right">
-                                <button type="button" wire:click="update" class="text-indigo-600 hover:underline">Save</button>
-                                <button type="button" wire:click="cancelEdit" class="ml-2 text-gray-500 hover:underline">Cancel</button>
+                                <button type="button" wire:click="update" class="text-indigo-600 hover:underline">Salvar</button>
+                                <button type="button" wire:click="cancelEdit" class="ml-2 text-gray-500 hover:underline">Cancelar</button>
                             </td>
                         @else
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $challenge->name }}</td>
@@ -55,14 +55,14 @@
                             </td>
                             <td class="px-4 py-2">
                                 @if ($challenge->active)
-                                    <span class="text-green-600">Active</span>
+                                    <span class="text-green-600">Ativo</span>
                                 @else
-                                    <span class="text-gray-400">Inactive</span>
+                                    <span class="text-gray-400">Inativo</span>
                                 @endif
                             </td>
                             <td class="px-4 py-2 text-right">
-                                <button type="button" wire:click="edit({{ $challenge->id }})" class="text-indigo-600 hover:underline">Edit</button>
-                                <button type="button" wire:click="delete({{ $challenge->id }})" wire:confirm="Delete this challenge?" class="ml-2 text-red-600 hover:underline">Delete</button>
+                                <button type="button" wire:click="edit({{ $challenge->id }})" class="text-indigo-600 hover:underline">Editar</button>
+                                <button type="button" wire:click="delete({{ $challenge->id }})" wire:confirm="Excluir este desafio?" class="ml-2 text-red-600 hover:underline">Excluir</button>
                             </td>
                         @endif
                     </tr>
@@ -76,13 +76,13 @@
     <form wire:submit="create" class="mt-6 space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
                 <input type="text" wire:model="name" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</label>
                 <select wire:model="type" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
                     @foreach ($challengeTypes as $challengeType)
                         <option value="{{ $challengeType->value }}">{{ $challengeType->label() }}</option>
@@ -92,35 +92,35 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição</label>
             <textarea wire:model="description" rows="2" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"></textarea>
         </div>
 
         <div class="grid grid-cols-4 gap-3">
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Target</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Meta</label>
                 <input type="number" min="1" wire:model="target" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">XP reward</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Recompensa de XP</label>
                 <input type="number" min="0" wire:model="xp_reward" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Starts at</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Início</label>
                 <input type="datetime-local" wire:model="starts_at" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ends at</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fim</label>
                 <input type="datetime-local" wire:model="ends_at" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
                 @error('ends_at') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
 
         <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-            Add challenge
+            Adicionar desafio
         </button>
     </form>
 </div>

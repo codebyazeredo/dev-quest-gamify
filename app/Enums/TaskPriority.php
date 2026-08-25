@@ -12,10 +12,10 @@ enum TaskPriority: int
     public function label(): string
     {
         return match ($this) {
-            self::LOW => 'Low',
+            self::LOW => 'Baixa',
             self::NORMAL => 'Normal',
-            self::HIGH => 'High',
-            self::CRITICAL => 'Critical',
+            self::HIGH => 'Alta',
+            self::CRITICAL => 'Crítica',
         };
     }
 
