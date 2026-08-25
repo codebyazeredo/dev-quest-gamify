@@ -18,7 +18,7 @@ class Achievements extends Component
 
     public string $description = '';
 
-    public string $icon = '🏆';
+    public string $icon = 'trophy';
 
     public int $condition_type = 1;
 
@@ -32,7 +32,7 @@ class Achievements extends Component
 
     public string $editingDescription = '';
 
-    public string $editingIcon = '🏆';
+    public string $editingIcon = 'trophy';
 
     public int $editingConditionType = 1;
 
@@ -71,7 +71,7 @@ class Achievements extends Component
         ]);
 
         $this->reset('name', 'description', 'icon', 'condition_type', 'condition_value', 'xp_reward');
-        $this->icon = '🏆';
+        $this->icon = 'trophy';
         $this->condition_type = 1;
         $this->condition_value = 1;
         $this->xp_reward = 10;

@@ -38,7 +38,10 @@
                                 <button type="button" wire:click="cancelEdit" class="ml-2 text-gray-500 hover:underline">Cancel</button>
                             </td>
                         @else
-                            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $achievement->icon }} {{ $achievement->name }}</td>
+                            <td class="flex items-center gap-2 px-4 py-2 text-gray-800 dark:text-gray-100">
+                                <span class="text-amber-500"><x-icon :name="$achievement->icon" class="h-4 w-4" /></span>
+                                {{ $achievement->name }}
+                            </td>
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $achievement->condition_type->label() }} ({{ $achievement->condition_value }})</td>
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $achievement->xp_reward }}</td>
                             <td class="px-4 py-2">

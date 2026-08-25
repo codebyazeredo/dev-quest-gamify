@@ -20,7 +20,7 @@ class AchievementFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'description' => fake()->sentence(),
-            'icon' => '🏆',
+            'icon' => 'trophy',
             'condition_type' => fake()->randomElement(AchievementConditionType::cases()),
             'condition_value' => fake()->numberBetween(1, 10),
             'xp_reward' => fake()->numberBetween(10, 100),

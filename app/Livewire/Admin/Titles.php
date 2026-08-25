@@ -16,7 +16,7 @@ class Titles extends Component
 {
     public string $name = '';
 
-    public string $icon = '🎖️';
+    public string $icon = 'medal';
 
     public ?int $achievement_id = null;
 
@@ -53,7 +53,7 @@ class Titles extends Component
         ]);
 
         $this->reset('name', 'icon', 'achievement_id');
-        $this->icon = '🎖️';
+        $this->icon = 'medal';
     }
 
     public function edit(int $titleId): void

@@ -20,7 +20,7 @@ class TitleManagementTest extends TestCase
         $component = Livewire::actingAs($admin)
             ->test(Titles::class)
             ->set('name', 'Night Owl')
-            ->set('icon', '🦉')
+            ->set('icon', 'owl')
             ->call('create');
 
         $title = Title::where('name', 'Night Owl')->first();

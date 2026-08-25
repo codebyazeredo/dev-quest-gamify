@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\XpSourceType;
+use App\Events\StreakBonusEarned;
 use App\Models\DailyCheckin;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,8 @@ class CheckinService
                     $checkin->id,
                     "{$streakCount}-day streak bonus",
                 );
+
+                event(new StreakBonusEarned($user, $streakCount, self::STREAK_BONUS_AMOUNT));
             }
 
             return $checkin;

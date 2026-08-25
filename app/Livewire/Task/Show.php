@@ -4,6 +4,7 @@ namespace App\Livewire\Task;
 
 use App\Enums\TaskEventType;
 use App\Enums\XpSourceType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\XpTransaction;
@@ -16,6 +17,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 class Show extends Component
 {
+    use FlushesToasts;
+
     public Task $task;
 
     public bool $showEditModal = false;
@@ -59,6 +62,7 @@ class Show extends Component
         app(TaskService::class)->assign($this->task, auth()->user());
 
         $this->task->refresh();
+        $this->flushToasts();
     }
 
     public function assignTo(): void
@@ -73,6 +77,7 @@ class Show extends Component
 
         $this->assignToUserId = null;
         $this->task->refresh();
+        $this->flushToasts();
     }
 
     public function markHomologationCompleted(): void
@@ -82,6 +87,7 @@ class Show extends Component
         app(TaskService::class)->markHomologationCompleted($this->task, auth()->user());
 
         $this->reloadTaskEvents();
+        $this->flushToasts();
     }
 
     public function markDeployed(): void
@@ -91,6 +97,7 @@ class Show extends Component
         app(TaskService::class)->markDeployed($this->task, auth()->user());
 
         $this->reloadTaskEvents();
+        $this->flushToasts();
     }
 
     protected function reloadTaskEvents(): void

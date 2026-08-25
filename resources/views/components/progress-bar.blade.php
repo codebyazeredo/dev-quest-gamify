@@ -6,7 +6,7 @@
 
 <div>
     <div class="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-        <div class="h-full rounded-full bg-indigo-600" style="width: {{ $percent }}%"></div>
+        <div class="h-full rounded-full bg-indigo-600 transition-[width] duration-500 ease-out" style="width: {{ $percent }}%"></div>
     </div>
 
     @if ($showLabel)

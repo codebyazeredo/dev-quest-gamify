@@ -8,7 +8,9 @@
             @foreach ($unlockedTitles as $title)
                 <div class="flex items-center justify-between rounded-lg border p-4 {{ $selectedTitleId === $title->id ? 'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/20' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800' }}">
                     <div class="flex items-center gap-2">
-                        <span class="text-2xl">{{ $title->icon }}</span>
+                        <span class="text-amber-500">
+                            <x-icon :name="$title->icon" class="h-6 w-6" />
+                        </span>
                         <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $title->name }}</span>
                     </div>
 

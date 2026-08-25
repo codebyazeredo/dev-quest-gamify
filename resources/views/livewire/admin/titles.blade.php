@@ -34,7 +34,10 @@
                                 <button type="button" wire:click="cancelEdit" class="ml-2 text-gray-500 hover:underline">Cancel</button>
                             </td>
                         @else
-                            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $title->icon }} {{ $title->name }}</td>
+                            <td class="flex items-center gap-2 px-4 py-2 text-gray-800 dark:text-gray-100">
+                                <span class="text-amber-500"><x-icon :name="$title->icon" class="h-4 w-4" /></span>
+                                {{ $title->name }}
+                            </td>
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $title->achievement?->name ?? '—' }}</td>
                             <td class="px-4 py-2">
                                 @if ($title->active)

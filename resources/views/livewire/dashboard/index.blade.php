@@ -2,7 +2,10 @@
     <div>
         <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">{{ auth()->user()->name }}</h1>
         @if ($selectedTitle)
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $selectedTitle->icon }} {{ $selectedTitle->name }}</p>
+            <p class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                <span class="text-amber-500"><x-icon :name="$selectedTitle->icon" class="h-4 w-4" /></span>
+                {{ $selectedTitle->name }}
+            </p>
         @else
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->role->label() }}</p>
         @endif
@@ -39,7 +42,10 @@
         </div>
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <p class="text-xs text-gray-500 dark:text-gray-400">Streak</p>
-            <p class="text-lg font-semibold text-gray-800 dark:text-gray-100">🔥 {{ $currentStreak }}</p>
+            <p class="flex items-center gap-1.5 text-lg font-semibold text-gray-800 dark:text-gray-100">
+                <span class="text-orange-500"><x-icon name="fire" class="h-5 w-5" /></span>
+                {{ $currentStreak }}
+            </p>
         </div>
     </div>
 

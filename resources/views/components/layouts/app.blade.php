@@ -104,6 +104,60 @@
             </div>
         </div>
 
+        <div
+            x-data="{ toasts: [] }"
+            x-on:toast.window="
+                const t = { id: Date.now() + Math.random(), ...$event.detail.toast };
+                toasts.push(t);
+                setTimeout(() => { toasts = toasts.filter(x => x.id !== t.id) }, 5000);
+            "
+            class="fixed right-4 top-4 z-50 flex w-80 flex-col gap-2"
+        >
+            <template x-for="t in toasts" :key="t.id">
+                <div
+                    x-show="true"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-x-4"
+                    x-transition:enter-end="opacity-100 translate-x-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-x-0"
+                    x-transition:leave-end="opacity-0 translate-x-4"
+                    :class="{
+                        'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-100 ring-2 ring-amber-400 scale-105 dark:from-amber-900/40 dark:to-yellow-900/30 dark:border-amber-600': t.type === 'level_up',
+                        'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30': t.type === 'achievement',
+                        'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30': t.type === 'challenge',
+                        'border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/30': t.type === 'streak',
+                    }"
+                    class="flex items-start gap-3 rounded-lg border p-3 shadow-lg"
+                >
+                    <span x-show="t.type === 'level_up'" class="text-amber-500">
+                        <x-icon name="star" class="h-7 w-7" />
+                    </span>
+                    <span x-show="t.type === 'achievement'" class="text-amber-500">
+                        <x-icon name="trophy" class="h-5 w-5" />
+                    </span>
+                    <span x-show="t.type === 'challenge'" class="text-indigo-500">
+                        <x-icon name="flag" class="h-5 w-5" />
+                    </span>
+                    <span x-show="t.type === 'streak'" class="text-orange-500">
+                        <x-icon name="fire" class="h-5 w-5" />
+                    </span>
+
+                    <div class="min-w-0 flex-1">
+                        <p
+                            x-text="t.title"
+                            :class="t.type === 'level_up' ? 'text-base font-bold text-amber-700 dark:text-amber-300' : 'text-sm font-semibold text-gray-800 dark:text-gray-100'"
+                        ></p>
+                        <p x-text="t.message" class="text-xs text-gray-600 dark:text-gray-300"></p>
+                    </div>
+
+                    <button type="button" @click="toasts = toasts.filter(x => x.id !== t.id)" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        &times;
+                    </button>
+                </div>
+            </template>
+        </div>
+
         @livewireScripts
     </body>
 </html>

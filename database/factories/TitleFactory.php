@@ -19,7 +19,7 @@ class TitleFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'description' => fake()->sentence(),
-            'icon' => '🎖️',
+            'icon' => 'medal',
             'achievement_id' => null,
             'active' => true,
         ];

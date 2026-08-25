@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Checkin;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\DailyCheckin;
 use App\Services\CheckinService;
 use Illuminate\Contracts\View\View;
@@ -9,11 +10,14 @@ use Livewire\Component;
 
 class Button extends Component
 {
+    use FlushesToasts;
+
     public function checkIn(): void
     {
         app(CheckinService::class)->checkIn(auth()->user());
 
         $this->dispatch('checked-in');
+        $this->flushToasts();
     }
 
     public function render(): View

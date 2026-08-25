@@ -5,9 +5,11 @@
         @foreach ($achievements as $row)
             @php [$achievement, $unlocked, $progress] = [$row['achievement'], $row['unlocked'], $row['progress']]; @endphp
 
-            <div class="rounded-lg border p-4 {{ $unlocked ? 'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/20' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800' }}">
+            <div class="rounded-lg border p-4 {{ $unlocked ? 'border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-md shadow-amber-200/60 ring-1 ring-amber-200 dark:border-amber-700 dark:from-amber-900/30 dark:to-yellow-900/20 dark:shadow-none dark:ring-amber-800' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800' }}">
                 <div class="flex items-center gap-2">
-                    <span class="text-2xl">{{ $achievement->icon }}</span>
+                    <span class="{{ $unlocked ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500' }}">
+                        <x-icon :name="$achievement->icon" class="h-7 w-7" />
+                    </span>
                     <div>
                         <h2 class="font-semibold text-gray-800 dark:text-gray-100">{{ $achievement->name }}</h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $achievement->description }}</p>
@@ -18,7 +20,7 @@
                     <x-progress-bar :value="min($progress, $achievement->condition_value)" :max="$achievement->condition_value" />
                 </div>
 
-                <p class="mt-2 text-xs {{ $unlocked ? 'font-semibold text-indigo-600 dark:text-indigo-300' : 'text-gray-400' }}">
+                <p class="mt-2 text-xs {{ $unlocked ? 'font-semibold text-amber-600 dark:text-amber-300' : 'text-gray-400' }}">
                     {{ $unlocked ? 'Unlocked' : '+'.$achievement->xp_reward.' XP' }}
                 </p>
             </div>

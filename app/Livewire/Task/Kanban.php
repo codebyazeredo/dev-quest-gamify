@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\Task;
 use App\Services\TaskService;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Kanban extends Component
 {
+    use FlushesToasts;
+
     public Board $board;
 
     public ?int $creatingInColumnId = null;
@@ -72,6 +75,7 @@ class Kanban extends Component
         app(TaskService::class)->move($task, $column, $position, auth()->user());
 
         $this->loadBoard();
+        $this->flushToasts();
     }
 
     public function claim(int $taskId): void
@@ -83,6 +87,7 @@ class Kanban extends Component
         app(TaskService::class)->assign($task, auth()->user());
 
         $this->loadBoard();
+        $this->flushToasts();
     }
 
     public function render(): View
