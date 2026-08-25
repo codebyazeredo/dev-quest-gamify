@@ -11,9 +11,13 @@ class AchievementUnlockedNotifier
 
     public function handle(AchievementUnlocked $event): void
     {
+        if (auth()->id() !== $event->user->id) {
+            return;
+        }
+
         $this->toasts->push(
             'achievement',
-            'Achievement unlocked!',
+            'Conquista desbloqueada!',
             $event->achievement->name,
         );
     }

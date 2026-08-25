@@ -4,12 +4,11 @@ namespace App\Support;
 
 class ToastCollector
 {
-    /** @var array<int, array{type: string, title: string, message: string}> */
-    private array $toasts = [];
+    private const SESSION_KEY = 'pending_toasts';
 
     public function push(string $type, string $title, string $message): void
     {
-        $this->toasts[] = ['type' => $type, 'title' => $title, 'message' => $message];
+        session()->push(self::SESSION_KEY, ['type' => $type, 'title' => $title, 'message' => $message]);
     }
 
     /**
@@ -17,9 +16,6 @@ class ToastCollector
      */
     public function flush(): array
     {
-        $toasts = $this->toasts;
-        $this->toasts = [];
-
-        return $toasts;
+        return session()->pull(self::SESSION_KEY, []);
     }
 }

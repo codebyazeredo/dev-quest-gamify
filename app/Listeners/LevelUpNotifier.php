@@ -11,10 +11,14 @@ class LevelUpNotifier
 
     public function handle(LevelUp $event): void
     {
+        if (auth()->id() !== $event->user->id) {
+            return;
+        }
+
         $this->toasts->push(
             'level_up',
-            'LEVEL UP!',
-            "You reached Level {$event->newLevel->level}.",
+            'SUBIU DE NÍVEL!',
+            "Você alcançou o Nível {$event->newLevel->level}.",
         );
     }
 }

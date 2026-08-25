@@ -11,10 +11,14 @@ class StreakBonusNotifier
 
     public function handle(StreakBonusEarned $event): void
     {
+        if (auth()->id() !== $event->user->id) {
+            return;
+        }
+
         $this->toasts->push(
             'streak',
-            'Streak!',
-            "You completed {$event->streakCount} consecutive days. +{$event->xpAwarded} XP",
+            'Sequência!',
+            "Você completou {$event->streakCount} dias consecutivos. +{$event->xpAwarded} XP",
         );
     }
 }

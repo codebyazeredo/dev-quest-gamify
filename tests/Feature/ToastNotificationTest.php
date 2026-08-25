@@ -46,20 +46,21 @@ class ToastNotificationTest extends TestCase
     public function test_leveling_up_via_task_completion_dispatches_a_level_up_toast(): void
     {
         $developer = User::factory()->developer()->create();
-        // moved by an admin: a developer-assignee moving their own task straight
-        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
-        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
 
-        $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
+        // task already past Review: the assignee moving Testing -> Done is not a
+        // self-review sign-off, so the developer can trigger their own toast —
+        // and since the toast is now scoped to auth()->id() === $event->user->id
+        // (bugfix), the developer must be both the assignee AND the actor here
+        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
-            'column_id' => $doing->id,
-            'status' => TaskStatus::DOING,
+            'column_id' => $testing->id,
+            'status' => TaskStatus::TESTING,
             'assigned_to' => $developer->id,
             'category_id' => $category->id,
             'priority' => TaskPriority::NORMAL,
@@ -67,7 +68,7 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
         ]);
 
-        Livewire::actingAs($mover)
+        Livewire::actingAs($developer)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $done->id, 0)
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'level_up');
@@ -79,20 +80,17 @@ class ToastNotificationTest extends TestCase
         $this->seed(TitleSeeder::class);
 
         $developer = User::factory()->developer()->create();
-        // moved by an admin: a developer-assignee moving their own task straight
-        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
-        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug', 'base_points' => 10]);
 
-        $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
+        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
-            'column_id' => $doing->id,
-            'status' => TaskStatus::DOING,
+            'column_id' => $testing->id,
+            'status' => TaskStatus::TESTING,
             'assigned_to' => $developer->id,
             'category_id' => $bugCategory->id,
             // fixed low XP so the task completion + achievement unlock never also
@@ -103,7 +101,7 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
         ]);
 
-        Livewire::actingAs($mover)
+        Livewire::actingAs($developer)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $done->id, 0)
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'achievement');
@@ -114,14 +112,11 @@ class ToastNotificationTest extends TestCase
         $this->seed(ChallengeSeeder::class);
 
         $developer = User::factory()->developer()->create();
-        // moved by an admin: a developer-assignee moving their own task straight
-        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
-        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
 
-        $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
+        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         // pre-level the developer to the max seeded level so the challenge's own XP
@@ -130,13 +125,13 @@ class ToastNotificationTest extends TestCase
         // inspects the first "toast"-named dispatch, so any level_up would mask it)
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
-        $component = Livewire::actingAs($mover)->test(Kanban::class, ['board' => $board]);
+        $component = Livewire::actingAs($developer)->test(Kanban::class, ['board' => $board]);
 
         for ($i = 0; $i < 10; $i++) {
             $task = Task::factory()->create([
                 'board_id' => $board->id,
-                'column_id' => $doing->id,
-                'status' => TaskStatus::DOING,
+                'column_id' => $testing->id,
+                'status' => TaskStatus::TESTING,
                 'assigned_to' => $developer->id,
                 'category_id' => $bugCategory->id,
                 'priority' => TaskPriority::NORMAL,
@@ -165,12 +160,46 @@ class ToastNotificationTest extends TestCase
             ->call('checkIn')
             ->assertDispatched('toast', function ($name, $params) {
                 return $params['toast']['type'] === 'streak'
-                    && str_contains($params['toast']['message'], '5 consecutive days');
+                    && str_contains($params['toast']['message'], '5 dias consecutivos');
             });
     }
 
     public function test_flush_returns_empty_when_nothing_was_queued(): void
     {
         $this->assertSame([], app(ToastCollector::class)->flush());
+    }
+
+    public function test_an_actor_does_not_see_a_toast_about_someone_elses_level_up(): void
+    {
+        $developer = User::factory()->developer()->create();
+        $reviewer = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+        BoardColumn::seedDefaultsFor($board);
+        $category = TaskCategory::factory()->create(['base_points' => 100]);
+
+        $review = $board->columns->firstWhere('status', TaskStatus::REVIEW);
+        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+
+        $task = Task::factory()->create([
+            'board_id' => $board->id,
+            'column_id' => $review->id,
+            'status' => TaskStatus::REVIEW,
+            'assigned_to' => $developer->id,
+            'category_id' => $category->id,
+            'priority' => TaskPriority::NORMAL,
+            'base_points' => 100,
+            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+        ]);
+
+        // 90 + the 10 XP the REVIEW_COMPLETED threshold grants on this move = 100,
+        // exactly crossing into level 2
+        app(XpService::class)->grant($developer, 90, XpSourceType::TASK, null, 'test setup buffer');
+
+        // the reviewer's own move crosses the developer's level threshold, but
+        // the reviewer is not the subject of that LevelUp event — no toast for them
+        Livewire::actingAs($reviewer)
+            ->test(Kanban::class, ['board' => $board])
+            ->call('moveTask', $task->id, $testing->id, 0)
+            ->assertNotDispatched('toast');
     }
 }

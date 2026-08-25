@@ -11,9 +11,13 @@ class ChallengeCompletedNotifier
 
     public function handle(ChallengeCompleted $event): void
     {
+        if (auth()->id() !== $event->user->id) {
+            return;
+        }
+
         $this->toasts->push(
             'challenge',
-            'Challenge completed!',
+            'Desafio concluído!',
             $event->challenge->name,
         );
     }

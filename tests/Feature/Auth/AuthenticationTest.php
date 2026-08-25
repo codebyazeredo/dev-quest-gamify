@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Level;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -19,6 +20,10 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
+        // the login-triggered auto-checkin (see AutoCheckinOnLogin) grants XP,
+        // which requires at least one Level row to exist
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
@@ -27,7 +32,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/boards');
     }
 
     public function test_users_cannot_authenticate_with_invalid_password(): void
