@@ -2,16 +2,13 @@
 
 namespace App\Policies;
 
+use App\Enums\TaskStatus;
+use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 
 class TaskPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return true;
-    }
-
     public function view(User $user, Task $task): bool
     {
         return true;
@@ -37,22 +34,47 @@ class TaskPolicy
         return $user->isDeveloper() && $task->assigned_to === null;
     }
 
-    public function move(User $user, Task $task): bool
+    /**
+     * A move that takes the task from before Testing to Testing-or-beyond is the
+     * review sign-off (see §9: developer "não pode revisar a própria tarefa") —
+     * the assignee cannot perform it themselves; any other developer can.
+     */
+    public function move(User $user, Task $task, BoardColumn $destination): bool
+    {
+        if ($user->isAdmin() || $user->isProductOwner()) {
+            return true;
+        }
+
+        if (! $user->isDeveloper()) {
+            return false;
+        }
+
+        $isSignOff = $task->status->value < TaskStatus::TESTING->value
+            && $destination->status->value >= TaskStatus::TESTING->value;
+
+        if ($isSignOff) {
+            return $task->assigned_to !== $user->id;
+        }
+
+        return $task->assigned_to === $user->id;
+    }
+
+    public function markHomologationCompleted(User $user, Task $task): bool
+    {
+        return $this->canActOnOwnTask($user, $task);
+    }
+
+    public function markDeployed(User $user, Task $task): bool
+    {
+        return $this->canActOnOwnTask($user, $task);
+    }
+
+    private function canActOnOwnTask(User $user, Task $task): bool
     {
         if ($user->isAdmin() || $user->isProductOwner()) {
             return true;
         }
 
         return $user->isDeveloper() && $task->assigned_to === $user->id;
-    }
-
-    public function markHomologationCompleted(User $user, Task $task): bool
-    {
-        return $this->move($user, $task);
-    }
-
-    public function markDeployed(User $user, Task $task): bool
-    {
-        return $this->move($user, $task);
     }
 }

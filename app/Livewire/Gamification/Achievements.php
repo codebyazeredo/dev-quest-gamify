@@ -17,15 +17,20 @@ class Achievements extends Component
         $achievementService = app(AchievementService::class);
 
         $unlockedIds = $user->unlockedAchievements()->pluck('achievement_id')->all();
+        $cache = [];
 
         $achievements = Achievement::where('active', true)
             ->orderBy('name')
             ->get()
-            ->map(fn (Achievement $achievement) => [
-                'achievement' => $achievement,
-                'unlocked' => in_array($achievement->id, $unlockedIds, true),
-                'progress' => $achievementService->valueFor($user, $achievement->condition_type),
-            ]);
+            ->map(function (Achievement $achievement) use ($user, $unlockedIds, $achievementService, &$cache) {
+                $cache[$achievement->condition_type->value] ??= $achievementService->valueFor($user, $achievement->condition_type);
+
+                return [
+                    'achievement' => $achievement,
+                    'unlocked' => in_array($achievement->id, $unlockedIds, true),
+                    'progress' => $cache[$achievement->condition_type->value],
+                ];
+            });
 
         return view('livewire.gamification.achievements', ['achievements' => $achievements]);
     }

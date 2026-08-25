@@ -22,11 +22,15 @@ class AchievementService
     {
         $unlockedIds = UserAchievement::where('user_id', $user->id)->pluck('achievement_id');
 
+        $cache = [];
+
         Achievement::where('active', true)
             ->whereNotIn('id', $unlockedIds)
             ->get()
-            ->each(function (Achievement $achievement) use ($user) {
-                if ($this->valueFor($user, $achievement->condition_type) >= $achievement->condition_value) {
+            ->each(function (Achievement $achievement) use ($user, &$cache) {
+                $cache[$achievement->condition_type->value] ??= $this->valueFor($user, $achievement->condition_type);
+
+                if ($cache[$achievement->condition_type->value] >= $achievement->condition_value) {
                     $this->unlock($user, $achievement);
                 }
             });

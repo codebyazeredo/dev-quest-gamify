@@ -46,6 +46,9 @@ class ToastNotificationTest extends TestCase
     public function test_leveling_up_via_task_completion_dispatches_a_level_up_toast(): void
     {
         $developer = User::factory()->developer()->create();
+        // moved by an admin: a developer-assignee moving their own task straight
+        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
+        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
@@ -64,7 +67,7 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
         ]);
 
-        Livewire::actingAs($developer)
+        Livewire::actingAs($mover)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $done->id, 0)
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'level_up');
@@ -76,6 +79,9 @@ class ToastNotificationTest extends TestCase
         $this->seed(TitleSeeder::class);
 
         $developer = User::factory()->developer()->create();
+        // moved by an admin: a developer-assignee moving their own task straight
+        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
+        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug', 'base_points' => 10]);
@@ -97,7 +103,7 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
         ]);
 
-        Livewire::actingAs($developer)
+        Livewire::actingAs($mover)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $done->id, 0)
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'achievement');
@@ -108,6 +114,9 @@ class ToastNotificationTest extends TestCase
         $this->seed(ChallengeSeeder::class);
 
         $developer = User::factory()->developer()->create();
+        // moved by an admin: a developer-assignee moving their own task straight
+        // from Doing to Done would now be blocked as self-review (Fase 6 policy)
+        $mover = User::factory()->admin()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
@@ -121,7 +130,7 @@ class ToastNotificationTest extends TestCase
         // inspects the first "toast"-named dispatch, so any level_up would mask it)
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
-        $component = Livewire::actingAs($developer)->test(Kanban::class, ['board' => $board]);
+        $component = Livewire::actingAs($mover)->test(Kanban::class, ['board' => $board]);
 
         for ($i = 0; $i < 10; $i++) {
             $task = Task::factory()->create([

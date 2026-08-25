@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\Achievement;
 use App\Models\Title;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -14,6 +13,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 class Titles extends Component
 {
+    use RequiresAdminAccess;
+
     public string $name = '';
 
     public string $icon = 'medal';
@@ -32,7 +33,7 @@ class Titles extends Component
 
     public function mount(): void
     {
-        Gate::authorize('accessAdminPanel', User::class);
+        $this->ensureAdminAccess();
     }
 
     public function create(): void

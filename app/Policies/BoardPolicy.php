@@ -7,11 +7,6 @@ use App\Models\User;
 
 class BoardPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return true;
-    }
-
     public function view(User $user, Board $board): bool
     {
         return $user->isAdmin() || $board->is_active;

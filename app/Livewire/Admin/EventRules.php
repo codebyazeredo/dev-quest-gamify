@@ -2,16 +2,17 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\TaskEventRule;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
 class EventRules extends Component
 {
+    use RequiresAdminAccess;
+
     public ?int $editingId = null;
 
     public int $editingXpReward = 0;
@@ -20,7 +21,7 @@ class EventRules extends Component
 
     public function mount(): void
     {
-        Gate::authorize('accessAdminPanel', User::class);
+        $this->ensureAdminAccess();
     }
 
     public function edit(int $ruleId): void

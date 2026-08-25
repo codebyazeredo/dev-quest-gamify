@@ -70,7 +70,7 @@ class Kanban extends Component
             abort(404);
         }
 
-        $this->authorize('move', $task);
+        $this->authorize('move', [$task, $column]);
 
         app(TaskService::class)->move($task, $column, $position, auth()->user());
 

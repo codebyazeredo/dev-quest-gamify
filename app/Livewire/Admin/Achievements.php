@@ -3,10 +3,9 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\AchievementConditionType;
+use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\Achievement;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -14,6 +13,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 class Achievements extends Component
 {
+    use RequiresAdminAccess;
+
     public string $name = '';
 
     public string $description = '';
@@ -44,7 +45,7 @@ class Achievements extends Component
 
     public function mount(): void
     {
-        Gate::authorize('accessAdminPanel', User::class);
+        $this->ensureAdminAccess();
     }
 
     public function create(): void
