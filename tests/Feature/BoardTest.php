@@ -61,4 +61,33 @@ class BoardTest extends TestCase
             ->assertSee('Active Board')
             ->assertDontSee('Inactive Board');
     }
+
+    public function test_landing_url_goes_straight_to_the_single_active_board(): void
+    {
+        $board = Board::factory()->create();
+
+        $this->assertSame(route('boards.show', $board), Board::landingUrl());
+    }
+
+    public function test_landing_url_goes_to_the_index_when_there_is_no_active_board(): void
+    {
+        $this->assertSame(route('boards.index'), Board::landingUrl());
+    }
+
+    public function test_landing_url_goes_to_the_index_when_there_are_multiple_active_boards(): void
+    {
+        Board::factory()->count(2)->create();
+
+        $this->assertSame(route('boards.index'), Board::landingUrl());
+    }
+
+    public function test_root_redirects_guests_to_login_and_authenticated_users_to_the_landing_board(): void
+    {
+        $this->get('/')->assertRedirect(route('login'));
+
+        $board = Board::factory()->create();
+        $developer = User::factory()->developer()->create();
+
+        $this->actingAs($developer)->get('/')->assertRedirect(route('boards.show', $board));
+    }
 }

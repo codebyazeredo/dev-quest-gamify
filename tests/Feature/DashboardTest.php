@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\XpSourceType;
 use App\Livewire\Dashboard\Index;
 use App\Models\Level;
+use App\Models\Title;
 use App\Models\User;
 use App\Models\XpTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,5 +32,22 @@ class DashboardTest extends TestCase
         $component->assertViewHas('totalXp', 150);
         $component->assertViewHas('currentLevel', fn ($level) => $level->level === 2);
         $component->assertViewHas('rankingPosition', 2);
+    }
+
+    public function test_navbar_shows_the_users_active_title(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+        $title = Title::factory()->create(['name' => 'Code Warrior']);
+        $user = User::factory()->create(['selected_title_id' => $title->id]);
+
+        $this->actingAs($user)->get('/dashboard')->assertSee('Code Warrior');
+    }
+
+    public function test_navbar_falls_back_to_role_label_without_an_active_title(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+        $user = User::factory()->developer()->create();
+
+        $this->actingAs($user)->get('/dashboard')->assertSee('Desenvolvedor');
     }
 }

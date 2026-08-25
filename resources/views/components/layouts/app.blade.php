@@ -4,7 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ $title ?? config('app.name', 'DevQuestGamify') }}</title>
+        @php $appSettings = \App\Models\AppSetting::current(); @endphp
+
+        <title>{{ $title ?? $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}</title>
 
         @fonts
 
@@ -15,8 +17,11 @@
     <body class="bg-gray-100 dark:bg-gray-900">
         <div class="flex min-h-screen flex-col">
             <nav class="flex items-center justify-between border-b bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
-                <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                    {{ config('app.name', 'DevQuestGamify') }}
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
+                    @if ($appSettings->logo_path)
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-7 w-auto">
+                    @endif
+                    {{ $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}
                 </a>
 
                 <div class="relative" x-data="{ open: false }">
@@ -25,14 +30,21 @@
                             {{ auth()->user()->initials() }}
                         </span>
                         <span>{{ auth()->user()->name }}</span>
-                        <span class="text-xs text-gray-400">{{ auth()->user()->role->label() }}</span>
+                        @if (auth()->user()->selectedTitle)
+                            <span class="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                                <x-icon :name="auth()->user()->selectedTitle->icon" class="h-3.5 w-3.5" />
+                                {{ auth()->user()->selectedTitle->name }}
+                            </span>
+                        @else
+                            <span class="text-xs text-gray-400">{{ auth()->user()->role->label() }}</span>
+                        @endif
                     </button>
 
                     <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 rounded-md border bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
-                                Log out
+                                Sair
                             </button>
                         </form>
                     </div>
@@ -43,7 +55,7 @@
                 <aside class="w-56 border-r bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
                     <nav class="flex flex-col gap-1">
                         <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Dashboard
+                            Minha conta
                         </a>
 
                         <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
@@ -58,16 +70,8 @@
                             Check-in
                         </a>
 
-                        <a href="{{ route('achievements') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('achievements') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Achievements
-                        </a>
-
-                        <a href="{{ route('titles') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('titles') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Titles
-                        </a>
-
                         <a href="{{ route('challenges') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('challenges') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Challenges
+                            Desafios
                         </a>
 
                         @if (auth()->user()->isAdmin())
@@ -75,24 +79,36 @@
                                 Admin
                             </a>
 
+                            <a href="{{ route('admin.users') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.users') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                                Usuários
+                            </a>
+
                             <a href="{{ route('admin.categories') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.categories') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Categories
+                                Categorias
                             </a>
 
                             <a href="{{ route('admin.event-rules') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.event-rules') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Event Rules
+                                Regras de XP
+                            </a>
+
+                            <a href="{{ route('admin.priority-rules') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.priority-rules') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                                Gravidade
                             </a>
 
                             <a href="{{ route('admin.achievements') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.achievements') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Achievements
+                                Conquistas
                             </a>
 
                             <a href="{{ route('admin.titles') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.titles') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Titles
+                                Títulos
                             </a>
 
                             <a href="{{ route('admin.challenges') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.challenges') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Challenges
+                                Desafios
+                            </a>
+
+                            <a href="{{ route('admin.settings') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.settings') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                                Configurações
                             </a>
                         @endif
                     </nav>
@@ -104,13 +120,27 @@
             </div>
         </div>
 
+        @php
+            $pendingToasts = collect(session()->pull('pending_toasts', []))
+                ->values()
+                ->map(fn ($toast, $index) => [...$toast, 'id' => $index])
+                ->all();
+        @endphp
+
         <div
-            x-data="{ toasts: [] }"
-            x-on:toast.window="
-                const t = { id: Date.now() + Math.random(), ...$event.detail.toast };
-                toasts.push(t);
-                setTimeout(() => { toasts = toasts.filter(x => x.id !== t.id) }, 5000);
-            "
+            x-data="{
+                toasts: @js($pendingToasts),
+                addToast(toast) {
+                    const t = { id: Date.now() + Math.random(), ...toast };
+                    this.toasts.push(t);
+                    this.scheduleRemoval(t);
+                },
+                scheduleRemoval(t) {
+                    setTimeout(() => { this.toasts = this.toasts.filter(x => x.id !== t.id) }, 5000);
+                }
+            }"
+            x-init="toasts.forEach(t => scheduleRemoval(t))"
+            x-on:toast.window="addToast($event.detail.toast)"
             class="fixed right-4 top-4 z-50 flex w-80 flex-col gap-2"
         >
             <template x-for="t in toasts" :key="t.id">

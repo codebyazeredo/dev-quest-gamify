@@ -45,4 +45,17 @@ class Board extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    /**
+     * The board screen is the app's landing page: straight into the single
+     * active board when there's exactly one, otherwise the boards list.
+     */
+    public static function landingUrl(): string
+    {
+        $boards = static::where('is_active', true)->get();
+
+        return $boards->count() === 1
+            ? route('boards.show', $boards->first())
+            : route('boards.index');
+    }
 }
