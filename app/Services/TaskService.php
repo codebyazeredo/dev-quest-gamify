@@ -12,6 +12,7 @@ use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskEvent;
+use App\Models\TaskPriorityRule;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -43,8 +44,8 @@ class TaskService
                 'status' => $column->status,
                 'position' => $position,
                 'base_points' => $category->base_points,
-                'priority_multiplier' => $priority->multiplier(),
-                'estimated_points' => $data['estimated_points'] ?? null,
+                'priority_multiplier' => TaskPriorityRule::multiplierFor($priority),
+                'due_at' => $data['due_at'] ?? null,
             ]);
         });
     }
@@ -93,7 +94,7 @@ class TaskService
         return DB::transaction(function () use ($task, $data) {
             $task->title = $data['title'] ?? $task->title;
             $task->description = $data['description'] ?? $task->description;
-            $task->estimated_points = $data['estimated_points'] ?? $task->estimated_points;
+            $task->due_at = $data['due_at'] ?? $task->due_at;
 
             $categoryChanged = isset($data['category_id']) && (int) $data['category_id'] !== $task->category_id;
             $priorityChanged = isset($data['priority']) && (int) $data['priority'] !== $task->priority->value;
@@ -108,7 +109,7 @@ class TaskService
                 if ($priorityChanged) {
                     $priority = TaskPriority::from((int) $data['priority']);
                     $task->priority = $priority;
-                    $task->priority_multiplier = (string) $priority->multiplier();
+                    $task->priority_multiplier = (string) TaskPriorityRule::multiplierFor($priority);
                 }
             }
 
@@ -169,13 +170,15 @@ class TaskService
             $completedEvent = $this->recordEventOnce($task, TaskEventType::COMPLETED, $actor);
 
             if ($completedEvent !== null) {
-                if ($task->assigned_to !== null && $task->xpValue() > 0) {
+                $xpAwarded = $task->isLate() ? 0 : $task->xpValue();
+
+                if ($task->assigned_to !== null && $xpAwarded > 0) {
                     $this->xpService->grant(
                         $task->assignedTo,
-                        $task->xpValue(),
+                        $xpAwarded,
                         XpSourceType::TASK,
                         $task->id,
-                        "Task completed - Task #{$task->id}",
+                        "Tarefa concluída - Tarefa #{$task->id}",
                     );
                 }
 

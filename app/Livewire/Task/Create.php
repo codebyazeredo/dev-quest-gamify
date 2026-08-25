@@ -27,7 +27,7 @@ class Create extends Component
 
     public ?int $assigned_to = null;
 
-    public ?int $estimated_points = null;
+    public ?string $due_at = null;
 
     public function mount(Board $board, int $columnId): void
     {
@@ -48,7 +48,7 @@ class Create extends Component
             'category_id' => ['required', 'exists:task_categories,id'],
             'priority' => ['required', 'integer'],
             'assigned_to' => ['nullable', 'exists:users,id'],
-            'estimated_points' => ['nullable', 'integer', 'min:0'],
+            'due_at' => ['nullable', 'date'],
         ];
     }
 

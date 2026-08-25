@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  * @property int $position
  * @property int $base_points
  * @property string $priority_multiplier
- * @property int|null $estimated_points
+ * @property CarbonInterface|null $due_at
  * @property CarbonInterface|null $started_at
  * @property CarbonInterface|null $completed_at
  * @property Carbon|null $created_at
@@ -36,7 +36,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'board_id', 'column_id', 'category_id', 'assigned_to', 'created_by',
     'title', 'description', 'priority', 'status', 'position',
-    'base_points', 'priority_multiplier', 'estimated_points',
+    'base_points', 'priority_multiplier', 'due_at',
     'started_at', 'completed_at',
 ])]
 class Task extends Model
@@ -50,6 +50,7 @@ class Task extends Model
             'priority' => TaskPriority::class,
             'status' => TaskStatus::class,
             'priority_multiplier' => 'decimal:2',
+            'due_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
@@ -109,5 +110,15 @@ class Task extends Model
     public function xpValue(): int
     {
         return (int) round($this->base_points * (float) $this->priority_multiplier);
+    }
+
+    /**
+     * A task delivered after its deadline earns zero XP (see TaskService).
+     */
+    public function isLate(): bool
+    {
+        return $this->completed_at !== null
+            && $this->due_at !== null
+            && $this->completed_at->gt($this->due_at);
     }
 }

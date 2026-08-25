@@ -6,6 +6,7 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Board;
 use App\Models\BoardColumn;
+use App\Models\Level;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
@@ -95,6 +96,50 @@ class TaskServiceTest extends TestCase
         app(TaskService::class)->move($task, $todo, 0, User::factory()->create());
 
         $this->assertNotNull($task->refresh()->started_at);
+    }
+
+    public function test_completing_a_task_on_time_grants_full_xp(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+
+        $board = Board::factory()->create();
+        $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+        $done = BoardColumn::factory()->for($board)->status(TaskStatus::DONE)->create(['is_final' => true]);
+        $developer = User::factory()->developer()->create();
+        $task = $this->createTask($board, $testing, [
+            'assigned_to' => $developer->id,
+            'base_points' => 10,
+            'priority' => TaskPriority::NORMAL,
+            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'due_at' => now()->addDay(),
+        ]);
+
+        app(TaskService::class)->move($task, $done, 0, $developer);
+
+        $this->assertSame(15, $developer->xpTransactions()->sum('amount'));
+        $this->assertFalse($task->refresh()->isLate());
+    }
+
+    public function test_completing_a_task_after_the_deadline_grants_zero_xp(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+
+        $board = Board::factory()->create();
+        $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+        $done = BoardColumn::factory()->for($board)->status(TaskStatus::DONE)->create(['is_final' => true]);
+        $developer = User::factory()->developer()->create();
+        $task = $this->createTask($board, $testing, [
+            'assigned_to' => $developer->id,
+            'base_points' => 10,
+            'priority' => TaskPriority::NORMAL,
+            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'due_at' => now()->subDay(),
+        ]);
+
+        app(TaskService::class)->move($task, $done, 0, $developer);
+
+        $this->assertSame(0, $developer->xpTransactions()->sum('amount'));
+        $this->assertTrue($task->refresh()->isLate());
     }
 
     /**

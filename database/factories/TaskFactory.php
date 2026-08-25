@@ -33,7 +33,6 @@ class TaskFactory extends Factory
             'position' => 0,
             'base_points' => fake()->numberBetween(5, 20),
             'priority_multiplier' => $priority->multiplier(),
-            'estimated_points' => null,
             'started_at' => null,
             'completed_at' => null,
         ];

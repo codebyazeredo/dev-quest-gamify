@@ -21,7 +21,7 @@ class Edit extends Component
 
     public int $priority;
 
-    public ?int $estimated_points;
+    public ?string $due_at;
 
     public function mount(int $taskId): void
     {
@@ -33,7 +33,7 @@ class Edit extends Component
         $this->description = (string) $this->task->description;
         $this->category_id = $this->task->category_id;
         $this->priority = $this->task->priority->value;
-        $this->estimated_points = $this->task->estimated_points;
+        $this->due_at = $this->task->due_at?->format('Y-m-d\TH:i');
     }
 
     /**
@@ -46,7 +46,7 @@ class Edit extends Component
             'description' => ['nullable', 'string'],
             'category_id' => ['required', 'exists:task_categories,id'],
             'priority' => ['required', 'integer'],
-            'estimated_points' => ['nullable', 'integer', 'min:0'],
+            'due_at' => ['nullable', 'date'],
         ];
     }
 
