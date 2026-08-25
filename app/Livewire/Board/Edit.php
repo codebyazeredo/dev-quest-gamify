@@ -150,7 +150,7 @@ class Edit extends Component
         $column = $this->board->columns()->findOrFail($columnId);
 
         if ($column->tasks()->exists()) {
-            $this->addError('columns', 'Cannot delete a column that still has tasks.');
+            $this->addError('columns', 'Não é possível excluir uma coluna que ainda possui tarefas.');
 
             return;
         }
