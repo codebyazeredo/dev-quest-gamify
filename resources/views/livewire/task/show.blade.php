@@ -36,7 +36,7 @@
         </div>
         <div>
             <dt class="text-gray-500 dark:text-gray-400">Prioridade</dt>
-            <dd class="font-medium text-gray-800 dark:text-gray-100">{{ $task->priority->label() }}</dd>
+            <dd class="font-medium text-gray-800 dark:text-gray-100">{{ $task->priority->name }}</dd>
         </div>
         <div>
             <dt class="text-gray-500 dark:text-gray-400">Status</dt>

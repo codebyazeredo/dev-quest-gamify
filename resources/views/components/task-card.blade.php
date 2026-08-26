@@ -20,7 +20,7 @@
     <div class="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span class="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">{{ $task->category->name }}</span>
         <span class="flex items-center gap-1.5">
-            {{ $task->priority->label() }}
+            {{ $task->priority->name }}
             <x-xp-badge :amount="$task->xpValue()" />
         </span>
     </div>

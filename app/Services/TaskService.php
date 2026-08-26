@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\TaskEventType;
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Events\TaskCompleted;
@@ -14,7 +13,7 @@ use App\Models\TaskCategory;
 use App\Models\TaskEvent;
 use App\Models\TaskEventRule;
 use App\Models\TaskMovement;
-use App\Models\TaskPriorityRule;
+use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +29,7 @@ class TaskService
         return DB::transaction(function () use ($data, $creator) {
             $category = TaskCategory::findOrFail((int) $data['category_id']);
             $column = BoardColumn::findOrFail((int) $data['column_id']);
-            $priority = TaskPriority::from((int) $data['priority']);
+            $priority = TaskPriority::findOrFail((int) $data['priority_id']);
 
             $position = Task::where('column_id', $column->id)->count();
 
@@ -38,15 +37,15 @@ class TaskService
                 'board_id' => $column->board_id,
                 'column_id' => $column->id,
                 'category_id' => $category->id,
+                'priority_id' => $priority->id,
                 'assigned_to' => $data['assigned_to'] ?? null,
                 'created_by' => $creator->id,
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
-                'priority' => $priority,
                 'status' => $column->status,
                 'position' => $position,
                 'base_points' => $category->base_points,
-                'priority_multiplier' => TaskPriorityRule::multiplierFor($priority),
+                'priority_multiplier' => $priority->multiplier,
                 'due_at' => $data['due_at'] ?? null,
             ]);
         });
@@ -162,7 +161,7 @@ class TaskService
             $task->due_at = $data['due_at'] ?? $task->due_at;
 
             $categoryChanged = isset($data['category_id']) && (int) $data['category_id'] !== $task->category_id;
-            $priorityChanged = isset($data['priority']) && (int) $data['priority'] !== $task->priority->value;
+            $priorityChanged = isset($data['priority_id']) && (int) $data['priority_id'] !== $task->priority_id;
 
             if (($categoryChanged || $priorityChanged) && $task->completed_at === null) {
                 if ($categoryChanged) {
@@ -172,9 +171,9 @@ class TaskService
                 }
 
                 if ($priorityChanged) {
-                    $priority = TaskPriority::from((int) $data['priority']);
-                    $task->priority = $priority;
-                    $task->priority_multiplier = (string) TaskPriorityRule::multiplierFor($priority);
+                    $priority = TaskPriority::findOrFail((int) $data['priority_id']);
+                    $task->priority_id = $priority->id;
+                    $task->priority_multiplier = (string) $priority->multiplier;
                 }
             }
 

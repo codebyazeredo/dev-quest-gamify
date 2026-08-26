@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Services;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Level;
 use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\TaskPriority;
 use App\Models\User;
 use App\Services\TaskService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,13 +23,14 @@ class TaskServiceTest extends TestCase
         $board = Board::factory()->create();
         $column = BoardColumn::factory()->for($board)->status(TaskStatus::TODO)->create();
         $category = TaskCategory::factory()->create(['base_points' => 10]);
+        $priority = TaskPriority::factory()->create(['multiplier' => '5.00']);
         $creator = User::factory()->create();
 
         $task = app(TaskService::class)->create([
             'title' => 'Fix login bug',
             'category_id' => $category->id,
             'column_id' => $column->id,
-            'priority' => TaskPriority::CRITICAL->value,
+            'priority_id' => $priority->id,
         ], $creator);
 
         $this->assertSame(10, $task->base_points);
@@ -41,8 +42,7 @@ class TaskServiceTest extends TestCase
     {
         $task = Task::factory()->create([
             'base_points' => 10,
-            'priority' => TaskPriority::CRITICAL,
-            'priority_multiplier' => TaskPriority::CRITICAL->multiplier(),
+            'priority_multiplier' => '5.00',
         ]);
 
         $this->assertSame(50, $task->xpValue());
@@ -109,8 +109,7 @@ class TaskServiceTest extends TestCase
         $task = $this->createTask($board, $testing, [
             'assigned_to' => $developer->id,
             'base_points' => 10,
-            'priority' => TaskPriority::NORMAL,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
             'due_at' => now()->addDay(),
         ]);
 
@@ -131,8 +130,7 @@ class TaskServiceTest extends TestCase
         $task = $this->createTask($board, $testing, [
             'assigned_to' => $developer->id,
             'base_points' => 10,
-            'priority' => TaskPriority::NORMAL,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
             'due_at' => now()->subDay(),
         ]);
 

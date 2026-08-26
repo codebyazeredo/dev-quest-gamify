@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Task;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\TaskPriority;
 use App\Models\User;
 use App\Services\TaskService;
 use Illuminate\Contracts\View\View;
@@ -25,7 +25,7 @@ class Create extends Component
 
     public ?int $category_id = null;
 
-    public int $priority = 2;
+    public ?int $priority_id = null;
 
     public ?int $assigned_to = null;
 
@@ -54,7 +54,7 @@ class Create extends Component
             'title' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
             'category_id' => ['required', 'exists:task_categories,id'],
-            'priority' => ['required', 'integer'],
+            'priority_id' => ['required', 'exists:task_priorities,id'],
             'assigned_to' => ['nullable', 'exists:users,id'],
             'due_at' => ['nullable', 'date'],
         ];
@@ -85,7 +85,7 @@ class Create extends Component
     {
         return view('livewire.task.create', [
             'categories' => TaskCategory::orderBy('name')->get(),
-            'priorities' => TaskPriority::cases(),
+            'priorities' => TaskPriority::orderBy('multiplier')->get(),
             'developers' => (auth()->user()->isAdmin() || auth()->user()->isProductOwner())
                 ? User::orderBy('name')->get()
                 : collect(),

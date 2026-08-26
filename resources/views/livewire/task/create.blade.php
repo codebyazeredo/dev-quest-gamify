@@ -27,11 +27,13 @@
 
             <div>
                 <label for="task-priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
-                <select id="task-priority" wire:model="priority" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                <select id="task-priority" wire:model="priority_id" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                    <option value="">Selecionar...</option>
                     @foreach ($priorities as $priorityOption)
-                        <option value="{{ $priorityOption->value }}">{{ $priorityOption->label() }}</option>
+                        <option value="{{ $priorityOption->id }}">{{ $priorityOption->name }}</option>
                     @endforeach
                 </select>
+                @error('priority_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
 

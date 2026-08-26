@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskEventType;
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Livewire\Gamification\Achievements;
 use App\Models\Board;
@@ -51,8 +50,7 @@ class AchievementTest extends TestCase
             'status' => TaskStatus::DOING,
             'assigned_to' => $developer->id,
             'category_id' => $bugCategory->id,
-            'priority' => TaskPriority::NORMAL,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
         ]);
 
         app(TaskService::class)->move($task, $done, 0, $developer);

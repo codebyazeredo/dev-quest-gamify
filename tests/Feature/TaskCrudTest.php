@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Livewire\Task\Create;
 use App\Livewire\Task\Edit;
@@ -10,6 +9,7 @@ use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -25,12 +25,13 @@ class TaskCrudTest extends TestCase
         $board = Board::factory()->create();
         $column = BoardColumn::factory()->for($board)->status(TaskStatus::BACKLOG)->create();
         $category = TaskCategory::factory()->create(['base_points' => 20]);
+        $priority = TaskPriority::factory()->create(['multiplier' => '2.00']);
 
         Livewire::actingAs($po)
             ->test(Create::class, ['board' => $board, 'columnId' => $column->id])
             ->set('title', 'Build report')
             ->set('category_id', $category->id)
-            ->set('priority', TaskPriority::HIGH->value)
+            ->set('priority_id', $priority->id)
             ->call('save');
 
         $task = Task::where('title', 'Build report')->first();
@@ -69,9 +70,11 @@ class TaskCrudTest extends TestCase
         $po = User::factory()->productOwner()->create();
         $category = TaskCategory::factory()->create(['base_points' => 10]);
         $otherCategory = TaskCategory::factory()->create(['base_points' => 99]);
+        $priority = TaskPriority::factory()->create(['multiplier' => '1.00']);
+        $otherPriority = TaskPriority::factory()->create(['multiplier' => '5.00']);
         $task = Task::factory()->create([
             'category_id' => $category->id,
-            'priority' => TaskPriority::LOW,
+            'priority_id' => $priority->id,
             'base_points' => 10,
             'priority_multiplier' => 1.00,
             'completed_at' => now(),
@@ -80,7 +83,7 @@ class TaskCrudTest extends TestCase
         Livewire::actingAs($po)
             ->test(Edit::class, ['taskId' => $task->id])
             ->set('category_id', $otherCategory->id)
-            ->set('priority', TaskPriority::CRITICAL->value)
+            ->set('priority_id', $otherPriority->id)
             ->call('save');
 
         $task->refresh();

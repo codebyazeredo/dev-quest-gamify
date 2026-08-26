@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\TaskFactory;
@@ -18,11 +17,11 @@ use Illuminate\Support\Carbon;
  * @property int $board_id
  * @property int $column_id
  * @property int $category_id
+ * @property int $priority_id
  * @property int|null $assigned_to
  * @property int $created_by
  * @property string $title
  * @property string|null $description
- * @property TaskPriority $priority
  * @property TaskStatus $status
  * @property int $position
  * @property int $base_points
@@ -37,8 +36,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
-    'board_id', 'column_id', 'category_id', 'assigned_to', 'created_by',
-    'title', 'description', 'priority', 'status', 'position',
+    'board_id', 'column_id', 'category_id', 'priority_id', 'assigned_to', 'created_by',
+    'title', 'description', 'status', 'position',
     'base_points', 'priority_multiplier', 'due_at',
     'rejection_reason', 'rejected_at', 'approved_by',
     'started_at', 'completed_at',
@@ -51,7 +50,6 @@ class Task extends Model
     protected function casts(): array
     {
         return [
-            'priority' => TaskPriority::class,
             'status' => TaskStatus::class,
             'priority_multiplier' => 'decimal:2',
             'due_at' => 'datetime',
@@ -83,6 +81,14 @@ class Task extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(TaskCategory::class, 'category_id');
+    }
+
+    /**
+     * @return BelongsTo<TaskPriority, $this>
+     */
+    public function priority(): BelongsTo
+    {
+        return $this->belongsTo(TaskPriority::class, 'priority_id');
     }
 
     /**

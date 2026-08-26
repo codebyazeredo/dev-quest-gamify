@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Task;
 
-use App\Enums\TaskPriority;
 use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\TaskPriority;
 use App\Services\TaskService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -19,7 +19,7 @@ class Edit extends Component
 
     public int $category_id;
 
-    public int $priority;
+    public int $priority_id;
 
     public ?string $due_at;
 
@@ -32,7 +32,7 @@ class Edit extends Component
         $this->title = $this->task->title;
         $this->description = (string) $this->task->description;
         $this->category_id = $this->task->category_id;
-        $this->priority = $this->task->priority->value;
+        $this->priority_id = $this->task->priority_id;
         $this->due_at = $this->task->due_at?->format('Y-m-d\TH:i');
     }
 
@@ -45,7 +45,7 @@ class Edit extends Component
             'title' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
             'category_id' => ['required', 'exists:task_categories,id'],
-            'priority' => ['required', 'integer'],
+            'priority_id' => ['required', 'exists:task_priorities,id'],
             'due_at' => ['nullable', 'date'],
         ];
     }
@@ -70,7 +70,7 @@ class Edit extends Component
     {
         return view('livewire.task.edit', [
             'categories' => TaskCategory::orderBy('name')->get(),
-            'priorities' => TaskPriority::cases(),
+            'priorities' => TaskPriority::orderBy('multiplier')->get(),
             'locked' => $this->task->completed_at !== null,
         ]);
     }

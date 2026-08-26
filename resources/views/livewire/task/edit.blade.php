@@ -25,9 +25,9 @@
 
             <div>
                 <label for="edit-task-priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
-                <select id="edit-task-priority" wire:model="priority" @disabled($locked) class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                <select id="edit-task-priority" wire:model="priority_id" @disabled($locked) class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
                     @foreach ($priorities as $priorityOption)
-                        <option value="{{ $priorityOption->value }}">{{ $priorityOption->label() }}</option>
+                        <option value="{{ $priorityOption->id }}">{{ $priorityOption->name }}</option>
                     @endforeach
                 </select>
             </div>

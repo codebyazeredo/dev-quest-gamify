@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Livewire\Checkin\Button;
@@ -64,9 +63,8 @@ class ToastNotificationTest extends TestCase
             'status' => TaskStatus::APPROVED,
             'assigned_to' => $developer->id,
             'category_id' => $category->id,
-            'priority' => TaskPriority::NORMAL,
             'base_points' => 100,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
         ]);
 
         Livewire::actingAs($developer)
@@ -97,9 +95,8 @@ class ToastNotificationTest extends TestCase
             // fixed low XP so the task completion + achievement unlock never also
             // cross a level threshold — assertDispatched only inspects the first
             // "toast"-named dispatch, so a level_up would mask the achievement toast
-            'priority' => TaskPriority::NORMAL,
             'base_points' => 10,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
         ]);
 
         Livewire::actingAs($developer)
@@ -135,8 +132,7 @@ class ToastNotificationTest extends TestCase
                 'status' => TaskStatus::APPROVED,
                 'assigned_to' => $developer->id,
                 'category_id' => $bugCategory->id,
-                'priority' => TaskPriority::NORMAL,
-                'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+                'priority_multiplier' => '1.50',
             ]);
 
             $component->call('moveTask', $task->id, $done->id, 0);
@@ -187,9 +183,8 @@ class ToastNotificationTest extends TestCase
             'status' => TaskStatus::REVIEW,
             'assigned_to' => $developer->id,
             'category_id' => $category->id,
-            'priority' => TaskPriority::NORMAL,
             'base_points' => 100,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
         ]);
 
         // 90 + the 10 XP the REVIEW_COMPLETED threshold grants on this move = 100,

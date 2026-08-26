@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskEventType;
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Events\TaskCompleted;
@@ -12,6 +11,7 @@ use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskEvent;
+use App\Models\TaskPriority;
 use App\Models\User;
 use App\Services\TaskService;
 use Database\Seeders\LevelSeeder;
@@ -90,8 +90,7 @@ class TaskEventTest extends TestCase
             'status' => TaskStatus::TODO,
             'assigned_to' => $developer->id,
             'category_id' => $category->id,
-            'priority' => TaskPriority::NORMAL,
-            'priority_multiplier' => TaskPriority::NORMAL->multiplier(),
+            'priority_multiplier' => '1.50',
             'base_points' => 10,
         ]);
 
@@ -113,8 +112,7 @@ class TaskEventTest extends TestCase
             'status' => TaskStatus::TESTING,
             'assigned_to' => $developer->id,
             'base_points' => 10,
-            'priority' => TaskPriority::LOW,
-            'priority_multiplier' => TaskPriority::LOW->multiplier(),
+            'priority_multiplier' => '1.00',
         ]);
 
         app(TaskService::class)->move($task, $this->columnFor($board, TaskStatus::DONE), 0, $developer);
