@@ -6,7 +6,7 @@
 
         @php $appSettings = \App\Models\AppSetting::current(); @endphp
 
-        <title>{{ $title ?? $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}</title>
+        <title>{{ $title ?? $appSettings->company_name ?: config('app.name', 'Dev Quest') }}</title>
 
         @fonts
 
@@ -19,7 +19,7 @@
             @if ($appSettings->logo_path)
                 <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-8 w-auto">
             @endif
-            {{ $appSettings->company_name ?: config('app.name', 'DevQuestGamify') }}
+            {{ $appSettings->company_name ?: config('app.name', 'Dev Quest') }}
         </div>
 
         @if (session('status'))
