@@ -26,9 +26,13 @@
 
                 <div class="relative" x-data="{ open: false }">
                     <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
-                            {{ auth()->user()->initials() }}
-                        </span>
+                        @if (auth()->user()->person?->foto_path)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
+                        @else
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
+                                {{ auth()->user()->initials() }}
+                            </span>
+                        @endif
                         <span>{{ auth()->user()->name }}</span>
                         @if (auth()->user()->selectedTitle)
                             <span class="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
