@@ -14,125 +14,95 @@
 
         @livewireStyles
     </head>
-    <body class="h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
-        <div class="flex h-screen flex-col">
-            <nav class="flex items-center justify-between border-b bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
-                    @if ($appSettings->logo_path)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-7 w-auto">
-                    @endif
-                    {{ $appSettings->company_name ?: config('app.name', 'Dev Quest') }}
-                </a>
-
-                <div class="relative" x-data="{ open: false }">
-                    <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
-                        @if (auth()->user()->person?->foto_path)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
-                        @else
-                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
-                                {{ auth()->user()->initials() }}
-                            </span>
-                        @endif
-                        <span>{{ auth()->user()->name }}</span>
-                        @if (auth()->user()->selectedTitle)
-                            <span class="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-                                <x-icon :name="auth()->user()->selectedTitle->icon" class="h-3.5 w-3.5" />
-                                {{ auth()->user()->selectedTitle->name }}
-                            </span>
-                        @else
-                            <span class="text-xs text-gray-400">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
-                        @endif
+    <body class="h-screen overflow-hidden bg-surface text-ink">
+        <div x-data="{ sidebarOpen: false }" class="flex h-screen flex-col">
+            <nav class="flex items-center justify-between border-b border-line bg-card px-4 py-3 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="sidebarOpen = true" class="rounded-md p-1.5 text-ink-muted hover:bg-line/30 lg:hidden" aria-label="Abrir menu">
+                        <x-icon name="menu" class="h-5 w-5" />
                     </button>
 
-                    <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 rounded-md border bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Minha conta
-                        </a>
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-bold tracking-tight text-ink">
+                        @if ($appSettings->logo_path)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-7 w-auto">
+                        @endif
+                        {{ $appSettings->company_name ?: config('app.name', 'Dev Quest') }}
+                    </a>
+                </div>
 
-                        <a href="{{ route('ranking') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('ranking') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Ranking
-                        </a>
+                <div class="flex items-center gap-1">
+                    <div class="relative" x-data="{ open: false }">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-ink hover:bg-line/30">
+                            @if (auth()->user()->person?->foto_path)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
+                            @else
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
+                                    {{ auth()->user()->initials() }}
+                                </span>
+                            @endif
+                            <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
+                            @if (auth()->user()->selectedTitle)
+                                <span class="hidden items-center gap-1 text-xs font-medium text-gold sm:flex">
+                                    <x-icon :name="auth()->user()->selectedTitle->icon" class="h-3.5 w-3.5" />
+                                    {{ auth()->user()->selectedTitle->name }}
+                                </span>
+                            @else
+                                <span class="hidden text-xs text-ink-muted sm:inline">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
+                            @endif
+                        </button>
 
-                        <a href="{{ route('checkin') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('checkin') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Check-in
-                        </a>
+                        <div x-show="open" x-cloak x-transition class="absolute right-0 mt-2 w-48 rounded-xl border border-line bg-card py-1 shadow-lg">
+                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('dashboard') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                                Minha conta
+                            </a>
 
-                        <a href="{{ route('challenges') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('challenges') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Desafios
-                        </a>
+                            <a href="{{ route('ranking') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('ranking') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                                Ranking
+                            </a>
 
-                        <hr class="my-1 border-gray-200 dark:border-gray-700">
+                            <a href="{{ route('checkin') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('checkin') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                                Check-in
+                            </a>
 
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
-                                Sair
-                            </button>
-                        </form>
+                            <a href="{{ route('challenges') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('challenges') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                                Desafios
+                            </a>
+
+                            <hr class="my-1 border-line">
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-ink hover:bg-line/30">
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </nav>
 
             <div class="flex flex-1 min-h-0">
-                <aside class="w-56 shrink-0 overflow-y-auto border-r bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
-                    <nav class="flex flex-col gap-1">
-                        <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Quadros
-                        </a>
+                <div x-show="sidebarOpen" x-cloak x-transition.opacity @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-ink/50 lg:hidden"></div>
 
-                        @if (auth()->user()->isAdmin())
-                            @php
-                                $navLink = fn (string $route, string $label) => [
-                                    'route' => $route,
-                                    'label' => $label,
-                                    'active' => request()->routeIs($route),
-                                ];
-                                $gestaoLinks = [
-                                    $navLink('admin.users', 'Usuários'),
-                                    $navLink('admin.people', 'Pessoas'),
-                                    $navLink('admin.roles', 'Roles'),
-                                ];
-                                $gamificacaoLinks = [
-                                    $navLink('admin.categories', 'Categorias'),
-                                    $navLink('admin.event-rules', 'Regras de XP'),
-                                    $navLink('admin.priority-rules', 'Gravidade'),
-                                    $navLink('admin.achievements', 'Conquistas'),
-                                    $navLink('admin.titles', 'Títulos'),
-                                    $navLink('admin.challenges', 'Desafios'),
-                                ];
-                                $sistemaLinks = [
-                                    $navLink('admin.settings', 'Configurações'),
-                                ];
-                            @endphp
-
-                            <x-sidebar-group label="Gestão" :active="collect($gestaoLinks)->contains('active', true)">
-                                @foreach ($gestaoLinks as $link)
-                                    <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                        {{ $link['label'] }}
-                                    </a>
-                                @endforeach
-                            </x-sidebar-group>
-
-                            <x-sidebar-group label="Gamificação" :active="collect($gamificacaoLinks)->contains('active', true)">
-                                @foreach ($gamificacaoLinks as $link)
-                                    <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                        {{ $link['label'] }}
-                                    </a>
-                                @endforeach
-                            </x-sidebar-group>
-
-                            <x-sidebar-group label="Sistema" :active="collect($sistemaLinks)->contains('active', true)">
-                                @foreach ($sistemaLinks as $link)
-                                    <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                        {{ $link['label'] }}
-                                    </a>
-                                @endforeach
-                            </x-sidebar-group>
-                        @endif
-                    </nav>
+                <aside
+                    x-show="sidebarOpen"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-x-4"
+                    x-transition:enter-end="opacity-100 translate-x-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-x-0"
+                    x-transition:leave-end="opacity-0 -translate-x-4"
+                    class="fixed inset-y-0 left-0 z-50 w-64 shrink-0 overflow-y-auto border-r border-line bg-card px-4 py-6 lg:hidden"
+                >
+                    <x-sidebar-nav />
                 </aside>
 
-                <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-6">
+                <aside class="hidden shrink-0 overflow-y-auto border-r border-line bg-card px-4 py-6 lg:block lg:w-56">
+                    <x-sidebar-nav />
+                </aside>
+
+                <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
                     {{ $slot }}
                 </main>
             </div>
@@ -160,7 +130,7 @@
             }"
             x-init="toasts.forEach(t => scheduleRemoval(t))"
             x-on:toast.window="addToast($event.detail.toast)"
-            class="fixed right-4 top-4 z-50 flex w-80 flex-col gap-2"
+            class="fixed right-4 top-4 z-[60] flex w-80 flex-col gap-2"
         >
             <template x-for="t in toasts" :key="t.id">
                 <div
@@ -172,43 +142,43 @@
                     x-transition:leave-start="opacity-100 translate-x-0"
                     x-transition:leave-end="opacity-0 translate-x-4"
                     :class="{
-                        'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-100 ring-2 ring-amber-400 scale-105 dark:from-amber-900/40 dark:to-yellow-900/30 dark:border-amber-600': t.type === 'level_up',
-                        'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30': t.type === 'achievement',
-                        'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30': t.type === 'challenge',
-                        'border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/30': t.type === 'streak',
-                        'border-rose-300 bg-rose-50 dark:border-rose-700 dark:bg-rose-900/30': t.type === 'error',
-                        'border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-900/30': t.type === 'checkin',
+                        'border-gold bg-gold/10 ring-2 ring-gold scale-105': t.type === 'level_up',
+                        'border-gold/40 bg-gold/10': t.type === 'achievement',
+                        'border-accent/40 bg-accent/10': t.type === 'challenge',
+                        'border-amber-clay/40 bg-amber-clay/10': t.type === 'streak',
+                        'border-terracotta/40 bg-terracotta/10': t.type === 'error',
+                        'border-forest/40 bg-forest/10': t.type === 'checkin',
                     }"
-                    class="flex items-start gap-3 rounded-lg border p-3 shadow-lg"
+                    class="flex items-start gap-3 rounded-xl border p-3 shadow-lg bg-card"
                 >
-                    <span x-show="t.type === 'level_up'" class="text-amber-500">
+                    <span x-show="t.type === 'level_up'" class="text-gold">
                         <x-icon name="star" class="h-7 w-7" />
                     </span>
-                    <span x-show="t.type === 'achievement'" class="text-amber-500">
+                    <span x-show="t.type === 'achievement'" class="text-gold">
                         <x-icon name="trophy" class="h-5 w-5" />
                     </span>
-                    <span x-show="t.type === 'challenge'" class="text-indigo-500">
+                    <span x-show="t.type === 'challenge'" class="text-accent">
                         <x-icon name="flag" class="h-5 w-5" />
                     </span>
-                    <span x-show="t.type === 'streak'" class="text-orange-500">
+                    <span x-show="t.type === 'streak'" class="text-amber-clay">
                         <x-icon name="fire" class="h-5 w-5" />
                     </span>
-                    <span x-show="t.type === 'error'" class="text-rose-500">
+                    <span x-show="t.type === 'error'" class="text-terracotta">
                         <x-icon name="alert" class="h-5 w-5" />
                     </span>
-                    <span x-show="t.type === 'checkin'" class="text-emerald-500">
+                    <span x-show="t.type === 'checkin'" class="text-forest">
                         <x-icon name="check" class="h-5 w-5" />
                     </span>
 
                     <div class="min-w-0 flex-1">
                         <p
                             x-text="t.title"
-                            :class="t.type === 'level_up' ? 'text-base font-bold text-amber-700 dark:text-amber-300' : 'text-sm font-semibold text-gray-800 dark:text-gray-100'"
+                            :class="t.type === 'level_up' ? 'text-base font-bold text-gold' : 'text-sm font-semibold text-ink'"
                         ></p>
-                        <p x-text="t.message" class="text-xs text-gray-600 dark:text-gray-300"></p>
+                        <p x-text="t.message" class="text-xs text-ink-muted"></p>
                     </div>
 
-                    <button type="button" @click="toasts = toasts.filter(x => x.id !== t.id)" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <button type="button" @click="toasts = toasts.filter(x => x.id !== t.id)" class="text-ink-muted hover:text-ink">
                         &times;
                     </button>
                 </div>

@@ -93,4 +93,16 @@
             <path d="M6 9l6 6 6-6" />
         </svg>
         @break
+
+    @case('menu')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        @break
+
+    @case('close')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <path d="M6 6l12 12M18 6l-12 12" />
+        </svg>
+        @break
 @endswitch

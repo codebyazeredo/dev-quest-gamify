@@ -1,7 +1,17 @@
 @theme {
-    --color-grayish: #d4cdc5;
-    --color-air-force-blue: #5b88a5;
-    --color-ivory: #f4f4f2;
-    --color-black-rose: #191013;
-    --color-midnight-blue: #243a69;
+    /* structure */
+    --color-surface: #f6f7f9;
+    --color-card: #ffffff;
+    --color-ink: #1b2733;
+    --color-ink-muted: #64748b;
+    --color-line: #e2e5ea;
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-accent: #7c6fe0;
+
+    /* status / labels */
+    --color-gold: #d4a017;
+    --color-forest: #16803d;
+    --color-terracotta: #dc2626;
+    --color-amber-clay: #ea7c1e;
 }

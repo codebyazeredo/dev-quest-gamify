@@ -1,10 +1,27 @@
 @props(['title', 'maxWidth' => 'max-w-md'])
 
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-    <div class="w-full {{ $maxWidth }} rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-        @if ($title)
-            <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $title }}</h2>
-        @endif
+<div x-data="{ show: false }" x-init="show = true" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div
+        x-show="show"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        class="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+    ></div>
+
+    <div
+        x-show="show"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        class="relative w-full {{ $maxWidth }} rounded-2xl bg-card p-6 shadow-2xl"
+    >
+        <div class="mb-4 flex items-start justify-between gap-4">
+            <h2 class="text-lg font-bold tracking-tight text-ink">{{ $title }}</h2>
+            <button type="button" x-on:click="$dispatch('close-modal')" title="Fechar" aria-label="Fechar" class="shrink-0 rounded-full p-1 text-ink-muted hover:bg-line/30">
+                <x-icon name="close" class="h-5 w-5" />
+            </button>
+        </div>
 
         {{ $slot }}
     </div>
