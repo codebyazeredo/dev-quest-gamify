@@ -3,7 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\ChallengeType;
-use App\Livewire\Admin\Challenges;
+use App\Livewire\Admin\Challenges\Create;
+use App\Livewire\Admin\Challenges\Edit;
+use App\Livewire\Admin\Challenges\Index;
 use App\Models\Challenge;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,25 +20,40 @@ class ChallengeManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $component = Livewire::actingAs($admin)
-            ->test(Challenges::class)
+        Livewire::actingAs($admin)
+            ->test(Create::class)
             ->set('name', 'Sprint Push')
             ->set('type', ChallengeType::TASKS_COMPLETED->value)
             ->set('target', 3)
             ->set('xp_reward', 40)
-            ->call('create');
+            ->call('save');
 
         $challenge = Challenge::where('name', 'Sprint Push')->first();
         $this->assertNotNull($challenge);
 
-        $component->call('edit', $challenge->id)
-            ->set('editingName', 'Sprint Push II')
-            ->call('update');
+        Livewire::actingAs($admin)
+            ->test(Edit::class, ['challengeId' => $challenge->id])
+            ->set('name', 'Sprint Push II')
+            ->call('save');
 
         $this->assertSame('Sprint Push II', $challenge->refresh()->name);
 
-        $component->call('delete', $challenge->id);
+        Livewire::actingAs($admin)
+            ->test(Index::class)
+            ->call('delete', $challenge->id);
+
         $this->assertNull(Challenge::find($challenge->id));
+    }
+
+    public function test_index_paginates_the_list(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Challenge::factory()->count(20)->create();
+
+        $challenges = Livewire::actingAs($admin)->test(Index::class)->viewData('challenges');
+
+        $this->assertSame(15, $challenges->count());
+        $this->assertTrue($challenges->hasMorePages());
     }
 
     public function test_developer_gets_forbidden_on_the_route(): void
@@ -53,7 +70,7 @@ class ChallengeManagementTest extends TestCase
         $developer = User::factory()->developer()->create();
 
         Livewire::actingAs($developer)
-            ->test(Challenges::class)
+            ->test(Index::class)
             ->assertForbidden();
     }
 }
