@@ -1,4 +1,8 @@
 <div>
+    <a href="{{ route('dashboard') }}" class="mb-4 inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+        ← Minha conta
+    </a>
+
     <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Títulos</h1>
 
     @if ($unlockedTitles->isEmpty())
@@ -15,7 +19,7 @@
                     </div>
 
                     @if ($selectedTitleId === $title->id)
-                        <button type="button" wire:click="clearTitle" class="text-xs text-gray-500 hover:underline">
+                        <button type="button" wire:click="clearTitle" class="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                             Remover
                         </button>
                     @else
