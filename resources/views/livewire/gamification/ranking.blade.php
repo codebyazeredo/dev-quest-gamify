@@ -1,5 +1,16 @@
 <div>
-    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Ranking</h1>
+    <h1 class="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-100">Ranking</h1>
+
+    <div class="mb-6 flex gap-2">
+        <button type="button" wire:click="setRole('dev')"
+            class="rounded-md px-4 py-2 text-sm font-medium {{ $activeRole === 'dev' ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+            Desenvolvedores
+        </button>
+        <button type="button" wire:click="setRole('tester')"
+            class="rounded-md px-4 py-2 text-sm font-medium {{ $activeRole === 'tester' ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+            Testes
+        </button>
+    </div>
 
     <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
         <table class="w-full text-sm">
@@ -11,7 +22,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @foreach ($users as $index => $user)
+                @forelse ($users as $index => $user)
                     @php
                         $rank = $users->firstItem() + $index;
                         $medalColor = match ($rank) {
@@ -32,7 +43,11 @@
                         <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $user->name }}</td>
                         <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ number_format($user->total_xp ?? 0) }}</td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Ninguém neste ranking ainda.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
