@@ -3,7 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\XpSourceType;
-use App\Livewire\Admin\Users;
+use App\Livewire\Admin\Users\Create;
+use App\Livewire\Admin\Users\Edit;
+use App\Livewire\Admin\Users\Index;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,14 +22,14 @@ class UserManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $person = Person::factory()->create(['nome' => 'Nova Pessoa']);
 
-        $component = Livewire::actingAs($admin)
-            ->test(Users::class)
+        Livewire::actingAs($admin)
+            ->test(Create::class)
             ->set('personId', $person->id)
             ->set('email', 'nova@devquestgamify.test')
             ->set('password', 'super-secret-1')
             ->set('password_confirmation', 'super-secret-1')
             ->set('roles', ['dev'])
-            ->call('create');
+            ->call('save');
 
         $user = User::where('email', 'nova@devquestgamify.test')->first();
         $this->assertNotNull($user);
@@ -35,17 +37,21 @@ class UserManagementTest extends TestCase
         $this->assertTrue($user->isDeveloper());
         $this->assertTrue(Hash::check('super-secret-1', $user->password));
 
-        $component->call('edit', $user->id)
-            ->set('editingEmail', 'atualizada@devquestgamify.test')
-            ->set('editingRoles', ['product_owner'])
-            ->call('update');
+        Livewire::actingAs($admin)
+            ->test(Edit::class, ['userId' => $user->id])
+            ->set('email', 'atualizada@devquestgamify.test')
+            ->set('roles', ['product_owner'])
+            ->call('save');
 
         $user->refresh();
         $this->assertSame('atualizada@devquestgamify.test', $user->email);
         $this->assertTrue($user->isProductOwner());
         $this->assertFalse($user->isDeveloper());
 
-        $component->call('delete', $user->id);
+        Livewire::actingAs($admin)
+            ->test(Index::class)
+            ->call('delete', $user->id);
+
         $this->assertNull(User::find($user->id));
     }
 
@@ -55,13 +61,13 @@ class UserManagementTest extends TestCase
         $existing = User::factory()->developer()->create();
 
         Livewire::actingAs($admin)
-            ->test(Users::class)
+            ->test(Create::class)
             ->set('personId', $existing->person_id)
             ->set('email', 'duplicado@devquestgamify.test')
             ->set('password', 'super-secret-1')
             ->set('password_confirmation', 'super-secret-1')
             ->set('roles', ['dev'])
-            ->call('create')
+            ->call('save')
             ->assertHasErrors(['personId']);
 
         $this->assertNull(User::where('email', 'duplicado@devquestgamify.test')->first());
@@ -78,10 +84,21 @@ class UserManagementTest extends TestCase
         ]);
 
         Livewire::actingAs($admin)
-            ->test(Users::class)
+            ->test(Index::class)
             ->call('delete', $developer->id);
 
         $this->assertNotNull(User::find($developer->id));
+    }
+
+    public function test_index_paginates_the_list(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->developer()->count(20)->create();
+
+        $users = Livewire::actingAs($admin)->test(Index::class)->viewData('users');
+
+        $this->assertSame(15, $users->count());
+        $this->assertTrue($users->hasMorePages());
     }
 
     public function test_developer_gets_forbidden_on_the_route(): void
@@ -98,7 +115,7 @@ class UserManagementTest extends TestCase
         $developer = User::factory()->developer()->create();
 
         Livewire::actingAs($developer)
-            ->test(Users::class)
+            ->test(Index::class)
             ->assertForbidden();
     }
 }
