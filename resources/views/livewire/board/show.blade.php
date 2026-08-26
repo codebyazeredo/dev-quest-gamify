@@ -1,4 +1,4 @@
-<div>
+<div class="flex flex-1 min-h-0 flex-col">
     <div class="mb-6 flex items-center justify-between">
         <div>
             <a href="{{ route('boards.index') }}" class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">

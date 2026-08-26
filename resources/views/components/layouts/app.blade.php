@@ -14,8 +14,8 @@
 
         @livewireStyles
     </head>
-    <body class="bg-gray-100 dark:bg-gray-900">
-        <div class="flex min-h-screen flex-col">
+    <body class="h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
+        <div class="flex h-screen flex-col">
             <nav class="flex items-center justify-between border-b bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
                     @if ($appSettings->logo_path)
@@ -51,8 +51,8 @@
                 </div>
             </nav>
 
-            <div class="flex flex-1">
-                <aside class="w-56 border-r bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex flex-1 min-h-0">
+                <aside class="w-56 shrink-0 overflow-y-auto border-r bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
                     <nav class="flex flex-col gap-1">
                         <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
                             Minha conta
@@ -122,7 +122,7 @@
                     </nav>
                 </aside>
 
-                <main class="min-w-0 flex-1 p-6">
+                <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-6">
                     {{ $slot }}
                 </main>
             </div>
