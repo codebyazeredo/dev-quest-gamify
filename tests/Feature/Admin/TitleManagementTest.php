@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\Titles;
+use App\Livewire\Admin\Titles\Create;
+use App\Livewire\Admin\Titles\Edit;
+use App\Livewire\Admin\Titles\Index;
 use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,23 +19,38 @@ class TitleManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $component = Livewire::actingAs($admin)
-            ->test(Titles::class)
+        Livewire::actingAs($admin)
+            ->test(Create::class)
             ->set('name', 'Night Owl')
             ->set('icon', 'owl')
-            ->call('create');
+            ->call('save');
 
         $title = Title::where('name', 'Night Owl')->first();
         $this->assertNotNull($title);
 
-        $component->call('edit', $title->id)
-            ->set('editingName', 'Night Owl Supreme')
-            ->call('update');
+        Livewire::actingAs($admin)
+            ->test(Edit::class, ['titleId' => $title->id])
+            ->set('name', 'Night Owl Supreme')
+            ->call('save');
 
         $this->assertSame('Night Owl Supreme', $title->refresh()->name);
 
-        $component->call('delete', $title->id);
+        Livewire::actingAs($admin)
+            ->test(Index::class)
+            ->call('delete', $title->id);
+
         $this->assertNull(Title::find($title->id));
+    }
+
+    public function test_index_paginates_the_list(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Title::factory()->count(20)->create();
+
+        $titles = Livewire::actingAs($admin)->test(Index::class)->viewData('titles');
+
+        $this->assertSame(15, $titles->count());
+        $this->assertTrue($titles->hasMorePages());
     }
 
     public function test_developer_gets_forbidden_on_the_route(): void
@@ -50,7 +67,7 @@ class TitleManagementTest extends TestCase
         $developer = User::factory()->developer()->create();
 
         Livewire::actingAs($developer)
-            ->test(Titles::class)
+            ->test(Index::class)
             ->assertForbidden();
     }
 }
