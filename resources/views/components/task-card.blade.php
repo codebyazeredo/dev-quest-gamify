@@ -11,7 +11,7 @@
         </a>
 
         @can('update', $task)
-            <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" class="shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" class="shrink-0 rounded border border-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                 Editar
             </button>
         @endcan

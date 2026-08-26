@@ -20,14 +20,14 @@
                                 @error('editingMultiplier') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </td>
                             <td class="px-4 py-2 text-right">
-                                <button type="button" wire:click="update" class="text-indigo-600 hover:underline">Salvar</button>
-                                <button type="button" wire:click="cancelEdit" class="ml-2 text-gray-500 hover:underline">Cancelar</button>
+                                <button type="button" wire:click="update" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500">Salvar</button>
+                                <button type="button" wire:click="cancelEdit" class="ml-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">Cancelar</button>
                             </td>
                         @else
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $row['priority']->label() }}</td>
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ number_format($row['multiplier'], 2) }}×</td>
                             <td class="px-4 py-2 text-right">
-                                <button type="button" wire:click="edit({{ $row['priority']->value }})" class="text-indigo-600 hover:underline">Editar</button>
+                                <button type="button" wire:click="edit({{ $row['priority']->value }})" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">Editar</button>
                             </td>
                         @endif
                     </tr>
