@@ -17,7 +17,7 @@ class PermissionLabel
             'create-task' => 'Criar tarefa',
             'move-task' => 'Mover tarefa',
             'test-task' => 'Testar tarefa',
-            'manage-board' => 'Gerenciar board',
+            'manage-board' => 'Gerenciar quadros',
             'assign-task' => 'Atribuir tarefa',
             'manage-users' => 'Gerenciar usuários',
             'manage-people' => 'Gerenciar pessoas',

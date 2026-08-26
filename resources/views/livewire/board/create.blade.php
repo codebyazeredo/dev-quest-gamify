@@ -1,4 +1,4 @@
-<x-modal title="Novo board">
+<x-modal title="Novo quadro">
     <form wire:submit="save" class="space-y-4">
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
@@ -24,7 +24,7 @@
                 Cancelar
             </button>
             <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                Criar board
+                Criar quadro
             </button>
         </div>
     </form>

@@ -1,4 +1,4 @@
-<x-modal title="Editar board" max-width="max-w-2xl">
+<x-modal title="Editar quadro" max-width="max-w-2xl">
     <form wire:submit="save" class="space-y-4">
         <div>
             <label for="edit-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>

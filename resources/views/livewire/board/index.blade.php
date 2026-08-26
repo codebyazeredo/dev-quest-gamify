@@ -1,10 +1,10 @@
 <div>
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Boards</h1>
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Quadros</h1>
 
         @can('create', \App\Models\Board::class)
             <button type="button" wire:click="toggleCreate" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                + Novo board
+                + Novo quadro
             </button>
         @endcan
     </div>
