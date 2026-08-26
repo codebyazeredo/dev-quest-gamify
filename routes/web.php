@@ -4,7 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Livewire\Admin\Achievements\Index as AdminAchievements;
 use App\Livewire\Admin\Categories\Index as AdminCategories;
 use App\Livewire\Admin\Challenges\Index as AdminChallenges;
-use App\Livewire\Admin\EventRules;
+use App\Livewire\Admin\EventRules\Index as AdminEventRules;
 use App\Livewire\Admin\People\Index as AdminPeople;
 use App\Livewire\Admin\PriorityRules;
 use App\Livewire\Admin\Roles\Index as AdminRoles;
@@ -51,7 +51,7 @@ Route::get('/admin/categories', AdminCategories::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.categories');
 
-Route::get('/admin/event-rules', EventRules::class)
+Route::get('/admin/event-rules', AdminEventRules::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.event-rules');
 
