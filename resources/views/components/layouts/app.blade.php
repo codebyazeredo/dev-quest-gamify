@@ -148,6 +148,7 @@
                     this.scheduleRemoval(t);
                 },
                 scheduleRemoval(t) {
+                    if (t.type === 'checkin') return;
                     setTimeout(() => { this.toasts = this.toasts.filter(x => x.id !== t.id) }, 5000);
                 }
             }"
@@ -170,6 +171,7 @@
                         'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30': t.type === 'challenge',
                         'border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/30': t.type === 'streak',
                         'border-rose-300 bg-rose-50 dark:border-rose-700 dark:bg-rose-900/30': t.type === 'error',
+                        'border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-900/30': t.type === 'checkin',
                     }"
                     class="flex items-start gap-3 rounded-lg border p-3 shadow-lg"
                 >
@@ -187,6 +189,9 @@
                     </span>
                     <span x-show="t.type === 'error'" class="text-rose-500">
                         <x-icon name="alert" class="h-5 w-5" />
+                    </span>
+                    <span x-show="t.type === 'checkin'" class="text-emerald-500">
+                        <x-icon name="check" class="h-5 w-5" />
                     </span>
 
                     <div class="min-w-0 flex-1">

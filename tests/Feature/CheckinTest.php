@@ -55,4 +55,24 @@ class CheckinTest extends TestCase
         $this->assertDatabaseCount('daily_checkins', 1);
         $this->assertSame(1, $developer->xpTransactions()->sum('amount'));
     }
+
+    public function test_checking_in_dispatches_a_persistent_checkin_toast(): void
+    {
+        $developer = User::factory()->developer()->create();
+
+        Livewire::actingAs($developer)
+            ->test(Button::class)
+            ->call('checkIn')
+            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'checkin');
+    }
+
+    public function test_a_repeat_check_in_the_same_day_does_not_dispatch_another_checkin_toast(): void
+    {
+        $developer = User::factory()->developer()->create();
+
+        $component = Livewire::actingAs($developer)->test(Button::class);
+        $component->call('checkIn');
+
+        $component->call('checkIn')->assertNotDispatched('toast');
+    }
 }
