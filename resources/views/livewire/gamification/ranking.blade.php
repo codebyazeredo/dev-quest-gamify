@@ -10,6 +10,10 @@
             class="rounded-md px-4 py-2 text-sm font-medium {{ $activeRole === 'tester' ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700' }}">
             Testes
         </button>
+        <button type="button" wire:click="setRole('suporte')"
+            class="rounded-md px-4 py-2 text-sm font-medium {{ $activeRole === 'suporte' ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+            Suporte
+        </button>
     </div>
 
     <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">

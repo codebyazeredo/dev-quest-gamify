@@ -33,6 +33,7 @@ class LevelProgress extends Component
             'nextLevel' => $nextLevel,
             'xpIntoLevel' => $xpIntoLevel,
             'xpForNext' => $xpForNext,
+            'participatesInLeveling' => $levelService->participatesInLeveling($user),
         ]);
     }
 }

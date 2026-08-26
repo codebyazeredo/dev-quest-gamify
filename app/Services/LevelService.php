@@ -21,16 +21,23 @@ class LevelService
     }
 
     /**
-     * Admins are the game's GM — always shown at max level, regardless of
-     * their actual XP total (which is left untouched, no fake XP is granted).
+     * Admin/PO are leadership, not players — always shown at max level,
+     * regardless of their actual XP total (which is left untouched, no fake
+     * XP is granted). Leveling is the motivation mechanic for the roles that
+     * actually execute the work (dev/tester/suporte) — see participatesInLeveling().
      */
     public function currentLevelFor(User $user): Level
     {
-        if ($user->isAdmin()) {
+        if (! $this->participatesInLeveling($user)) {
             return $this->maxLevel();
         }
 
         return $this->levelForTotalXp($this->totalXpFor($user));
+    }
+
+    public function participatesInLeveling(User $user): bool
+    {
+        return ! ($user->isAdmin() || $user->isProductOwner());
     }
 
     public function maxLevel(): Level

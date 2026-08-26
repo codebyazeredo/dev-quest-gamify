@@ -61,7 +61,7 @@ class LevelServiceTest extends TestCase
         $this->assertNull($service->nextLevelFor($level3));
     }
 
-    public function test_current_level_for_returns_max_level_for_admins_regardless_of_real_xp(): void
+    public function test_current_level_for_returns_max_level_for_admins_and_product_owners_regardless_of_real_xp(): void
     {
         Level::factory()->create(['level' => 1, 'xp_required' => 0]);
         Level::factory()->create(['level' => 2, 'xp_required' => 100]);
@@ -69,22 +69,36 @@ class LevelServiceTest extends TestCase
 
         $admin = User::factory()->admin()->create();
         XpTransaction::factory()->create(['user_id' => $admin->id, 'amount' => 1]);
+        $po = User::factory()->productOwner()->create();
+        XpTransaction::factory()->create(['user_id' => $po->id, 'amount' => 1]);
 
         $service = app(LevelService::class);
 
         $this->assertSame($maxLevel->level, $service->currentLevelFor($admin)->level);
         $this->assertNull($service->nextLevelFor($service->currentLevelFor($admin)));
+        $this->assertSame($maxLevel->level, $service->currentLevelFor($po)->level);
         // the real XP total is untouched — only the displayed level is short-circuited
         $this->assertSame(1, $service->totalXpFor($admin));
+        $this->assertSame(1, $service->totalXpFor($po));
+
+        $this->assertFalse($service->participatesInLeveling($admin));
+        $this->assertFalse($service->participatesInLeveling($po));
     }
 
-    public function test_current_level_for_a_non_admin_still_reflects_real_xp(): void
+    public function test_current_level_for_a_dev_tester_or_suporte_still_reflects_real_xp(): void
     {
         Level::factory()->create(['level' => 1, 'xp_required' => 0]);
         Level::factory()->create(['level' => 2, 'xp_required' => 100]);
 
         $developer = User::factory()->developer()->create();
+        $tester = User::factory()->tester()->create();
+        $suporte = User::factory()->suporte()->create();
 
-        $this->assertSame(1, app(LevelService::class)->currentLevelFor($developer)->level);
+        $service = app(LevelService::class);
+
+        $this->assertSame(1, $service->currentLevelFor($developer)->level);
+        $this->assertTrue($service->participatesInLeveling($developer));
+        $this->assertTrue($service->participatesInLeveling($tester));
+        $this->assertTrue($service->participatesInLeveling($suporte));
     }
 }
