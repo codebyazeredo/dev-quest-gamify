@@ -35,9 +35,13 @@ class Create extends Component
      */
     protected function rules(): array
     {
+        $isPercentage = $this->type !== null && TaskEventType::from($this->type)->isPercentageBased();
+
         return [
             'type' => ['required', 'integer'],
-            'xp_reward' => ['required', 'integer', 'min:0'],
+            'xp_reward' => array_filter([
+                'required', 'integer', 'min:0', $isPercentage ? 'max:100' : null,
+            ]),
         ];
     }
 

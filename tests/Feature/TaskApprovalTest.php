@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TaskEventType;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Livewire\Task\Kanban;
@@ -9,6 +10,7 @@ use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
+use App\Models\TaskEventRule;
 use App\Models\User;
 use App\Models\XpTransaction;
 use Database\Seeders\LevelSeeder;
@@ -157,5 +159,65 @@ class TaskApprovalTest extends TestCase
             ->call('markDeployed');
 
         $this->assertGreaterThan(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
+    }
+
+    public function test_tester_bonus_scales_as_a_percentage_of_the_tasks_own_xp_value(): void
+    {
+        TaskEventRule::where('type', TaskEventType::APPROVED)->update(['xp_reward' => 50]);
+
+        $tester = User::factory()->tester()->create();
+        $assignee = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+        BoardColumn::seedDefaultsFor($board);
+        $task = $this->taskInTesting($board, $assignee);
+        $task->update(['base_points' => 20, 'priority_multiplier' => '2.00']);
+
+        Livewire::actingAs($tester)->test(Show::class, ['task' => $task])->call('approve');
+        Livewire::actingAs($assignee)
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted');
+
+        // xpValue() = 20 * 2.00 = 40; 50% of that = 20
+        $this->assertSame(20, (int) XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
+    }
+
+    public function test_creator_is_rewarded_a_percentage_of_the_tasks_value_once_it_completes(): void
+    {
+        TaskEventRule::where('type', TaskEventType::CREATION_COMPLETED)->update(['xp_reward' => 25]);
+
+        $creator = User::factory()->suporte()->create();
+        $assignee = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+        BoardColumn::seedDefaultsFor($board);
+        $task = $this->taskInTesting($board, $assignee);
+        $task->update(['created_by' => $creator->id, 'base_points' => 20, 'priority_multiplier' => '2.00']);
+
+        Livewire::actingAs(User::factory()->tester()->create())->test(Show::class, ['task' => $task])->call('approve');
+        Livewire::actingAs($assignee)
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted');
+
+        // xpValue() = 20 * 2.00 = 40; 25% of that = 10
+        $this->assertSame(10, (int) XpTransaction::where('user_id', $creator->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
+    }
+
+    public function test_late_task_zeroes_the_tester_and_creator_bonuses_too(): void
+    {
+        $tester = User::factory()->tester()->create();
+        $creator = User::factory()->suporte()->create();
+        $assignee = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+        BoardColumn::seedDefaultsFor($board);
+        $task = $this->taskInTesting($board, $assignee);
+        $task->update(['created_by' => $creator->id, 'due_at' => now()->subDay()]);
+
+        Livewire::actingAs($tester)->test(Show::class, ['task' => $task])->call('approve');
+        Livewire::actingAs($assignee)
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted');
+
+        $this->assertTrue($task->refresh()->isLate());
+        $this->assertSame(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
+        $this->assertSame(0, XpTransaction::where('user_id', $creator->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
     }
 }

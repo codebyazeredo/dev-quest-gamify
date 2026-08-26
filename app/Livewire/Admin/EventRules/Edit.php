@@ -31,7 +31,9 @@ class Edit extends Component
     protected function rules(): array
     {
         return [
-            'xp_reward' => ['required', 'integer', 'min:0'],
+            'xp_reward' => array_filter([
+                'required', 'integer', 'min:0', $this->rule->type->isPercentageBased() ? 'max:100' : null,
+            ]),
         ];
     }
 

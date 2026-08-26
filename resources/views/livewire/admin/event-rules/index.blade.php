@@ -28,7 +28,7 @@
                         <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $type->label() }}</td>
                         <td class="px-4 py-2 text-gray-800 dark:text-gray-100">
                             @if ($rule)
-                                {{ $rule->xp_reward }}
+                                {{ $rule->xp_reward }}{{ $type->isPercentageBased() ? '% do valor da tarefa' : ' XP' }}
                             @else
                                 <span class="text-xs text-gray-400">Não configurado</span>
                             @endif

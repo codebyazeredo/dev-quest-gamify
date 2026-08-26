@@ -17,6 +17,9 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Recompensa de XP</label>
                 <input type="number" min="0" wire:model="xp_reward" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Para "Aprovado pelo testador" e "Tarefa criada concluída", o valor é uma porcentagem (0-100) do XP da tarefa. Para os demais eventos, é XP fixo.
+                </p>
                 @error('xp_reward') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 

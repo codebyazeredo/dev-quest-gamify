@@ -125,21 +125,30 @@ class TaskEventTest extends TestCase
         ]);
     }
 
-    public function test_unassigned_task_completion_records_events_but_grants_no_xp(): void
+    public function test_unassigned_task_completion_grants_no_completion_bonus_but_still_rewards_the_creator(): void
     {
         $board = $this->boardWithStandardColumns();
         $admin = User::factory()->admin()->create();
+        $creator = User::factory()->create();
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $this->columnFor($board, TaskStatus::TODO)->id,
             'status' => TaskStatus::TODO,
             'assigned_to' => null,
+            'created_by' => $creator->id,
         ]);
 
         app(TaskService::class)->move($task, $this->columnFor($board, TaskStatus::DONE), 0, $admin);
 
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::COMPLETED->value]);
-        $this->assertDatabaseCount('xp_transactions', 0);
+        // nobody was assigned, so there's no completion bonus to grant — but the
+        // creator's % bonus (see TaskService::grantDeferredCreatorXp()) doesn't
+        // depend on there being an assignee at all
+        $this->assertDatabaseCount('xp_transactions', 1);
+        $this->assertDatabaseHas('xp_transactions', [
+            'user_id' => $creator->id,
+            'source_type' => XpSourceType::TASK_EVENT->value,
+        ]);
     }
 
     protected function boardWithStandardColumns(): Board
