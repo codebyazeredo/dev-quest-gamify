@@ -9,7 +9,8 @@ enum TaskStatus: int
     case DOING = 3;
     case REVIEW = 4;
     case TESTING = 5;
-    case DONE = 6;
+    case APPROVED = 6;
+    case DONE = 7;
 
     public function label(): string
     {
@@ -19,6 +20,7 @@ enum TaskStatus: int
             self::DOING => 'Em Andamento',
             self::REVIEW => 'Em Revisão',
             self::TESTING => 'Em Teste',
+            self::APPROVED => 'Aprovado',
             self::DONE => 'Concluído',
         };
     }

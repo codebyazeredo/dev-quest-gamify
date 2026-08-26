@@ -2,10 +2,14 @@
 
 namespace App\Livewire\Task;
 
+use App\Enums\TaskStatus;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
+use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Services\TaskService;
+use App\Support\ToastCollector;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -70,12 +74,32 @@ class Kanban extends Component
             abort(404);
         }
 
-        $this->authorize('move', [$task, $column]);
+        try {
+            $this->authorize('move', [$task, $column]);
+        } catch (AuthorizationException) {
+            app(ToastCollector::class)->push('error', 'Movimento não permitido', $this->moveDenialMessage($task, $column));
+            $this->flushToasts();
+
+            return;
+        }
 
         app(TaskService::class)->move($task, $column, $position, auth()->user());
 
         $this->loadBoard();
         $this->flushToasts();
+    }
+
+    private function moveDenialMessage(Task $task, BoardColumn $column): string
+    {
+        if ($column->status === TaskStatus::APPROVED) {
+            return 'A coluna "Aprovado" só é alcançada aprovando a tarefa em teste.';
+        }
+
+        if ($task->status === TaskStatus::TESTING) {
+            return 'Tarefas em teste só saem por aprovação ou reprovação do testador.';
+        }
+
+        return 'Você não tem permissão para mover esta tarefa para esta coluna.';
     }
 
     public function claim(int $taskId): void

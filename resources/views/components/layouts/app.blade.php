@@ -165,6 +165,7 @@
                         'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30': t.type === 'achievement',
                         'border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30': t.type === 'challenge',
                         'border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/30': t.type === 'streak',
+                        'border-rose-300 bg-rose-50 dark:border-rose-700 dark:bg-rose-900/30': t.type === 'error',
                     }"
                     class="flex items-start gap-3 rounded-lg border p-3 shadow-lg"
                 >
@@ -179,6 +180,9 @@
                     </span>
                     <span x-show="t.type === 'streak'" class="text-orange-500">
                         <x-icon name="fire" class="h-5 w-5" />
+                    </span>
+                    <span x-show="t.type === 'error'" class="text-rose-500">
+                        <x-icon name="alert" class="h-5 w-5" />
                     </span>
 
                     <div class="min-w-0 flex-1">

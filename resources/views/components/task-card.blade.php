@@ -25,6 +25,12 @@
         </span>
     </div>
 
+    @if ($task->rejection_reason)
+        <span class="mt-2 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
+            Reprovada
+        </span>
+    @endif
+
     @if ($task->isLate())
         <span class="mt-2 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
             Atrasada

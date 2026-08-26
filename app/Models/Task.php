@@ -28,6 +28,9 @@ use Illuminate\Support\Carbon;
  * @property int $base_points
  * @property string $priority_multiplier
  * @property CarbonInterface|null $due_at
+ * @property string|null $rejection_reason
+ * @property CarbonInterface|null $rejected_at
+ * @property int|null $approved_by
  * @property CarbonInterface|null $started_at
  * @property CarbonInterface|null $completed_at
  * @property Carbon|null $created_at
@@ -37,6 +40,7 @@ use Illuminate\Support\Carbon;
     'board_id', 'column_id', 'category_id', 'assigned_to', 'created_by',
     'title', 'description', 'priority', 'status', 'position',
     'base_points', 'priority_multiplier', 'due_at',
+    'rejection_reason', 'rejected_at', 'approved_by',
     'started_at', 'completed_at',
 ])]
 class Task extends Model
@@ -51,6 +55,7 @@ class Task extends Model
             'status' => TaskStatus::class,
             'priority_multiplier' => 'decimal:2',
             'due_at' => 'datetime',
+            'rejected_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
@@ -102,6 +107,22 @@ class Task extends Model
     public function taskEvents(): HasMany
     {
         return $this->hasMany(TaskEvent::class)->orderBy('occurred_at');
+    }
+
+    /**
+     * @return HasMany<TaskMovement, $this>
+     */
+    public function movements(): HasMany
+    {
+        return $this->hasMany(TaskMovement::class)->orderBy('created_at');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     /**

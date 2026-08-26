@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Enums\TaskEventType;
 use App\Enums\XpSourceType;
 use App\Events\TaskEventCreated;
 use App\Models\TaskEventRule;
@@ -14,6 +15,12 @@ class GrantXpListener
     public function handle(TaskEventCreated $event): void
     {
         $taskEvent = $event->taskEvent;
+
+        if ($taskEvent->type === TaskEventType::APPROVED) {
+            // Testers only earn XP once the task actually reaches completion,
+            // not at the moment of approval — see TaskService::grantDeferredTesterXp().
+            return;
+        }
 
         $rule = TaskEventRule::where('type', $taskEvent->type)->first();
 

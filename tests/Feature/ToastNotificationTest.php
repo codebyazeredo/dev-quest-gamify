@@ -50,17 +50,18 @@ class ToastNotificationTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
 
-        // task already past Review: the assignee moving Testing -> Done is not a
-        // self-review sign-off, so the developer can trigger their own toast —
-        // and since the toast is now scoped to auth()->id() === $event->user->id
-        // (bugfix), the developer must be both the assignee AND the actor here
-        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+        // task already approved by a tester: the assignee moving Aprovado -> Done
+        // is a normal completion move, not a self-review sign-off, so the
+        // developer can trigger their own toast — and since the toast is now
+        // scoped to auth()->id() === $event->user->id (bugfix), the developer
+        // must be both the assignee AND the actor here
+        $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
-            'column_id' => $testing->id,
-            'status' => TaskStatus::TESTING,
+            'column_id' => $approved->id,
+            'status' => TaskStatus::APPROVED,
             'assigned_to' => $developer->id,
             'category_id' => $category->id,
             'priority' => TaskPriority::NORMAL,
@@ -84,13 +85,13 @@ class ToastNotificationTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug', 'base_points' => 10]);
 
-        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+        $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
-            'column_id' => $testing->id,
-            'status' => TaskStatus::TESTING,
+            'column_id' => $approved->id,
+            'status' => TaskStatus::APPROVED,
             'assigned_to' => $developer->id,
             'category_id' => $bugCategory->id,
             // fixed low XP so the task completion + achievement unlock never also
@@ -116,7 +117,7 @@ class ToastNotificationTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
 
-        $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+        $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         // pre-level the developer to the max seeded level so the challenge's own XP
@@ -130,8 +131,8 @@ class ToastNotificationTest extends TestCase
         for ($i = 0; $i < 10; $i++) {
             $task = Task::factory()->create([
                 'board_id' => $board->id,
-                'column_id' => $testing->id,
-                'status' => TaskStatus::TESTING,
+                'column_id' => $approved->id,
+                'status' => TaskStatus::APPROVED,
                 'assigned_to' => $developer->id,
                 'category_id' => $bugCategory->id,
                 'priority' => TaskPriority::NORMAL,

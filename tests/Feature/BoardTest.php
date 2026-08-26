@@ -27,7 +27,7 @@ class BoardTest extends TestCase
         $board = Board::where('name', 'New Board')->first();
 
         $this->assertNotNull($board);
-        $this->assertSame(6, $board->columns()->count());
+        $this->assertSame(7, $board->columns()->count());
     }
 
     public function test_developer_cannot_create_board(): void

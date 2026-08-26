@@ -16,12 +16,20 @@ class TaskPolicy
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isProductOwner();
+        return $user->isAdmin() || $user->isProductOwner() || $user->isSuporte();
     }
 
     public function update(User $user, Task $task): bool
     {
-        return $user->isAdmin() || $user->isProductOwner();
+        if ($user->isAdmin() || $user->isProductOwner()) {
+            return true;
+        }
+
+        if ($user->isSuporte()) {
+            return $task->status === TaskStatus::BACKLOG;
+        }
+
+        return false;
     }
 
     public function assignAny(User $user): bool
@@ -38,9 +46,21 @@ class TaskPolicy
      * A move that takes the task from before Testing to Testing-or-beyond is the
      * review sign-off (see §9: developer "não pode revisar a própria tarefa") —
      * the assignee cannot perform it themselves; any other developer can.
+     *
+     * Testing is a checkpoint, not a regular column: nobody exits it through a
+     * generic drag, and nobody enters "Aprovado" that way either — both only
+     * happen through the dedicated approve()/reject() actions below.
      */
     public function move(User $user, Task $task, BoardColumn $destination): bool
     {
+        if ($destination->status === TaskStatus::APPROVED) {
+            return false;
+        }
+
+        if ($task->status === TaskStatus::TESTING && $destination->status !== TaskStatus::TESTING) {
+            return false;
+        }
+
         if ($user->isAdmin() || $user->isProductOwner()) {
             return true;
         }
@@ -50,13 +70,37 @@ class TaskPolicy
         }
 
         $isSignOff = $task->status->value < TaskStatus::TESTING->value
-            && $destination->status->value >= TaskStatus::TESTING->value;
+            && $destination->status === TaskStatus::TESTING;
 
         if ($isSignOff) {
             return $task->assigned_to !== $user->id;
         }
 
         return $task->assigned_to === $user->id;
+    }
+
+    /**
+     * Approving/rejecting out of Testing is the tester's anti-cheat checkpoint:
+     * even a user who is both Dev and Tester cannot sign off on their own
+     * assigned task (see §6 — role stacking must not bypass this rule).
+     */
+    public function approve(User $user, Task $task): bool
+    {
+        return $this->canApproveOrReject($user, $task);
+    }
+
+    public function reject(User $user, Task $task): bool
+    {
+        return $this->canApproveOrReject($user, $task);
+    }
+
+    private function canApproveOrReject(User $user, Task $task): bool
+    {
+        if ($user->isAdmin() || $user->isProductOwner()) {
+            return true;
+        }
+
+        return $user->isTester() && $task->assigned_to !== $user->id;
     }
 
     public function markHomologationCompleted(User $user, Task $task): bool

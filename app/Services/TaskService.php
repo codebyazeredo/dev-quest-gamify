@@ -12,6 +12,8 @@ use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskEvent;
+use App\Models\TaskEventRule;
+use App\Models\TaskMovement;
 use App\Models\TaskPriorityRule;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -50,12 +52,19 @@ class TaskService
         });
     }
 
-    public function move(Task $task, BoardColumn $destination, int $position, User $actor): Task
+    public function move(Task $task, BoardColumn $destination, int $position, User $actor, ?string $note = null): Task
     {
-        return DB::transaction(function () use ($task, $destination, $position, $actor) {
+        return DB::transaction(function () use ($task, $destination, $position, $actor, $note) {
             $previousStatus = $task->status;
+            $previousColumnId = $task->column_id;
+            $changingColumn = $previousColumnId !== $destination->id;
 
-            if ($task->column_id === $destination->id) {
+            if ($previousStatus === TaskStatus::TODO && $destination->status !== TaskStatus::TODO) {
+                $task->rejection_reason = null;
+                $task->rejected_at = null;
+            }
+
+            if (! $changingColumn) {
                 $this->reorderWithinColumn($task, $position);
             } else {
                 $this->closeGap($task->column_id, $task->position);
@@ -73,10 +82,66 @@ class TaskService
             $task->save();
             $task->refresh();
 
+            if ($changingColumn) {
+                TaskMovement::create([
+                    'task_id' => $task->id,
+                    'from_column_id' => $previousColumnId,
+                    'to_column_id' => $destination->id,
+                    'user_id' => $actor->id,
+                    'note' => $note,
+                    'created_at' => now(),
+                ]);
+            }
+
             $this->recordLifecycleEvents($task, $destination, $previousStatus, $actor);
 
             return $task;
         });
+    }
+
+    /**
+     * Move a task from Testing into the "Aprovado" checkpoint column. The only
+     * way out of Testing besides reject() — see TaskPolicy::move()/approve().
+     */
+    public function approve(Task $task, User $actor): Task
+    {
+        return DB::transaction(function () use ($task, $actor) {
+            $destination = $this->columnFor($task, TaskStatus::APPROVED);
+
+            $task->rejection_reason = null;
+            $task->rejected_at = null;
+            $task->approved_by = $actor->id;
+
+            $moved = $this->move($task, $destination, $destination->tasks()->count(), $actor);
+
+            $this->recordEventOnce($moved, TaskEventType::APPROVED, $actor);
+
+            return $moved->refresh();
+        });
+    }
+
+    /**
+     * Send a task back to "A Fazer" with a mandatory reason. The task keeps the
+     * rejection badge until it leaves "A Fazer" again (see move()).
+     */
+    public function reject(Task $task, User $actor, string $reason): Task
+    {
+        return DB::transaction(function () use ($task, $actor, $reason) {
+            $destination = $this->columnFor($task, TaskStatus::TODO);
+
+            $task->rejection_reason = $reason;
+            $task->rejected_at = now();
+            $task->approved_by = null;
+
+            return $this->move($task, $destination, $destination->tasks()->count(), $actor, $reason);
+        });
+    }
+
+    private function columnFor(Task $task, TaskStatus $status): BoardColumn
+    {
+        return BoardColumn::where('board_id', $task->board_id)
+            ->where('status', $status)
+            ->firstOrFail();
     }
 
     public function assign(Task $task, ?User $user): Task
@@ -182,9 +247,43 @@ class TaskService
                     );
                 }
 
+                $this->grantDeferredTesterXp($task);
+
                 event(new TaskCompleted($task, $actor));
             }
         }
+    }
+
+    /**
+     * The tester who approved this task only earns their XP once the task is
+     * truly finished (see §4 — "só ganha os pontos quando a tarefa for
+     * terminada"), not at the moment of approval. GrantXpListener explicitly
+     * skips TaskEventType::APPROVED for this reason; this is where it's
+     * actually granted, reusing the same admin-configurable TaskEventRule.
+     */
+    private function grantDeferredTesterXp(Task $task): void
+    {
+        if ($task->approved_by === null) {
+            return;
+        }
+
+        $rule = TaskEventRule::where('type', TaskEventType::APPROVED)->first();
+
+        if (! $rule || ! $rule->active || $rule->xp_reward <= 0) {
+            return;
+        }
+
+        $approvalEvent = TaskEvent::where('task_id', $task->id)
+            ->where('type', TaskEventType::APPROVED)
+            ->first();
+
+        $this->xpService->grant(
+            $task->approvedBy,
+            $rule->xp_reward,
+            XpSourceType::TASK_EVENT,
+            $approvalEvent?->id ?? $task->id,
+            "Aprovação de teste - Tarefa #{$task->id}",
+        );
     }
 
     /**

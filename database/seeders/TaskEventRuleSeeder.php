@@ -18,6 +18,7 @@ class TaskEventRuleSeeder extends Seeder
             ['type' => TaskEventType::HOMOLOGATION_COMPLETED, 'xp_reward' => 5, 'active' => true],
             ['type' => TaskEventType::DEPLOYED, 'xp_reward' => 20, 'active' => true],
             ['type' => TaskEventType::COMPLETED, 'xp_reward' => 0, 'active' => false],
+            ['type' => TaskEventType::APPROVED, 'xp_reward' => 10, 'active' => true],
         ];
 
         foreach ($rules as $rule) {

@@ -23,6 +23,10 @@ class Show extends Component
 
     public bool $showEditModal = false;
 
+    public bool $showRejectForm = false;
+
+    public string $rejectionReasonInput = '';
+
     public ?int $assignToUserId = null;
 
     public function mount(Task $task): void
@@ -32,6 +36,7 @@ class Show extends Component
         $this->task = $task->load([
             'board', 'column', 'category', 'assignedTo', 'createdBy',
             'taskEvents.user', 'taskEvents.xpTransaction',
+            'movements.user', 'movements.fromColumn', 'movements.toColumn',
         ]);
     }
 
@@ -78,6 +83,47 @@ class Show extends Component
         $this->assignToUserId = null;
         $this->task->refresh();
         $this->flushToasts();
+    }
+
+    public function approve(): void
+    {
+        $this->authorize('approve', $this->task);
+
+        app(TaskService::class)->approve($this->task, auth()->user());
+
+        $this->reloadAfterMove();
+        $this->flushToasts();
+    }
+
+    public function toggleRejectForm(): void
+    {
+        $this->authorize('reject', $this->task);
+
+        $this->showRejectForm = ! $this->showRejectForm;
+        $this->rejectionReasonInput = '';
+    }
+
+    public function reject(): void
+    {
+        $this->authorize('reject', $this->task);
+
+        $validated = $this->validate([
+            'rejectionReasonInput' => ['required', 'string', 'min:3', 'max:1000'],
+        ], [], ['rejectionReasonInput' => 'motivo']);
+
+        app(TaskService::class)->reject($this->task, auth()->user(), $validated['rejectionReasonInput']);
+
+        $this->rejectionReasonInput = '';
+        $this->showRejectForm = false;
+        $this->reloadAfterMove();
+        $this->flushToasts();
+    }
+
+    protected function reloadAfterMove(): void
+    {
+        $this->task->refresh();
+        $this->task->load(['column', 'movements.user', 'movements.fromColumn', 'movements.toColumn']);
+        $this->reloadTaskEvents();
     }
 
     public function markHomologationCompleted(): void

@@ -11,6 +11,7 @@ enum TaskEventType: int
     case HOMOLOGATION_COMPLETED = 5;
     case DEPLOYED = 6;
     case COMPLETED = 7;
+    case APPROVED = 8;
 
     public function label(): string
     {
@@ -22,6 +23,7 @@ enum TaskEventType: int
             self::HOMOLOGATION_COMPLETED => 'Homologação concluída',
             self::DEPLOYED => 'Implantado',
             self::COMPLETED => 'Concluído',
+            self::APPROVED => 'Aprovado pelo testador',
         };
     }
 }

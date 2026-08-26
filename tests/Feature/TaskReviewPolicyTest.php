@@ -33,7 +33,7 @@ class TaskReviewPolicyTest extends TestCase
         Livewire::actingAs($developer)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $testing->id, 0)
-            ->assertForbidden();
+            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
 
         $this->assertSame($review->id, $task->refresh()->column_id);
     }
@@ -123,7 +123,7 @@ class TaskReviewPolicyTest extends TestCase
         Livewire::actingAs($otherDeveloper)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $doing->id, 0)
-            ->assertForbidden();
+            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
 
         $this->assertSame($todo->id, $task->refresh()->column_id);
     }
