@@ -23,7 +23,7 @@ class TaskCrudTest extends TestCase
     {
         $po = User::factory()->productOwner()->create();
         $board = Board::factory()->create();
-        $column = BoardColumn::factory()->for($board)->status(TaskStatus::TODO)->create();
+        $column = BoardColumn::factory()->for($board)->status(TaskStatus::BACKLOG)->create();
         $category = TaskCategory::factory()->create(['base_points' => 20]);
 
         Livewire::actingAs($po)

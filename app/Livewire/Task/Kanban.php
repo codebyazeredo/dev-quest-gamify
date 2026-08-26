@@ -40,6 +40,12 @@ class Kanban extends Component
     {
         $this->authorize('create', Task::class);
 
+        $column = $this->board->columns->firstWhere('id', $columnId);
+
+        if (! $column || $column->status !== TaskStatus::BACKLOG) {
+            abort(404);
+        }
+
         $this->creatingInColumnId = $columnId;
     }
 

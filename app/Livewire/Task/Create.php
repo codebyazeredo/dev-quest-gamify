@@ -3,7 +3,9 @@
 namespace App\Livewire\Task;
 
 use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
 use App\Models\Board;
+use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
@@ -32,6 +34,12 @@ class Create extends Component
     public function mount(Board $board, int $columnId): void
     {
         $this->authorize('create', Task::class);
+
+        $column = BoardColumn::findOrFail($columnId);
+
+        if ($column->board_id !== $board->id || $column->status !== TaskStatus::BACKLOG) {
+            abort(404);
+        }
 
         $this->board = $board;
         $this->columnId = $columnId;

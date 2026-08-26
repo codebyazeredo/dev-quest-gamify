@@ -37,7 +37,7 @@ class PriorityRuleManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $po = User::factory()->productOwner()->create();
         $board = Board::factory()->create();
-        $column = BoardColumn::factory()->for($board)->create();
+        $column = BoardColumn::factory()->for($board)->status(\App\Enums\TaskStatus::BACKLOG)->create();
         $category = TaskCategory::factory()->create(['base_points' => 10]);
 
         Livewire::actingAs($admin)

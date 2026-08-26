@@ -18,11 +18,13 @@
                     @endforeach
                 </div>
 
-                @can('create', \App\Models\Task::class)
-                    <button type="button" wire:click="openCreate({{ $column->id }})" class="mt-2 w-full rounded-md border border-dashed border-gray-300 py-1 text-xs text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-600">
-                        + Nova tarefa
-                    </button>
-                @endcan
+                @if ($column->status === \App\Enums\TaskStatus::BACKLOG)
+                    @can('create', \App\Models\Task::class)
+                        <button type="button" wire:click="openCreate({{ $column->id }})" class="mt-2 w-full rounded-md border border-dashed border-gray-300 py-1 text-xs text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-600">
+                            + Nova tarefa
+                        </button>
+                    @endcan
+                @endif
             </div>
         @endforeach
     </div>
