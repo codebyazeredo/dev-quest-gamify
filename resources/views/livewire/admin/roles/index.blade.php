@@ -1,47 +1,47 @@
 <div>
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Roles &amp; permissões</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink">Roles &amp; permissões</h1>
 
-        <button type="button" wire:click="toggleCreate" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+        <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
             + Novo role
         </button>
     </div>
 
-    @error('delete') <p class="mb-4 text-sm text-red-600">{{ $message }}</p> @enderror
+    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
 
-    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="overflow-x-auto rounded-xl border border-line">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-left text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+            <thead class="bg-line/20 text-left text-ink-muted">
                 <tr>
-                    <th class="px-4 py-2">Role</th>
+                    <th class="px-4 py-3">Role</th>
                     @foreach ($permissions as $permission)
-                        <th class="px-3 py-2 text-center">{{ \App\Support\PermissionLabel::for($permission->name) }}</th>
+                        <th class="px-3 py-3 text-center">{{ \App\Support\PermissionLabel::for($permission->name) }}</th>
                     @endforeach
-                    <th class="px-4 py-2"></th>
+                    <th class="px-4 py-3"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody class="divide-y divide-line/50">
                 @forelse ($roles as $role)
                     <tr wire:key="role-{{ $role->id }}">
-                        <td class="px-4 py-2 font-medium text-gray-800 dark:text-gray-100">
+                        <td class="px-4 py-3 font-medium text-ink">
                             {{ \App\Enums\UserRole::labelFor($role->name) }}
                             @if ($role->name === 'admin')
-                                <span class="ml-1 text-xs text-gray-400">(acesso total)</span>
+                                <span class="ml-1 text-xs text-ink-muted">(acesso total)</span>
                             @endif
                         </td>
                         @foreach ($permissions as $permission)
-                            <td class="px-3 py-2 text-center">
+                            <td class="px-3 py-3 text-center">
                                 <input type="checkbox"
                                     @checked($role->hasPermissionTo($permission))
                                     @disabled($role->name === 'admin')
                                     wire:click="togglePermission({{ $role->id }}, {{ $permission->id }})"
-                                    class="rounded border-gray-300">
+                                    class="rounded border-line">
                             </td>
                         @endforeach
-                        <td class="px-4 py-2 text-right">
+                        <td class="px-4 py-3 text-right">
                             @unless ($role->name === 'admin')
                                 <button type="button" wire:click="delete({{ $role->id }})" wire:confirm="Excluir este role?" title="Excluir" aria-label="Excluir"
-                                    class="rounded-md border border-red-300 p-1.5 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30">
+                                    class="rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10">
                                     <x-icon name="trash" class="h-4 w-4" />
                                 </button>
                             @endunless
@@ -49,7 +49,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $permissions->count() + 2 }}" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum role cadastrado.</td>
+                        <td colspan="{{ $permissions->count() + 2 }}" class="px-4 py-6 text-center text-ink-muted">Nenhum role cadastrado.</td>
                     </tr>
                 @endforelse
             </tbody>

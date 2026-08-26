@@ -1,24 +1,24 @@
 <x-modal title="Nova gravidade">
     <form wire:submit="save" class="space-y-4">
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
+            <label class="block text-sm font-medium text-ink">Nome</label>
             <input type="text" wire:model="name" autofocus
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-            @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
+            @error('name') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Multiplicador de XP</label>
+            <label class="block text-sm font-medium text-ink">Multiplicador de XP</label>
             <input type="number" min="0" step="0.01" wire:model="multiplier"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-            @error('multiplier') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
+            @error('multiplier') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="cancel" class="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+            <button type="button" wire:click="cancel" class="rounded-lg px-4 py-2 text-sm font-medium text-ink-muted hover:bg-line/20">
                 Cancelar
             </button>
-            <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
                 Criar gravidade
             </button>
         </div>
