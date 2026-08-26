@@ -33,7 +33,7 @@ class Kanban extends Component
 
     protected function loadBoard(): void
     {
-        $this->board->load(['columns.tasks.category', 'columns.tasks.assignedTo']);
+        $this->board->load(['columns.tasks.category', 'columns.tasks.assignedTo', 'columns.tasks.taskEvents']);
     }
 
     public function openCreate(int $columnId): void
@@ -99,6 +99,10 @@ class Kanban extends Component
     {
         if ($column->status === TaskStatus::APPROVED) {
             return 'A coluna "Aprovado" só é alcançada aprovando a tarefa em teste.';
+        }
+
+        if ($column->status === TaskStatus::DONE) {
+            return 'A coluna "Concluído" só é alcançada marcando homologação e implantação na tarefa aprovada.';
         }
 
         if ($task->status === TaskStatus::TESTING) {

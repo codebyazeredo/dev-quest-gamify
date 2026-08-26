@@ -6,6 +6,7 @@ use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Livewire\Checkin\Button;
 use App\Livewire\Task\Kanban;
+use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -49,13 +50,12 @@ class ToastNotificationTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
 
-        // task already approved by a tester: the assignee moving Aprovado -> Done
-        // is a normal completion move, not a self-review sign-off, so the
+        // task already approved by a tester: the assignee marking homologação
+        // auto-completes it, which is not a self-review sign-off, so the
         // developer can trigger their own toast — and since the toast is now
         // scoped to auth()->id() === $event->user->id (bugfix), the developer
         // must be both the assignee AND the actor here
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
-        $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
@@ -68,8 +68,8 @@ class ToastNotificationTest extends TestCase
         ]);
 
         Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $done->id, 0)
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted')
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'level_up');
     }
 
@@ -84,7 +84,6 @@ class ToastNotificationTest extends TestCase
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug', 'base_points' => 10]);
 
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
-        $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         $task = Task::factory()->create([
             'board_id' => $board->id,
@@ -100,8 +99,8 @@ class ToastNotificationTest extends TestCase
         ]);
 
         Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $done->id, 0)
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted')
             ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'achievement');
     }
 
@@ -115,7 +114,6 @@ class ToastNotificationTest extends TestCase
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
 
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
-        $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         // pre-level the developer to the max seeded level so the challenge's own XP
         // reward can never also cross a level threshold and queue a level_up toast
@@ -123,7 +121,7 @@ class ToastNotificationTest extends TestCase
         // inspects the first "toast"-named dispatch, so any level_up would mask it)
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
-        $component = Livewire::actingAs($developer)->test(Kanban::class, ['board' => $board]);
+        $component = null;
 
         for ($i = 0; $i < 10; $i++) {
             $task = Task::factory()->create([
@@ -135,7 +133,8 @@ class ToastNotificationTest extends TestCase
                 'priority_multiplier' => '1.50',
             ]);
 
-            $component->call('moveTask', $task->id, $done->id, 0);
+            $component = Livewire::actingAs($developer)->test(Show::class, ['task' => $task]);
+            $component->call('markHomologationCompleted');
         }
 
         $component->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'challenge');

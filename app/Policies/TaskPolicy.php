@@ -49,11 +49,18 @@ class TaskPolicy
      *
      * Testing is a checkpoint, not a regular column: nobody exits it through a
      * generic drag, and nobody enters "Aprovado" that way either — both only
-     * happen through the dedicated approve()/reject() actions below.
+     * happen through the dedicated approve()/reject() actions below. "Concluído"
+     * is the same story: nobody drags into it — it's only reached automatically
+     * once both homologação and implantação are marked on an approved task (see
+     * TaskService::completeIfReady()).
      */
     public function move(User $user, Task $task, BoardColumn $destination): bool
     {
         if ($destination->status === TaskStatus::APPROVED) {
+            return false;
+        }
+
+        if ($destination->status === TaskStatus::DONE) {
             return false;
         }
 
@@ -103,14 +110,24 @@ class TaskPolicy
         return $user->isTester() && $task->assigned_to !== $user->id;
     }
 
+    /**
+     * Marking homologação is what completes the task (see
+     * TaskService::markHomologationCompleted()) — only makes sense once a
+     * tester has signed off, i.e. a task currently sitting in "Aprovado".
+     */
     public function markHomologationCompleted(User $user, Task $task): bool
     {
-        return $this->canActOnOwnTask($user, $task);
+        return $task->status === TaskStatus::APPROVED && $this->canActOnOwnTask($user, $task);
     }
 
+    /**
+     * Implantação is tracked after the fact, once the task is already done —
+     * it no longer gates anything, so it only applies to a task sitting in
+     * "Concluído".
+     */
     public function markDeployed(User $user, Task $task): bool
     {
-        return $this->canActOnOwnTask($user, $task);
+        return $task->status === TaskStatus::DONE && $this->canActOnOwnTask($user, $task);
     }
 
     private function canActOnOwnTask(User $user, Task $task): bool

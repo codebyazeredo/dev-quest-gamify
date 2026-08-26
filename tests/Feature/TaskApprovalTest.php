@@ -144,7 +144,6 @@ class TaskApprovalTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $task = $this->taskInTesting($board, $assignee);
-        $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
         Livewire::actingAs($tester)
             ->test(Show::class, ['task' => $task])
@@ -153,8 +152,9 @@ class TaskApprovalTest extends TestCase
         $this->assertSame(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
 
         Livewire::actingAs($assignee)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $done->id, 0);
+            ->test(Show::class, ['task' => $task])
+            ->call('markHomologationCompleted')
+            ->call('markDeployed');
 
         $this->assertGreaterThan(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
     }

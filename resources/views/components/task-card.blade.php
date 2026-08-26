@@ -31,6 +31,18 @@
         </span>
     @endif
 
+    @if ($task->status === \App\Enums\TaskStatus::APPROVED && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::HOMOLOGATION_COMPLETED))
+        <span class="mt-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+            Não homologado
+        </span>
+    @endif
+
+    @if ($task->status === \App\Enums\TaskStatus::DONE && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::DEPLOYED))
+        <span class="mt-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+            Não implantado
+        </span>
+    @endif
+
     @if ($task->isLate())
         <span class="mt-2 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
             Atrasada

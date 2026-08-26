@@ -183,15 +183,31 @@ class TaskService
         });
     }
 
+    /**
+     * "Concluído" is never reached by dragging (see TaskPolicy::move()) —
+     * marking homologação on an approved task is what completes it, moving it
+     * there automatically and reusing move()'s existing completion side
+     * effects (XP bonus, deferred tester XP, TaskCompleted event).
+     */
     public function markHomologationCompleted(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
             $this->recordEventOnce($task, TaskEventType::HOMOLOGATION_COMPLETED, $actor);
 
+            $done = BoardColumn::where('board_id', $task->board_id)->where('status', TaskStatus::DONE)->first();
+
+            if ($done !== null && $task->column_id !== $done->id) {
+                $this->move($task, $done, $done->tasks()->count(), $actor);
+            }
+
             return $task->refresh();
         });
     }
 
+    /**
+     * Implantação is recorded after the task is already "Concluído" — it's a
+     * tracking flag (see the "não implantado" card badge), not a transition.
+     */
     public function markDeployed(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
