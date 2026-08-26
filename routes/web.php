@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Livewire\Admin\Achievements as AdminAchievements;
+use App\Livewire\Admin\Achievements\Index as AdminAchievements;
 use App\Livewire\Admin\Categories\Index as AdminCategories;
 use App\Livewire\Admin\Challenges as AdminChallenges;
 use App\Livewire\Admin\EventRules;
