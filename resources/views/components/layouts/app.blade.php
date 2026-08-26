@@ -45,6 +45,24 @@
                     </button>
 
                     <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 rounded-md border bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                            Minha conta
+                        </a>
+
+                        <a href="{{ route('ranking') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('ranking') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                            Ranking
+                        </a>
+
+                        <a href="{{ route('checkin') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('checkin') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                            Check-in
+                        </a>
+
+                        <a href="{{ route('challenges') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('challenges') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                            Desafios
+                        </a>
+
+                        <hr class="my-1 border-gray-200 dark:border-gray-700">
+
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
@@ -58,24 +76,8 @@
             <div class="flex flex-1 min-h-0">
                 <aside class="w-56 shrink-0 overflow-y-auto border-r bg-white px-4 py-6 dark:border-gray-700 dark:bg-gray-800">
                     <nav class="flex flex-col gap-1">
-                        <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Minha conta
-                        </a>
-
                         <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
                             Boards
-                        </a>
-
-                        <a href="{{ route('ranking') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('ranking') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Ranking
-                        </a>
-
-                        <a href="{{ route('checkin') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('checkin') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Check-in
-                        </a>
-
-                        <a href="{{ route('challenges') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('challenges') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                            Desafios
                         </a>
 
                         @if (auth()->user()->isAdmin())
