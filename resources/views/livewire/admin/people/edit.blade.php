@@ -71,7 +71,7 @@
                     <img src="{{ \Illuminate\Support\Facades\Storage::url($person->foto_path) }}" alt="" class="mt-2 h-16 w-16 rounded-full object-cover">
                 @endif
 
-                <input type="file" wire:model="foto" accept="image/*" class="mt-2 block w-full text-sm text-gray-700 dark:text-gray-300">
+                <input type="file" wire:model="foto" accept="image/*" class="mt-2 block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-300 dark:file:bg-gray-700 dark:file:text-gray-100 dark:hover:file:bg-gray-600">
                 @error('foto') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>
