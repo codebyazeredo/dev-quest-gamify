@@ -30,8 +30,8 @@
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $category->name }}</td>
                             <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ $category->base_points }}</td>
                             <td class="px-4 py-2 text-right">
-                                <button type="button" wire:click="edit({{ $category->id }})" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">Editar</button>
-                                <button type="button" wire:click="delete({{ $category->id }})" wire:confirm="Excluir esta categoria?" class="ml-2 rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30">Excluir</button>
+                                <button type="button" wire:click="edit({{ $category->id }})" title="Editar" aria-label="Editar" class="rounded-md border border-gray-300 p-1.5 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"><x-icon name="pencil" class="h-4 w-4" /></button>
+                                <button type="button" wire:click="delete({{ $category->id }})" wire:confirm="Excluir esta categoria?" title="Excluir" aria-label="Excluir" class="ml-2 rounded-md border border-red-300 p-1.5 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"><x-icon name="trash" class="h-4 w-4" /></button>
                             </td>
                         @endif
                     </tr>

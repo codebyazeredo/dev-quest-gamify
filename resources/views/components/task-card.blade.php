@@ -11,8 +11,8 @@
         </a>
 
         @can('update', $task)
-            <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" class="shrink-0 rounded border border-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                Editar
+            <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="shrink-0 rounded border border-gray-200 p-1 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                <x-icon name="pencil" class="h-3.5 w-3.5" />
             </button>
         @endcan
     </div>
