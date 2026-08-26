@@ -21,7 +21,7 @@ class AuthorizationTest extends TestCase
     {
         $user = User::factory()->developer()->create();
 
-        $response = $this->actingAs($user)->get('/admin');
+        $response = $this->actingAs($user)->get('/admin/users');
 
         $response->assertForbidden();
     }
@@ -30,7 +30,7 @@ class AuthorizationTest extends TestCase
     {
         $user = User::factory()->admin()->create();
 
-        $response = $this->actingAs($user)->get('/admin');
+        $response = $this->actingAs($user)->get('/admin/users');
 
         $response->assertOk();
     }

@@ -81,10 +81,6 @@
                         </a>
 
                         @if (auth()->user()->isAdmin())
-                            <a href="{{ route('admin.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.*') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
-                                Admin
-                            </a>
-
                             <a href="{{ route('admin.users') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.users') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
                                 Usuários
                             </a>

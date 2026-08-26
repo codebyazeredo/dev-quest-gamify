@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AdminController;
 use App\Livewire\Admin\Achievements\Index as AdminAchievements;
 use App\Livewire\Admin\Categories\Index as AdminCategories;
 use App\Livewire\Admin\Challenges\Index as AdminChallenges;
@@ -24,8 +23,6 @@ use App\Models\Board;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => auth()->check() ? redirect(Board::landingUrl()) : redirect()->route('login'))->name('home');
-
-Route::get('/admin', AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
