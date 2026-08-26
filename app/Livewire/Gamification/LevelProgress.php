@@ -21,7 +21,7 @@ class LevelProgress extends Component
         $levelService = app(LevelService::class);
 
         $totalXp = $levelService->totalXpFor($user);
-        $currentLevel = $levelService->levelForTotalXp($totalXp);
+        $currentLevel = $levelService->currentLevelFor($user);
         $nextLevel = $levelService->nextLevelFor($currentLevel);
 
         $xpIntoLevel = $totalXp - $currentLevel->xp_required;

@@ -60,4 +60,31 @@ class LevelServiceTest extends TestCase
         $this->assertSame(3, $service->nextLevelFor($level2)->level);
         $this->assertNull($service->nextLevelFor($level3));
     }
+
+    public function test_current_level_for_returns_max_level_for_admins_regardless_of_real_xp(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+        Level::factory()->create(['level' => 2, 'xp_required' => 100]);
+        $maxLevel = Level::factory()->create(['level' => 3, 'xp_required' => 500]);
+
+        $admin = User::factory()->admin()->create();
+        XpTransaction::factory()->create(['user_id' => $admin->id, 'amount' => 1]);
+
+        $service = app(LevelService::class);
+
+        $this->assertSame($maxLevel->level, $service->currentLevelFor($admin)->level);
+        $this->assertNull($service->nextLevelFor($service->currentLevelFor($admin)));
+        // the real XP total is untouched — only the displayed level is short-circuited
+        $this->assertSame(1, $service->totalXpFor($admin));
+    }
+
+    public function test_current_level_for_a_non_admin_still_reflects_real_xp(): void
+    {
+        Level::factory()->create(['level' => 1, 'xp_required' => 0]);
+        Level::factory()->create(['level' => 2, 'xp_required' => 100]);
+
+        $developer = User::factory()->developer()->create();
+
+        $this->assertSame(1, app(LevelService::class)->currentLevelFor($developer)->level);
+    }
 }

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\TaskEventType;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
+use App\Livewire\Gamification\Achievements;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -17,6 +18,7 @@ use Database\Seeders\LevelSeeder;
 use Database\Seeders\TaskEventRuleSeeder;
 use Database\Seeders\TitleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AchievementTest extends TestCase
@@ -107,5 +109,25 @@ class AchievementTest extends TestCase
             UserAchievement::whereHas('achievement', fn ($q) => $q->where('slug', 'release-master'))
                 ->where('user_id', $developer->id)->exists()
         );
+    }
+
+    public function test_admin_sees_every_achievement_as_already_unlocked(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $rows = Livewire::actingAs($admin)->test(Achievements::class)->viewData('achievements');
+
+        $this->assertNotEmpty($rows);
+        $this->assertTrue($rows->every(fn (array $row) => $row['unlocked'] === true));
+    }
+
+    public function test_a_developer_with_no_progress_sees_achievements_as_locked(): void
+    {
+        $developer = User::factory()->developer()->create();
+
+        $rows = Livewire::actingAs($developer)->test(Achievements::class)->viewData('achievements');
+
+        $this->assertNotEmpty($rows);
+        $this->assertTrue($rows->every(fn (array $row) => $row['unlocked'] === false));
     }
 }

@@ -20,9 +20,22 @@ class LevelService
             ->firstOrFail();
     }
 
+    /**
+     * Admins are the game's GM — always shown at max level, regardless of
+     * their actual XP total (which is left untouched, no fake XP is granted).
+     */
     public function currentLevelFor(User $user): Level
     {
+        if ($user->isAdmin()) {
+            return $this->maxLevel();
+        }
+
         return $this->levelForTotalXp($this->totalXpFor($user));
+    }
+
+    public function maxLevel(): Level
+    {
+        return Level::orderByDesc('level')->firstOrFail();
     }
 
     public function nextLevelFor(Level $current): ?Level

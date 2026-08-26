@@ -29,7 +29,10 @@ class Titles extends Component
     {
         $user = auth()->user();
 
-        $unlockedTitles = $user->unlockedTitles()->with('title')->get()->pluck('title');
+        // Admins are the game's GM — every title is already available to use.
+        $unlockedTitles = $user->isAdmin()
+            ? Title::orderBy('name')->get()
+            : $user->unlockedTitles()->with('title')->get()->pluck('title');
 
         return view('livewire.gamification.titles', [
             'unlockedTitles' => $unlockedTitles,

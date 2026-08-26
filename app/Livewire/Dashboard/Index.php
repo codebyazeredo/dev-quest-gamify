@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Achievement;
 use App\Models\Task;
+use App\Models\Title;
 use App\Models\XpTransaction;
 use App\Services\CheckinService;
 use App\Services\LevelService;
@@ -27,7 +29,7 @@ class Index extends Component
         $levelService = app(LevelService::class);
 
         $totalXp = $levelService->totalXpFor($user);
-        $currentLevel = $levelService->levelForTotalXp($totalXp);
+        $currentLevel = $levelService->currentLevelFor($user);
 
         $tasksCompleted = Task::where('assigned_to', $user->id)
             ->whereNotNull('completed_at')
@@ -49,8 +51,8 @@ class Index extends Component
             'tasksCompleted' => $tasksCompleted,
             'xpThisWeek' => $xpThisWeek,
             'rankingPosition' => $usersAboveMe + 1,
-            'achievementsCount' => $user->unlockedAchievements()->count(),
-            'titlesCount' => $user->unlockedTitles()->count(),
+            'achievementsCount' => $user->isAdmin() ? Achievement::where('active', true)->count() : $user->unlockedAchievements()->count(),
+            'titlesCount' => $user->isAdmin() ? Title::count() : $user->unlockedTitles()->count(),
             'currentStreak' => app(CheckinService::class)->currentStreakFor($user),
             'selectedTitle' => $user->selectedTitle,
         ]);

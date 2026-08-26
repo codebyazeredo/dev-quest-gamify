@@ -19,15 +19,18 @@ class Achievements extends Component
         $unlockedIds = $user->unlockedAchievements()->pluck('achievement_id')->all();
         $cache = [];
 
+        // Admins are the game's GM — every achievement shows as already unlocked.
+        $isAdmin = $user->isAdmin();
+
         $achievements = Achievement::where('active', true)
             ->orderBy('name')
             ->get()
-            ->map(function (Achievement $achievement) use ($user, $unlockedIds, $achievementService, &$cache) {
+            ->map(function (Achievement $achievement) use ($user, $unlockedIds, $achievementService, $isAdmin, &$cache) {
                 $cache[$achievement->condition_type->value] ??= $achievementService->valueFor($user, $achievement->condition_type);
 
                 return [
                     'achievement' => $achievement,
-                    'unlocked' => in_array($achievement->id, $unlockedIds, true),
+                    'unlocked' => $isAdmin || in_array($achievement->id, $unlockedIds, true),
                     'progress' => $cache[$achievement->condition_type->value],
                 ];
             });
