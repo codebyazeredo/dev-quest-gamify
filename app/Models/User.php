@@ -3,7 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -14,25 +13,28 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property int $id
+ * @property int $person_id
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
- * @property UserRole $role
  * @property int|null $selected_title_id
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'selected_title_id'])]
+#[Fillable(['name', 'email', 'password', 'person_id', 'selected_title_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
+
+    protected $guard_name = 'web';
 
     /**
      * Get the attributes that should be cast.
@@ -44,7 +46,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => UserRole::class,
         ];
     }
 
@@ -62,17 +63,35 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === UserRole::ADMIN;
+        return $this->hasRole('admin');
     }
 
     public function isProductOwner(): bool
     {
-        return $this->role === UserRole::PRODUCT_OWNER;
+        return $this->hasRole('product_owner');
     }
 
     public function isDeveloper(): bool
     {
-        return $this->role === UserRole::DEVELOPER;
+        return $this->hasRole('dev');
+    }
+
+    public function isTester(): bool
+    {
+        return $this->hasRole('tester');
+    }
+
+    public function isSuporte(): bool
+    {
+        return $this->hasRole('suporte');
+    }
+
+    /**
+     * @return BelongsTo<Person, $this>
+     */
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class);
     }
 
     /**

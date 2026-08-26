@@ -36,7 +36,7 @@
                                 {{ auth()->user()->selectedTitle->name }}
                             </span>
                         @else
-                            <span class="text-xs text-gray-400">{{ auth()->user()->role->label() }}</span>
+                            <span class="text-xs text-gray-400">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
                         @endif
                     </button>
 
@@ -83,6 +83,10 @@
                                 Usuários
                             </a>
 
+                            <a href="{{ route('admin.people') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.people') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                                Pessoas
+                            </a>
+
                             <a href="{{ route('admin.categories') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.categories') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
                                 Categorias
                             </a>
@@ -109,6 +113,10 @@
 
                             <a href="{{ route('admin.settings') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.settings') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
                                 Configurações
+                            </a>
+
+                            <a href="{{ route('admin.roles') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.roles') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700' }}">
+                                Roles
                             </a>
                         @endif
                     </nav>

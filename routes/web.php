@@ -5,7 +5,9 @@ use App\Livewire\Admin\Achievements as AdminAchievements;
 use App\Livewire\Admin\Categories;
 use App\Livewire\Admin\Challenges as AdminChallenges;
 use App\Livewire\Admin\EventRules;
+use App\Livewire\Admin\People\Index as AdminPeople;
 use App\Livewire\Admin\PriorityRules;
+use App\Livewire\Admin\Roles as AdminRoles;
 use App\Livewire\Admin\Settings as AdminSettings;
 use App\Livewire\Admin\Titles as AdminTitles;
 use App\Livewire\Admin\Users as AdminUsers;
@@ -41,6 +43,10 @@ Route::get('/admin/users', AdminUsers::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.users');
 
+Route::get('/admin/people', AdminPeople::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.people');
+
 Route::get('/admin/categories', Categories::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.categories');
@@ -68,5 +74,9 @@ Route::get('/admin/challenges', AdminChallenges::class)
 Route::get('/admin/settings', AdminSettings::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.settings');
+
+Route::get('/admin/roles', AdminRoles::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.roles');
 
 require __DIR__.'/auth.php';

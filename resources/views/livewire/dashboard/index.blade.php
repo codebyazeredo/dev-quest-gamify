@@ -7,7 +7,7 @@
                 {{ $selectedTitle->name }}
             </p>
         @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->role->label() }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</p>
         @endif
     </div>
 

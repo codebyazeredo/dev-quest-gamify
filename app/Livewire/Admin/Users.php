@@ -2,21 +2,22 @@
 
 namespace App\Livewire\Admin;
 
-use App\Enums\UserRole;
 use App\Livewire\Concerns\RequiresAdminAccess;
+use App\Models\Person;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
 #[Layout('components.layouts.app')]
 class Users extends Component
 {
     use RequiresAdminAccess;
 
-    public string $name = '';
+    public ?int $personId = null;
 
     public string $email = '';
 
@@ -24,11 +25,10 @@ class Users extends Component
 
     public string $password_confirmation = '';
 
-    public int $role = UserRole::DEVELOPER->value;
+    /** @var array<int, string> */
+    public array $roles = [];
 
     public ?int $editingId = null;
-
-    public string $editingName = '';
 
     public string $editingEmail = '';
 
@@ -36,41 +36,48 @@ class Users extends Component
 
     public string $editingPasswordConfirmation = '';
 
-    public int $editingRole = UserRole::DEVELOPER->value;
+    /** @var array<int, string> */
+    public array $editingRoles = [];
 
     public function mount(): void
     {
         $this->ensureAdminAccess();
     }
 
-    /**
-     * @return array<int>
-     */
-    protected function assignableRoles(): array
-    {
-        return [UserRole::PRODUCT_OWNER->value, UserRole::DEVELOPER->value];
-    }
-
     public function create(): void
     {
         $this->authorize('create', User::class);
 
-        $this->validate([
-            'name' => ['required', 'string', 'max:255'],
+        $validated = $this->validate([
+            'personId' => [
+                'required',
+                'integer',
+                Rule::exists('people', 'id'),
+            ],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', Rule::in($this->assignableRoles())],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => [Rule::exists('roles', 'name')],
+        ], [], ['personId' => 'pessoa']);
+
+        $person = Person::findOrFail($validated['personId']);
+
+        if ($person->user()->exists()) {
+            $this->addError('personId', 'Esta pessoa já possui um usuário.');
+
+            return;
+        }
+
+        $user = User::create([
+            'name' => $person->nome,
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'person_id' => $person->id,
         ]);
 
-        User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role' => UserRole::from($this->role),
-        ]);
+        $user->syncRoles($validated['roles']);
 
-        $this->reset('name', 'email', 'password', 'password_confirmation', 'role');
-        $this->role = UserRole::DEVELOPER->value;
+        $this->reset('personId', 'email', 'password', 'password_confirmation', 'roles');
     }
 
     public function edit(int $userId): void
@@ -80,11 +87,10 @@ class Users extends Component
         $this->authorize('update', $user);
 
         $this->editingId = $user->id;
-        $this->editingName = $user->name;
         $this->editingEmail = $user->email;
         $this->editingPassword = '';
         $this->editingPasswordConfirmation = '';
-        $this->editingRole = $user->role->value;
+        $this->editingRoles = $user->getRoleNames()->toArray();
     }
 
     public function update(): void
@@ -93,22 +99,21 @@ class Users extends Component
 
         $this->authorize('update', $user);
 
-        $this->validate([
-            'editingName' => ['required', 'string', 'max:255'],
+        $validated = $this->validate([
             'editingEmail' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'editingPassword' => ['nullable', 'confirmed', Password::defaults()],
-            'editingRole' => ['required', Rule::in($this->assignableRoles())],
+            'editingRoles' => ['required', 'array', 'min:1'],
+            'editingRoles.*' => [Rule::exists('roles', 'name')],
         ], [], ['editingPassword' => 'password']);
 
-        $user->name = $this->editingName;
-        $user->email = $this->editingEmail;
-        $user->role = UserRole::from($this->editingRole);
+        $user->email = $validated['editingEmail'];
 
         if ($this->editingPassword !== '') {
             $user->password = $this->editingPassword;
         }
 
         $user->save();
+        $user->syncRoles($validated['editingRoles']);
 
         $this->editingId = null;
     }
@@ -136,9 +141,9 @@ class Users extends Component
     public function render(): View
     {
         return view('livewire.admin.users', [
-            'users' => User::whereIn('role', $this->assignableRoles())->orderBy('name')->get(),
-            'roles' => UserRole::cases(),
-            'assignableRoles' => $this->assignableRoles(),
+            'users' => User::with('person')->orderBy('name')->get(),
+            'availableRoles' => Role::orderBy('name')->pluck('name'),
+            'availablePeople' => Person::whereDoesntHave('user')->orderBy('nome')->get(),
         ]);
     }
 }

@@ -13,7 +13,7 @@ class EnsureUserHasRole
     {
         $user = $request->user();
 
-        if (! $user instanceof User || ! in_array($user->role->name, array_map('strtoupper', $roles), true)) {
+        if (! $user instanceof User || ! $user->hasAnyRole($roles)) {
             abort(403);
         }
 
