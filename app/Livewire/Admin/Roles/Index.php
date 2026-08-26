@@ -1,38 +1,42 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Admin\Roles;
 
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 #[Layout('components.layouts.app')]
-class Roles extends Component
+class Index extends Component
 {
     use RequiresAdminAccess;
+    use WithPagination;
 
-    public string $name = '';
+    public bool $showCreateModal = false;
 
     public function mount(): void
     {
         $this->ensureAdminAccess();
     }
 
-    public function create(): void
+    public function toggleCreate(): void
     {
         $this->authorize('accessAdminPanel', User::class);
 
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:60', 'alpha_dash', 'unique:roles,name'],
-        ]);
+        $this->showCreateModal = ! $this->showCreateModal;
+    }
 
-        Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
-
-        $this->reset('name');
+    #[On('close-modal')]
+    #[On('role-saved')]
+    public function closeModal(): void
+    {
+        $this->showCreateModal = false;
     }
 
     public function togglePermission(int $roleId, int $permissionId): void
@@ -77,8 +81,8 @@ class Roles extends Component
 
     public function render(): View
     {
-        return view('livewire.admin.roles', [
-            'roles' => Role::with('permissions')->orderBy('name')->get(),
+        return view('livewire.admin.roles.index', [
+            'roles' => Role::with('permissions')->orderBy('name')->paginate(15),
             'permissions' => Permission::orderBy('name')->get(),
         ]);
     }

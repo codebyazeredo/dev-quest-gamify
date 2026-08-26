@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\Roles;
+use App\Livewire\Admin\Roles\Create;
+use App\Livewire\Admin\Roles\Index;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -19,9 +20,9 @@ class RoleManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         Livewire::actingAs($admin)
-            ->test(Roles::class)
+            ->test(Create::class)
             ->set('name', 'financeiro')
-            ->call('create');
+            ->call('save');
 
         $this->assertNotNull(Role::where('name', 'financeiro')->first());
     }
@@ -32,7 +33,7 @@ class RoleManagementTest extends TestCase
         $role = Role::create(['name' => 'financeiro', 'guard_name' => 'web']);
         $permission = Permission::where('name', 'create-task')->first();
 
-        $component = Livewire::actingAs($admin)->test(Roles::class);
+        $component = Livewire::actingAs($admin)->test(Index::class);
 
         $component->call('togglePermission', $role->id, $permission->id);
         $this->assertTrue($role->fresh()->hasPermissionTo($permission));
@@ -47,7 +48,7 @@ class RoleManagementTest extends TestCase
         $adminRole = Role::where('name', 'admin')->first();
         $permission = Permission::where('name', 'manage-users')->first();
 
-        $component = Livewire::actingAs($admin)->test(Roles::class);
+        $component = Livewire::actingAs($admin)->test(Index::class);
 
         $component->call('togglePermission', $adminRole->id, $permission->id);
         $this->assertTrue($adminRole->fresh()->hasPermissionTo($permission));
@@ -63,11 +64,24 @@ class RoleManagementTest extends TestCase
         $devRole = Role::where('name', 'dev')->first();
 
         Livewire::actingAs($admin)
-            ->test(Roles::class)
+            ->test(Index::class)
             ->call('delete', $devRole->id);
 
         $this->assertNotNull(Role::find($devRole->id));
         $this->assertTrue($developer->fresh()->hasRole('dev'));
+    }
+
+    public function test_index_paginates_the_list(): void
+    {
+        $admin = User::factory()->admin()->create();
+        foreach (range(1, 20) as $i) {
+            Role::create(['name' => "custom-role-{$i}", 'guard_name' => 'web']);
+        }
+
+        $roles = Livewire::actingAs($admin)->test(Index::class)->viewData('roles');
+
+        $this->assertSame(15, $roles->count());
+        $this->assertTrue($roles->hasMorePages());
     }
 
     public function test_developer_gets_forbidden_on_the_route(): void
@@ -84,7 +98,7 @@ class RoleManagementTest extends TestCase
         $developer = User::factory()->developer()->create();
 
         Livewire::actingAs($developer)
-            ->test(Roles::class)
+            ->test(Index::class)
             ->assertForbidden();
     }
 }

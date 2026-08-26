@@ -1,5 +1,11 @@
 <div>
-    <h1 class="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100">Roles &amp; permissões</h1>
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Roles &amp; permissões</h1>
+
+        <button type="button" wire:click="toggleCreate" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+            + Novo role
+        </button>
+    </div>
 
     @error('delete') <p class="mb-4 text-sm text-red-600">{{ $message }}</p> @enderror
 
@@ -9,13 +15,13 @@
                 <tr>
                     <th class="px-4 py-2">Role</th>
                     @foreach ($permissions as $permission)
-                        <th class="px-3 py-2 text-center">{{ $permission->name }}</th>
+                        <th class="px-3 py-2 text-center">{{ \App\Support\PermissionLabel::for($permission->name) }}</th>
                     @endforeach
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @foreach ($roles as $role)
+                @forelse ($roles as $role)
                     <tr wire:key="role-{{ $role->id }}">
                         <td class="px-4 py-2 font-medium text-gray-800 dark:text-gray-100">
                             {{ \App\Enums\UserRole::labelFor($role->name) }}
@@ -41,20 +47,20 @@
                             @endunless
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="{{ $permissions->count() + 2 }}" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum role cadastrado.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
-    <form wire:submit="create" class="mt-6 flex items-end gap-2">
-        <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Novo role</label>
-            <input type="text" wire:model="name" placeholder="ex: financeiro" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-            @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
+    <div class="mt-4">
+        {{ $roles->links() }}
+    </div>
 
-        <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-            Criar role
-        </button>
-    </form>
+    @if ($showCreateModal)
+        <livewire:admin.roles.create wire:key="role-create" />
+    @endif
 </div>

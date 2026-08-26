@@ -7,7 +7,7 @@ use App\Livewire\Admin\Challenges\Index as AdminChallenges;
 use App\Livewire\Admin\EventRules;
 use App\Livewire\Admin\People\Index as AdminPeople;
 use App\Livewire\Admin\PriorityRules;
-use App\Livewire\Admin\Roles as AdminRoles;
+use App\Livewire\Admin\Roles\Index as AdminRoles;
 use App\Livewire\Admin\Settings as AdminSettings;
 use App\Livewire\Admin\Titles\Index as AdminTitles;
 use App\Livewire\Admin\Users\Index as AdminUsers;
