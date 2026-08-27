@@ -4,8 +4,9 @@ namespace App\Livewire\Admin\Priorities;
 
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskPriority;
+use App\Repositories\TaskPriorityRepository;
+use App\Services\Admin\PriorityService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Edit extends Component
@@ -20,7 +21,7 @@ class Edit extends Component
 
     public function mount(int $priorityId): void
     {
-        $this->priority = TaskPriority::findOrFail($priorityId);
+        $this->priority = app(TaskPriorityRepository::class)->findOrFail($priorityId);
 
         $this->authorize('update', $this->priority);
 
@@ -42,13 +43,9 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->priority->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'multiplier' => $validated['multiplier'],
-        ]);
+        $priority = app(PriorityService::class)->update($this->priority, $validated);
 
-        $this->toastSuccess('Prioridade atualizada', "\"{$validated['name']}\" foi atualizada.");
+        $this->toastSuccess('Prioridade atualizada', "\"{$priority->name}\" foi atualizada.");
         $this->flushToasts();
 
         $this->dispatch('priority-saved');

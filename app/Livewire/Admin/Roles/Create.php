@@ -4,9 +4,9 @@ namespace App\Livewire\Admin\Roles;
 
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\User;
+use App\Services\Admin\RoleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use Spatie\Permission\Models\Role;
 
 class Create extends Component
 {
@@ -32,9 +32,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
+        $role = app(RoleService::class)->create($validated['name']);
 
-        $this->toastSuccess('Papel criado', "\"{$validated['name']}\" foi criado.");
+        $this->toastSuccess('Papel criado', "\"{$role->name}\" foi criado.");
         $this->flushToasts();
 
         $this->dispatch('role-saved');

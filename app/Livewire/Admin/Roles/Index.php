@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Admin\Roles;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\User;
+use App\Repositories\PermissionRepository;
+use App\Repositories\RoleRepository;
+use App\Services\Admin\RoleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 #[Layout('components.layouts.app')]
 class Index extends Component
@@ -47,45 +49,27 @@ class Index extends Component
     {
         $this->authorize('accessAdminPanel', User::class);
 
-        $role = Role::findOrFail($roleId);
+        $role = app(RoleRepository::class)->findOrFail($roleId);
 
-        if ($role->name === 'admin') {
-            return;
-        }
-
-        $permission = Permission::findOrFail($permissionId);
-
-        if ($role->hasPermissionTo($permission)) {
-            $role->revokePermissionTo($permission);
-        } else {
-            $role->givePermissionTo($permission);
-        }
+        app(RoleService::class)->togglePermission($role, $permissionId);
     }
 
     public function delete(int $roleId): void
     {
         $this->authorize('accessAdminPanel', User::class);
 
-        $role = Role::findOrFail($roleId);
-
-        if ($role->name === 'admin') {
-            $this->addError('delete', 'O role "admin" não pode ser excluído.');
-            $this->toastError('Não foi possível excluir', 'O role "admin" não pode ser excluído.');
-            $this->flushToasts();
-
-            return;
-        }
-
-        if ($role->users()->exists()) {
-            $this->addError('delete', 'Não é possível excluir um role em uso por algum usuário.');
-            $this->toastError('Não foi possível excluir', 'Este role está em uso por algum usuário.');
-            $this->flushToasts();
-
-            return;
-        }
-
+        $role = app(RoleRepository::class)->findOrFail($roleId);
         $name = $role->name;
-        $role->delete();
+
+        try {
+            app(RoleService::class)->delete($role);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
+            $this->flushToasts();
+
+            return;
+        }
 
         $this->toastSuccess('Papel excluído', "\"{$name}\" foi excluído.");
         $this->flushToasts();
@@ -94,8 +78,8 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.roles.index', [
-            'roles' => Role::with('permissions')->orderBy('name')->paginate($this->perPage),
-            'permissions' => Permission::orderBy('name')->get(),
+            'roles' => app(RoleRepository::class)->paginate($this->perPage),
+            'permissions' => app(PermissionRepository::class)->all(),
         ]);
     }
 }

@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Achievements;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\Achievement;
+use App\Repositories\AchievementRepository;
+use App\Services\Admin\AchievementService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $achievementId): void
     {
-        $achievement = Achievement::findOrFail($achievementId);
+        $achievement = app(AchievementRepository::class)->findOrFail($achievementId);
 
         $this->authorize('update', $achievement);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $achievementId): void
     {
-        $achievement = Achievement::findOrFail($achievementId);
+        $achievement = app(AchievementRepository::class)->findOrFail($achievementId);
 
         $this->authorize('delete', $achievement);
 
-        if ($achievement->userAchievements()->exists()) {
-            $this->addError('delete', 'Não é possível excluir uma conquista que usuários já desbloquearam.');
+        $name = $achievement->name;
+
+        try {
+            app(AchievementService::class)->delete($achievement);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
             $this->toastError('Não foi possível excluir', 'Esta conquista já foi desbloqueada por usuários.');
             $this->flushToasts();
 
             return;
         }
-
-        $name = $achievement->name;
-        $achievement->delete();
 
         $this->toastSuccess('Conquista excluída', "\"{$name}\" foi excluída.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.achievements.index', [
-            'achievements' => Achievement::orderBy('name')->paginate($this->perPage),
+            'achievements' => app(AchievementRepository::class)->paginate($this->perPage),
         ]);
     }
 }

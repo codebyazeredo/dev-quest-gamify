@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\People;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\Person;
+use App\Repositories\PersonRepository;
+use App\Services\Admin\PersonService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $personId): void
     {
-        $person = Person::findOrFail($personId);
+        $person = app(PersonRepository::class)->findOrFail($personId);
 
         $this->authorize('update', $person);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $personId): void
     {
-        $person = Person::findOrFail($personId);
+        $person = app(PersonRepository::class)->findOrFail($personId);
 
         $this->authorize('delete', $person);
 
-        if ($person->user()->exists()) {
-            $this->addError('delete', 'Não é possível excluir uma pessoa que já possui um usuário vinculado.');
-            $this->toastError('Não foi possível excluir', 'Esta pessoa já possui um usuário vinculado.');
+        $nome = $person->nome;
+
+        try {
+            app(PersonService::class)->delete($person);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
             $this->flushToasts();
 
             return;
         }
-
-        $nome = $person->nome;
-        $person->delete();
 
         $this->toastSuccess('Pessoa excluída', "\"{$nome}\" foi excluída.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.people.index', [
-            'people' => Person::orderBy('nome')->paginate($this->perPage),
+            'people' => app(PersonRepository::class)->paginate($this->perPage),
         ]);
     }
 }

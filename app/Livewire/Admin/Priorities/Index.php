@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Priorities;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\TaskPriority;
+use App\Repositories\TaskPriorityRepository;
+use App\Services\Admin\PriorityService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $priorityId): void
     {
-        $priority = TaskPriority::findOrFail($priorityId);
+        $priority = app(TaskPriorityRepository::class)->findOrFail($priorityId);
 
         $this->authorize('update', $priority);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $priorityId): void
     {
-        $priority = TaskPriority::findOrFail($priorityId);
+        $priority = app(TaskPriorityRepository::class)->findOrFail($priorityId);
 
         $this->authorize('delete', $priority);
 
-        if ($priority->tasks()->exists()) {
-            $this->addError('delete', 'Não é possível excluir uma gravidade que ainda possui tarefas.');
-            $this->toastError('Não foi possível excluir', 'Esta gravidade ainda possui tarefas.');
+        $name = $priority->name;
+
+        try {
+            app(PriorityService::class)->delete($priority);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
             $this->flushToasts();
 
             return;
         }
-
-        $name = $priority->name;
-        $priority->delete();
 
         $this->toastSuccess('Prioridade excluída', "\"{$name}\" foi excluída.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.priorities.index', [
-            'priorities' => TaskPriority::orderBy('multiplier')->paginate($this->perPage),
+            'priorities' => app(TaskPriorityRepository::class)->paginate($this->perPage),
         ]);
     }
 }

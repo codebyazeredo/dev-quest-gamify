@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Categories;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\TaskCategory;
+use App\Repositories\TaskCategoryRepository;
+use App\Services\Admin\CategoryService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $categoryId): void
     {
-        $category = TaskCategory::findOrFail($categoryId);
+        $category = app(TaskCategoryRepository::class)->findOrFail($categoryId);
 
         $this->authorize('update', $category);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $categoryId): void
     {
-        $category = TaskCategory::findOrFail($categoryId);
+        $category = app(TaskCategoryRepository::class)->findOrFail($categoryId);
 
         $this->authorize('delete', $category);
 
-        if ($category->tasks()->exists()) {
-            $this->addError('delete', 'Não é possível excluir uma categoria que ainda possui tarefas.');
-            $this->toastError('Não foi possível excluir', 'Esta categoria ainda possui tarefas.');
+        $name = $category->name;
+
+        try {
+            app(CategoryService::class)->delete($category);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
             $this->flushToasts();
 
             return;
         }
-
-        $name = $category->name;
-        $category->delete();
 
         $this->toastSuccess('Categoria excluída', "\"{$name}\" foi excluída.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.categories.index', [
-            'categories' => TaskCategory::orderBy('name')->paginate($this->perPage),
+            'categories' => app(TaskCategoryRepository::class)->paginate($this->perPage),
         ]);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Livewire\Admin\EventRules;
 use App\Enums\TaskEventType;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskEventRule;
+use App\Repositories\TaskEventRuleRepository;
+use App\Services\Admin\EventRuleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -20,7 +22,7 @@ class Edit extends Component
 
     public function mount(int $typeValue): void
     {
-        $this->rule = TaskEventRule::where('type', TaskEventType::from($typeValue))->firstOrFail();
+        $this->rule = app(TaskEventRuleRepository::class)->findByTypeOrFail(TaskEventType::from($typeValue));
 
         $this->authorize('update', $this->rule);
 
@@ -43,12 +45,9 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->rule->update([
-            'xp_reward' => $validated['xp_reward'],
-            'active' => $this->active,
-        ]);
+        $rule = app(EventRuleService::class)->update($this->rule, $validated['xp_reward'], $this->active);
 
-        $this->toastSuccess('Regra atualizada', "\"{$this->rule->type->label()}\" foi atualizada.");
+        $this->toastSuccess('Regra atualizada', "\"{$rule->type->label()}\" foi atualizada.");
         $this->flushToasts();
 
         $this->dispatch('event-rule-saved');

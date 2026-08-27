@@ -4,11 +4,10 @@ namespace App\Livewire\Admin\People;
 
 use App\Enums\Gender;
 use App\Livewire\Concerns\FlushesToasts;
-use App\Models\Address;
 use App\Models\Person;
 use App\Rules\ValidCpf;
+use App\Services\Admin\PersonService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -77,32 +76,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        DB::transaction(function () use ($validated) {
-            $fotoPath = $this->foto !== null ? $this->foto->store('people', 'public') : null;
+        $person = app(PersonService::class)->create($validated, $this->foto);
 
-            $person = Person::create([
-                'nome' => $validated['nome'],
-                'cpf' => $validated['cpf'],
-                'rg' => $validated['rg'] !== '' ? $validated['rg'] : null,
-                'nascimento' => $validated['nascimento'],
-                'sexo' => $validated['sexo'],
-                'email' => $validated['email'],
-                'telefone1' => $validated['telefone1'],
-                'telefone2' => $validated['telefone2'] !== '' ? $validated['telefone2'] : null,
-                'foto_path' => $fotoPath,
-            ]);
-
-            Address::create([
-                'person_id' => $person->id,
-                'cep' => $validated['cep'],
-                'logradouro' => $validated['logradouro'],
-                'numero' => $validated['numero'] !== '' ? $validated['numero'] : null,
-                'cidade' => $validated['cidade'],
-                'estado' => strtoupper($validated['estado']),
-            ]);
-        });
-
-        $this->toastSuccess('Pessoa criada', "\"{$validated['nome']}\" foi criada.");
+        $this->toastSuccess('Pessoa criada', "\"{$person->nome}\" foi criada.");
         $this->flushToasts();
 
         $this->dispatch('person-saved');

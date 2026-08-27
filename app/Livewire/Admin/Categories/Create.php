@@ -4,8 +4,8 @@ namespace App\Livewire\Admin\Categories;
 
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskCategory;
+use App\Services\Admin\CategoryService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Create extends Component
@@ -47,15 +47,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        TaskCategory::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'base_points' => $validated['base_points'],
-            'color' => $validated['color'],
-            'text_color' => $validated['text_color'],
-        ]);
+        $category = app(CategoryService::class)->create($validated);
 
-        $this->toastSuccess('Categoria criada', "\"{$validated['name']}\" foi criada.");
+        $this->toastSuccess('Categoria criada', "\"{$category->name}\" foi criada.");
         $this->flushToasts();
 
         $this->dispatch('category-saved');

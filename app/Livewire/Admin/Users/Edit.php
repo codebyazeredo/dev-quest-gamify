@@ -4,11 +4,13 @@ namespace App\Livewire\Admin\Users;
 
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\User;
+use App\Repositories\RoleRepository;
+use App\Repositories\UserRepository;
+use App\Services\Admin\UserService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
-use Spatie\Permission\Models\Role;
 
 class Edit extends Component
 {
@@ -26,7 +28,7 @@ class Edit extends Component
 
     public function mount(int $userId): void
     {
-        $this->user = User::findOrFail($userId);
+        $this->user = app(UserRepository::class)->findOrFail($userId);
 
         $this->authorize('update', $this->user);
 
@@ -50,16 +52,14 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->user->email = $validated['email'];
+        $user = app(UserService::class)->update(
+            $this->user,
+            $validated['email'],
+            $this->password !== '' ? $this->password : null,
+            $validated['roles'],
+        );
 
-        if ($this->password !== '') {
-            $this->user->password = $this->password;
-        }
-
-        $this->user->save();
-        $this->user->syncRoles($validated['roles']);
-
-        $this->toastSuccess('Usuário atualizado', "\"{$this->user->name}\" foi atualizado.");
+        $this->toastSuccess('Usuário atualizado', "\"{$user->name}\" foi atualizado.");
         $this->flushToasts();
 
         $this->dispatch('user-saved');
@@ -73,7 +73,7 @@ class Edit extends Component
     public function render(): View
     {
         return view('livewire.admin.users.edit', [
-            'availableRoles' => Role::orderBy('name')->pluck('name'),
+            'availableRoles' => app(RoleRepository::class)->names(),
         ]);
     }
 }

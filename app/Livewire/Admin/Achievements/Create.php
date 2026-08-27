@@ -5,9 +5,9 @@ namespace App\Livewire\Admin\Achievements;
 use App\Enums\AchievementConditionType;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
+use App\Services\Admin\AchievementService;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Create extends Component
@@ -49,17 +49,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        Achievement::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'description' => $validated['description'],
-            'icon' => $validated['icon'],
-            'condition_type' => AchievementConditionType::from($validated['condition_type']),
-            'condition_value' => $validated['condition_value'],
-            'xp_reward' => $validated['xp_reward'],
-        ]);
+        $achievement = app(AchievementService::class)->create($validated);
 
-        $this->toastSuccess('Conquista criada', "\"{$validated['name']}\" foi criada.");
+        $this->toastSuccess('Conquista criada', "\"{$achievement->name}\" foi criada.");
         $this->flushToasts();
 
         $this->dispatch('achievement-saved');

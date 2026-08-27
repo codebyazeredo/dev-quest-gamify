@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Titles;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\Title;
+use App\Repositories\TitleRepository;
+use App\Services\Admin\TitleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $titleId): void
     {
-        $title = Title::findOrFail($titleId);
+        $title = app(TitleRepository::class)->findOrFail($titleId);
 
         $this->authorize('update', $title);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $titleId): void
     {
-        $title = Title::findOrFail($titleId);
+        $title = app(TitleRepository::class)->findOrFail($titleId);
 
         $this->authorize('delete', $title);
 
-        if ($title->userTitles()->exists()) {
-            $this->addError('delete', 'Não é possível excluir um título que usuários já desbloquearam.');
-            $this->toastError('Não foi possível excluir', 'Usuários já desbloquearam este título.');
+        $name = $title->name;
+
+        try {
+            app(TitleService::class)->delete($title);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
             $this->flushToasts();
 
             return;
         }
-
-        $name = $title->name;
-        $title->delete();
 
         $this->toastSuccess('Título excluído', "\"{$name}\" foi excluído.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.titles.index', [
-            'titles' => Title::with('achievement')->orderBy('name')->paginate($this->perPage),
+            'titles' => app(TitleRepository::class)->paginate($this->perPage),
         ]);
     }
 }

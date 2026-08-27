@@ -5,9 +5,10 @@ namespace App\Livewire\Admin\Achievements;
 use App\Enums\AchievementConditionType;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
+use App\Repositories\AchievementRepository;
+use App\Services\Admin\AchievementService;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Edit extends Component
@@ -32,7 +33,7 @@ class Edit extends Component
 
     public function mount(int $achievementId): void
     {
-        $this->achievement = Achievement::findOrFail($achievementId);
+        $this->achievement = app(AchievementRepository::class)->findOrFail($achievementId);
 
         $this->authorize('update', $this->achievement);
 
@@ -63,18 +64,12 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->achievement->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'description' => $validated['description'],
-            'icon' => $validated['icon'],
-            'condition_type' => AchievementConditionType::from($validated['condition_type']),
-            'condition_value' => $validated['condition_value'],
-            'xp_reward' => $validated['xp_reward'],
+        $achievement = app(AchievementService::class)->update($this->achievement, [
+            ...$validated,
             'active' => $this->active,
         ]);
 
-        $this->toastSuccess('Conquista atualizada', "\"{$validated['name']}\" foi atualizada.");
+        $this->toastSuccess('Conquista atualizada', "\"{$achievement->name}\" foi atualizada.");
         $this->flushToasts();
 
         $this->dispatch('achievement-saved');

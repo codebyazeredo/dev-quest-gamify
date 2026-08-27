@@ -2,14 +2,16 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Exceptions\DuplicateEntryException;
 use App\Livewire\Concerns\FlushesToasts;
-use App\Models\Person;
 use App\Models\User;
+use App\Repositories\PersonRepository;
+use App\Repositories\RoleRepository;
+use App\Services\Admin\UserService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
-use Spatie\Permission\Models\Role;
 
 class Create extends Component
 {
@@ -52,24 +54,20 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        $person = Person::findOrFail($validated['personId']);
-
-        if ($person->user()->exists()) {
-            $this->addError('personId', 'Esta pessoa já possui um usuário.');
+        try {
+            $user = app(UserService::class)->create(
+                $validated['personId'],
+                $validated['email'],
+                $validated['password'],
+                $validated['roles'],
+            );
+        } catch (DuplicateEntryException $e) {
+            $this->addError('personId', $e->getMessage());
 
             return;
         }
 
-        $user = User::create([
-            'name' => $person->nome,
-            'email' => $validated['email'],
-            'password' => $validated['password'],
-            'person_id' => $person->id,
-        ]);
-
-        $user->syncRoles($validated['roles']);
-
-        $this->toastSuccess('Usuário criado', "\"{$person->nome}\" foi criado.");
+        $this->toastSuccess('Usuário criado', "\"{$user->name}\" foi criado.");
         $this->flushToasts();
 
         $this->dispatch('user-saved');
@@ -83,8 +81,8 @@ class Create extends Component
     public function render(): View
     {
         return view('livewire.admin.users.create', [
-            'availableRoles' => Role::orderBy('name')->pluck('name'),
-            'availablePeople' => Person::whereDoesntHave('user')->orderBy('nome')->get(),
+            'availableRoles' => app(RoleRepository::class)->names(),
+            'availablePeople' => app(PersonRepository::class)->withoutUser(),
         ]);
     }
 }

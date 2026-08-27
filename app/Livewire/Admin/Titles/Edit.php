@@ -3,11 +3,12 @@
 namespace App\Livewire\Admin\Titles;
 
 use App\Livewire\Concerns\FlushesToasts;
-use App\Models\Achievement;
 use App\Models\Title;
+use App\Repositories\AchievementRepository;
+use App\Repositories\TitleRepository;
+use App\Services\Admin\TitleService;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Edit extends Component
@@ -26,7 +27,7 @@ class Edit extends Component
 
     public function mount(int $titleId): void
     {
-        $this->title = Title::findOrFail($titleId);
+        $this->title = app(TitleRepository::class)->findOrFail($titleId);
 
         $this->authorize('update', $this->title);
 
@@ -51,15 +52,12 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->title->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'icon' => $validated['icon'],
-            'achievement_id' => $validated['achievement_id'],
+        $title = app(TitleService::class)->update($this->title, [
+            ...$validated,
             'active' => $this->active,
         ]);
 
-        $this->toastSuccess('Título atualizado', "\"{$validated['name']}\" foi atualizado.");
+        $this->toastSuccess('Título atualizado', "\"{$title->name}\" foi atualizado.");
         $this->flushToasts();
 
         $this->dispatch('title-saved');
@@ -73,7 +71,7 @@ class Edit extends Component
     public function render(): View
     {
         return view('livewire.admin.titles.edit', [
-            'achievements' => Achievement::orderBy('name')->get(),
+            'achievements' => app(AchievementRepository::class)->all(),
             'icons' => FlavorIcons::all(),
         ]);
     }

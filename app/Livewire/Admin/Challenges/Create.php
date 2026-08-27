@@ -5,8 +5,8 @@ namespace App\Livewire\Admin\Challenges;
 use App\Enums\ChallengeType;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Challenge;
+use App\Services\Admin\ChallengeService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Create extends Component
@@ -54,18 +54,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        Challenge::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'description' => $validated['description'],
-            'type' => ChallengeType::from($validated['type']),
-            'target' => $validated['target'],
-            'xp_reward' => $validated['xp_reward'],
-            'starts_at' => $validated['starts_at'],
-            'ends_at' => $validated['ends_at'],
-        ]);
+        $challenge = app(ChallengeService::class)->create($validated);
 
-        $this->toastSuccess('Desafio criado', "\"{$validated['name']}\" foi criado.");
+        $this->toastSuccess('Desafio criado', "\"{$challenge->name}\" foi criado.");
         $this->flushToasts();
 
         $this->dispatch('challenge-saved');

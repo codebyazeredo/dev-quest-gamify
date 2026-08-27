@@ -5,8 +5,9 @@ namespace App\Livewire\Admin\Challenges;
 use App\Enums\ChallengeType;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Challenge;
+use App\Repositories\ChallengeRepository;
+use App\Services\Admin\ChallengeService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Edit extends Component
@@ -33,7 +34,7 @@ class Edit extends Component
 
     public function mount(int $challengeId): void
     {
-        $this->challenge = Challenge::findOrFail($challengeId);
+        $this->challenge = app(ChallengeRepository::class)->findOrFail($challengeId);
 
         $this->authorize('update', $this->challenge);
 
@@ -66,19 +67,12 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->challenge->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'description' => $validated['description'],
-            'type' => ChallengeType::from($validated['type']),
-            'target' => $validated['target'],
-            'xp_reward' => $validated['xp_reward'],
-            'starts_at' => $validated['starts_at'],
-            'ends_at' => $validated['ends_at'],
+        $challenge = app(ChallengeService::class)->update($this->challenge, [
+            ...$validated,
             'active' => $this->active,
         ]);
 
-        $this->toastSuccess('Desafio atualizado', "\"{$validated['name']}\" foi atualizado.");
+        $this->toastSuccess('Desafio atualizado', "\"{$challenge->name}\" foi atualizado.");
         $this->flushToasts();
 
         $this->dispatch('challenge-saved');

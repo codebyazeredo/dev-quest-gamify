@@ -3,11 +3,11 @@
 namespace App\Livewire\Admin\Titles;
 
 use App\Livewire\Concerns\FlushesToasts;
-use App\Models\Achievement;
 use App\Models\Title;
+use App\Repositories\AchievementRepository;
+use App\Services\Admin\TitleService;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Create extends Component
@@ -40,14 +40,9 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        Title::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'icon' => $validated['icon'],
-            'achievement_id' => $validated['achievement_id'],
-        ]);
+        $title = app(TitleService::class)->create($validated);
 
-        $this->toastSuccess('Título criado', "\"{$validated['name']}\" foi criado.");
+        $this->toastSuccess('Título criado', "\"{$title->name}\" foi criado.");
         $this->flushToasts();
 
         $this->dispatch('title-saved');
@@ -61,7 +56,7 @@ class Create extends Component
     public function render(): View
     {
         return view('livewire.admin.titles.create', [
-            'achievements' => Achievement::orderBy('name')->get(),
+            'achievements' => app(AchievementRepository::class)->all(),
             'icons' => FlavorIcons::all(),
         ]);
     }

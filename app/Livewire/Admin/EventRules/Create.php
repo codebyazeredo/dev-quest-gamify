@@ -3,8 +3,11 @@
 namespace App\Livewire\Admin\EventRules;
 
 use App\Enums\TaskEventType;
+use App\Exceptions\DuplicateEntryException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskEventRule;
+use App\Repositories\TaskEventRuleRepository;
+use App\Services\Admin\EventRuleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -25,7 +28,9 @@ class Create extends Component
 
     protected function availableTypes(): array
     {
-        $configured = TaskEventRule::pluck('type')->map(fn (TaskEventType $type) => $type->value)->all();
+        $configured = app(TaskEventRuleRepository::class)->configuredTypes()
+            ->map(fn (TaskEventType $type) => $type->value)
+            ->all();
 
         return array_values(array_filter(TaskEventType::cases(), fn (TaskEventType $type) => ! in_array($type->value, $configured, true)));
     }
@@ -50,19 +55,15 @@ class Create extends Component
 
         $type = TaskEventType::from($validated['type']);
 
-        if (TaskEventRule::where('type', $type)->exists()) {
-            $this->addError('type', 'Este evento já possui uma regra configurada.');
+        try {
+            $rule = app(EventRuleService::class)->create($type, $validated['xp_reward'], $this->active);
+        } catch (DuplicateEntryException $e) {
+            $this->addError('type', $e->getMessage());
 
             return;
         }
 
-        TaskEventRule::create([
-            'type' => $type,
-            'xp_reward' => $validated['xp_reward'],
-            'active' => $this->active,
-        ]);
-
-        $this->toastSuccess('Regra criada', "\"{$type->label()}\" foi criada.");
+        $this->toastSuccess('Regra criada', "\"{$rule->type->label()}\" foi criada.");
         $this->flushToasts();
 
         $this->dispatch('event-rule-saved');

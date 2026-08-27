@@ -4,8 +4,9 @@ namespace App\Livewire\Admin\Categories;
 
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskCategory;
+use App\Repositories\TaskCategoryRepository;
+use App\Services\Admin\CategoryService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Edit extends Component
@@ -24,7 +25,7 @@ class Edit extends Component
 
     public function mount(int $categoryId): void
     {
-        $this->category = TaskCategory::findOrFail($categoryId);
+        $this->category = app(TaskCategoryRepository::class)->findOrFail($categoryId);
 
         $this->authorize('update', $this->category);
 
@@ -56,15 +57,9 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        $this->category->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'base_points' => $validated['base_points'],
-            'color' => $validated['color'],
-            'text_color' => $validated['text_color'],
-        ]);
+        $category = app(CategoryService::class)->update($this->category, $validated);
 
-        $this->toastSuccess('Categoria atualizada', "\"{$validated['name']}\" foi atualizada.");
+        $this->toastSuccess('Categoria atualizada', "\"{$category->name}\" foi atualizada.");
         $this->flushToasts();
 
         $this->dispatch('category-saved');

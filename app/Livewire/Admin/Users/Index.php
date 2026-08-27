@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\User;
+use App\Repositories\UserRepository;
+use App\Services\Admin\UserService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -38,7 +41,7 @@ class Index extends Component
 
     public function edit(int $userId): void
     {
-        $user = User::findOrFail($userId);
+        $user = app(UserRepository::class)->findOrFail($userId);
 
         $this->authorize('update', $user);
 
@@ -55,20 +58,21 @@ class Index extends Component
 
     public function delete(int $userId): void
     {
-        $user = User::findOrFail($userId);
+        $user = app(UserRepository::class)->findOrFail($userId);
 
         $this->authorize('delete', $user);
 
-        if ($user->xpTransactions()->exists()) {
-            $this->addError('delete', 'Não é possível excluir um usuário que já possui histórico de atividade.');
-            $this->toastError('Não foi possível excluir', 'Este usuário já possui histórico de atividade.');
+        $name = $user->name;
+
+        try {
+            app(UserService::class)->delete($user);
+        } catch (DeletionBlockedException $e) {
+            $this->addError('delete', $e->getMessage());
+            $this->toastError('Não foi possível excluir', $e->getMessage());
             $this->flushToasts();
 
             return;
         }
-
-        $name = $user->name;
-        $user->delete();
 
         $this->toastSuccess('Usuário excluído', "\"{$name}\" foi excluído.");
         $this->flushToasts();
@@ -77,7 +81,7 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.users.index', [
-            'users' => User::with('person')->orderBy('name')->paginate($this->perPage),
+            'users' => app(UserRepository::class)->paginate($this->perPage),
         ]);
     }
 }

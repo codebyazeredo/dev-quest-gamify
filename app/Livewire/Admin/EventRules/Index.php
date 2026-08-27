@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\EventRules;
 use App\Enums\TaskEventType;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\TaskEventRule;
+use App\Repositories\TaskEventRuleRepository;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -33,7 +34,7 @@ class Index extends Component
 
     public function edit(int $typeValue): void
     {
-        $rule = TaskEventRule::where('type', TaskEventType::from($typeValue))->firstOrFail();
+        $rule = app(TaskEventRuleRepository::class)->findByTypeOrFail(TaskEventType::from($typeValue));
 
         $this->authorize('update', $rule);
 
@@ -50,11 +51,12 @@ class Index extends Component
 
     public function render(): View
     {
-        $configuredTypes = TaskEventRule::pluck('type');
+        $repository = app(TaskEventRuleRepository::class);
+        $configuredTypes = $repository->configuredTypes();
 
         $rows = collect(TaskEventType::cases())->map(fn (TaskEventType $type) => [
             'type' => $type,
-            'rule' => TaskEventRule::where('type', $type)->first(),
+            'rule' => $repository->findByType($type),
         ]);
 
         return view('livewire.admin.event-rules.index', [

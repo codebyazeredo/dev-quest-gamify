@@ -4,12 +4,11 @@ namespace App\Livewire\Admin\People;
 
 use App\Enums\Gender;
 use App\Livewire\Concerns\FlushesToasts;
-use App\Models\Address;
 use App\Models\Person;
+use App\Repositories\PersonRepository;
 use App\Rules\ValidCpf;
+use App\Services\Admin\PersonService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -51,7 +50,7 @@ class Edit extends Component
 
     public function mount(int $personId): void
     {
-        $this->person = Person::with('address')->findOrFail($personId);
+        $this->person = app(PersonRepository::class)->findWithAddressOrFail($personId);
 
         $this->authorize('update', $this->person);
 
@@ -98,40 +97,9 @@ class Edit extends Component
 
         $validated = $this->validate();
 
-        DB::transaction(function () use ($validated) {
-            if ($this->foto !== null) {
-                if ($this->person->foto_path) {
-                    Storage::disk('public')->delete($this->person->foto_path);
-                }
+        $person = app(PersonService::class)->update($this->person, $validated, $this->foto);
 
-                $this->person->foto_path = $this->foto->store('people', 'public');
-            }
-
-            $this->person->fill([
-                'nome' => $validated['nome'],
-                'cpf' => $validated['cpf'],
-                'rg' => $validated['rg'] !== '' ? $validated['rg'] : null,
-                'nascimento' => $validated['nascimento'],
-                'sexo' => $validated['sexo'],
-                'email' => $validated['email'],
-                'telefone1' => $validated['telefone1'],
-                'telefone2' => $validated['telefone2'] !== '' ? $validated['telefone2'] : null,
-            ]);
-            $this->person->save();
-
-            Address::updateOrCreate(
-                ['person_id' => $this->person->id],
-                [
-                    'cep' => $validated['cep'],
-                    'logradouro' => $validated['logradouro'],
-                    'numero' => $validated['numero'] !== '' ? $validated['numero'] : null,
-                    'cidade' => $validated['cidade'],
-                    'estado' => strtoupper($validated['estado']),
-                ]
-            );
-        });
-
-        $this->toastSuccess('Pessoa atualizada', "\"{$validated['nome']}\" foi atualizada.");
+        $this->toastSuccess('Pessoa atualizada', "\"{$person->nome}\" foi atualizada.");
         $this->flushToasts();
 
         $this->dispatch('person-saved');
