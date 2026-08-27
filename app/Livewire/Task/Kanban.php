@@ -33,7 +33,9 @@ class Kanban extends Component
 
     protected function loadBoard(): void
     {
-        $this->board->load(['columns.tasks.category', 'columns.tasks.assignedTo', 'columns.tasks.taskEvents']);
+        $this->board->load([
+            'columns.tasks' => fn ($query) => $query->visibleTo(auth()->user())->with(['category', 'assignedTo', 'taskEvents']),
+        ]);
     }
 
     public function openCreate(int $columnId): void
