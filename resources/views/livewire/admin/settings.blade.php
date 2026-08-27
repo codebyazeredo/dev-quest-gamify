@@ -4,7 +4,7 @@
     <form wire:submit="save" class="max-w-md space-y-4 rounded-xl border border-line bg-card p-5">
         <div>
             <label class="block text-sm font-medium text-ink">Nome da empresa</label>
-            <input type="text" wire:model="company_name" placeholder="Dev Quest"
+            <input type="text" wire:model="company_name" placeholder="{{ \App\Models\AppSetting::DEFAULT_NAME }}"
                 class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
             @error('company_name') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
         </div>
@@ -12,12 +12,16 @@
         <div>
             <label class="block text-sm font-medium text-ink">Logo</label>
 
-            @if ($setting->logo_path && ! $logo)
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($setting->logo_path) }}" alt="" class="mt-2 h-12 w-auto">
+            @if ($setting->logoUrl() && ! $logo)
+                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-4">
+                    <img src="{{ $setting->logoUrl() }}" alt="" class="h-32 max-w-full w-auto">
+                </div>
             @endif
 
             @if ($logo)
-                <img src="{{ $logo->temporaryUrl() }}" alt="" class="mt-2 h-12 w-auto">
+                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-4">
+                    <img src="{{ $logo->temporaryUrl() }}" alt="" class="h-32 max-w-full w-auto">
+                </div>
             @endif
 
             <input type="file" wire:model="logo" accept="image/*"
