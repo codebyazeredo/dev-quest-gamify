@@ -14,7 +14,7 @@
 
         @livewireStyles
     </head>
-    <body class="flex min-h-screen flex-col items-center justify-center bg-surface px-4 text-ink">
+    <body class="flex min-h-screen flex-col items-center justify-center bg-linear-to-r from-primary to-accent px-4 text-ink">
         @if (session('status'))
             <div class="mb-4 w-full max-w-md rounded-xl border border-forest/30 bg-forest/10 p-4 text-sm text-forest">
                 {{ session('status') }}
@@ -33,7 +33,7 @@
             {{ $slot }}
         </div>
 
-        <x-footer class="mt-6 w-full max-w-md" />
+        <x-footer variant="inverted" class="mt-6 w-full max-w-md" />
 
         @livewireScripts
     </body>

@@ -16,7 +16,7 @@
     </head>
     <body class="h-screen overflow-hidden bg-surface text-ink">
         <div class="flex h-screen flex-col">
-            <nav class="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-6">
+            <nav class="flex items-center justify-between gap-3 bg-linear-to-r from-primary to-accent px-4 py-3 sm:px-6">
                 <a href="{{ route('boards.index') }}" class="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-white">
                     @if ($appSettings->logoUrl())
                         <img src="{{ $appSettings->logoUrl() }}" alt="" class="h-7 w-auto">
