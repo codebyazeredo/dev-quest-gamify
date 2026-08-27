@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin\Priorities;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
+use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\TaskPriority;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -13,7 +15,9 @@ use Livewire\WithPagination;
 #[Layout('components.layouts.app')]
 class Index extends Component
 {
+    use FlushesToasts;
     use RequiresAdminAccess;
+    use WithAdjustablePerPage;
     use WithPagination;
 
     public bool $showCreateModal = false;
@@ -57,17 +61,23 @@ class Index extends Component
 
         if ($priority->tasks()->exists()) {
             $this->addError('delete', 'Não é possível excluir uma gravidade que ainda possui tarefas.');
+            $this->toastError('Não foi possível excluir', 'Esta gravidade ainda possui tarefas.');
+            $this->flushToasts();
 
             return;
         }
 
+        $name = $priority->name;
         $priority->delete();
+
+        $this->toastSuccess('Prioridade excluída', "\"{$name}\" foi excluída.");
+        $this->flushToasts();
     }
 
     public function render(): View
     {
         return view('livewire.admin.priorities.index', [
-            'priorities' => TaskPriority::orderBy('multiplier')->paginate(15),
+            'priorities' => TaskPriority::orderBy('multiplier')->paginate($this->perPage),
         ]);
     }
 }

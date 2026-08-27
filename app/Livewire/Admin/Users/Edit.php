@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,8 @@ use Spatie\Permission\Models\Role;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public User $user;
 
     public string $email = '';
@@ -19,7 +22,6 @@ class Edit extends Component
 
     public string $password_confirmation = '';
 
-    /** @var array<int, string> */
     public array $roles = [];
 
     public function mount(int $userId): void
@@ -32,9 +34,6 @@ class Edit extends Component
         $this->roles = $this->user->getRoleNames()->toArray();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -59,6 +58,9 @@ class Edit extends Component
 
         $this->user->save();
         $this->user->syncRoles($validated['roles']);
+
+        $this->toastSuccess('Usuário atualizado', "\"{$this->user->name}\" foi atualizado.");
+        $this->flushToasts();
 
         $this->dispatch('user-saved');
     }

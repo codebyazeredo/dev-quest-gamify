@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Titles;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
 use App\Models\Title;
 use App\Support\FlavorIcons;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public string $icon = 'medal';
@@ -22,9 +25,6 @@ class Create extends Component
         $this->authorize('create', Title::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -46,6 +46,9 @@ class Create extends Component
             'icon' => $validated['icon'],
             'achievement_id' => $validated['achievement_id'],
         ]);
+
+        $this->toastSuccess('Título criado', "\"{$validated['name']}\" foi criado.");
+        $this->flushToasts();
 
         $this->dispatch('title-saved');
     }

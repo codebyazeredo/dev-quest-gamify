@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
 use App\Models\AppSetting;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Livewire\WithFileUploads;
 #[Layout('components.layouts.app')]
 class Settings extends Component
 {
+    use FlushesToasts;
     use RequiresAdminAccess;
     use WithFileUploads;
 
@@ -51,6 +53,9 @@ class Settings extends Component
         $setting->save();
 
         $this->logo = null;
+
+        $this->toastSuccess('Configurações salvas', 'As alterações foram aplicadas.');
+        $this->flushToasts();
     }
 
     public function render(): View

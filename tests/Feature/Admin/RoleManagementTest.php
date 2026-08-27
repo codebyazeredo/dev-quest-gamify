@@ -80,7 +80,7 @@ class RoleManagementTest extends TestCase
 
         $roles = Livewire::actingAs($admin)->test(Index::class)->viewData('roles');
 
-        $this->assertSame(15, $roles->count());
+        $this->assertSame(10, $roles->count());
         $this->assertTrue($roles->hasMorePages());
     }
 

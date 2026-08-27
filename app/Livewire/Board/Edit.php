@@ -3,6 +3,7 @@
 namespace App\Livewire\Board;
 
 use App\Enums\TaskStatus;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use Illuminate\Contracts\View\View;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public Board $board;
 
     public string $name;
@@ -34,9 +37,6 @@ class Edit extends Component
         $this->is_active = $board->is_active;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -53,6 +53,9 @@ class Edit extends Component
         $validated = $this->validate();
 
         $this->board->update($validated);
+
+        $this->toastSuccess('Quadro atualizado', 'As alterações foram salvas.');
+        $this->flushToasts();
 
         $this->dispatch('board-updated');
     }
@@ -78,6 +81,9 @@ class Edit extends Component
 
         $this->newColumnName = '';
         $this->board->refresh();
+
+        $this->toastSuccess('Coluna adicionada', 'A coluna foi criada.');
+        $this->flushToasts();
     }
 
     public function renameColumn(int $columnId, string $name): void
@@ -88,6 +94,9 @@ class Edit extends Component
         $column->update(['name' => $name]);
 
         $this->board->refresh();
+
+        $this->toastSuccess('Coluna renomeada', 'O nome da coluna foi atualizado.');
+        $this->flushToasts();
     }
 
     public function setColumnStatus(int $columnId, int $status): void
@@ -103,6 +112,9 @@ class Edit extends Component
         ]);
 
         $this->board->refresh();
+
+        $this->toastSuccess('Status da coluna atualizado', 'A coluna foi reclassificada.');
+        $this->flushToasts();
     }
 
     public function moveColumnUp(int $columnId): void
@@ -151,6 +163,8 @@ class Edit extends Component
 
         if ($column->tasks()->exists()) {
             $this->addError('columns', 'Não é possível excluir uma coluna que ainda possui tarefas.');
+            $this->toastError('Não foi possível excluir', 'Esta coluna ainda possui tarefas.');
+            $this->flushToasts();
 
             return;
         }
@@ -161,6 +175,9 @@ class Edit extends Component
             ->each(fn (BoardColumn $column, int $index) => $column->update(['position' => $index]));
 
         $this->board->refresh();
+
+        $this->toastSuccess('Coluna excluída', 'A coluna foi removida do quadro.');
+        $this->flushToasts();
     }
 
     public function cancel(): void

@@ -3,6 +3,7 @@
 namespace App\Livewire\Task;
 
 use App\Enums\TaskStatus;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -15,6 +16,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public Board $board;
 
     public int $columnId;
@@ -45,9 +48,6 @@ class Create extends Component
         $this->columnId = $columnId;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -72,6 +72,9 @@ class Create extends Component
         }
 
         app(TaskService::class)->create($validated, auth()->user());
+
+        $this->toastSuccess('Tarefa criada', "\"{$validated['title']}\" foi criada.");
+        $this->flushToasts();
 
         $this->dispatch('task-created');
     }

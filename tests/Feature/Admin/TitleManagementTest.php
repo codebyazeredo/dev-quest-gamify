@@ -49,7 +49,7 @@ class TitleManagementTest extends TestCase
 
         $titles = Livewire::actingAs($admin)->test(Index::class)->viewData('titles');
 
-        $this->assertSame(15, $titles->count());
+        $this->assertSame(10, $titles->count());
         $this->assertTrue($titles->hasMorePages());
     }
 

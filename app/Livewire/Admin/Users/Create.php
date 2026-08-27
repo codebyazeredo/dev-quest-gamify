@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -12,6 +13,8 @@ use Spatie\Permission\Models\Role;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public ?int $personId = null;
 
     public string $email = '';
@@ -20,7 +23,6 @@ class Create extends Component
 
     public string $password_confirmation = '';
 
-    /** @var array<int, string> */
     public array $roles = [];
 
     public function mount(): void
@@ -28,9 +30,6 @@ class Create extends Component
         $this->authorize('create', User::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -42,9 +41,6 @@ class Create extends Component
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     protected function validationAttributes(): array
     {
         return ['personId' => 'pessoa'];
@@ -72,6 +68,9 @@ class Create extends Component
         ]);
 
         $user->syncRoles($validated['roles']);
+
+        $this->toastSuccess('Usuário criado', "\"{$person->nome}\" foi criado.");
+        $this->flushToasts();
 
         $this->dispatch('user-saved');
     }

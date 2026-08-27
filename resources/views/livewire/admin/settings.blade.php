@@ -13,14 +13,14 @@
             <label class="block text-sm font-medium text-ink">Logo</label>
 
             @if ($setting->logoUrl() && ! $logo)
-                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-4">
-                    <img src="{{ $setting->logoUrl() }}" alt="" class="h-32 max-w-full w-auto">
+                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-6">
+                    <img src="{{ $setting->logoUrl() }}" alt="" class="h-48 max-w-full w-auto">
                 </div>
             @endif
 
             @if ($logo)
-                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-4">
-                    <img src="{{ $logo->temporaryUrl() }}" alt="" class="h-32 max-w-full w-auto">
+                <div class="mt-2 flex w-full items-center justify-center rounded-lg border border-line bg-surface p-6">
+                    <img src="{{ $logo->temporaryUrl() }}" alt="" class="h-48 max-w-full w-auto">
                 </div>
             @endif
 

@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin\Roles;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
+use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -15,7 +17,9 @@ use Spatie\Permission\Models\Role;
 #[Layout('components.layouts.app')]
 class Index extends Component
 {
+    use FlushesToasts;
     use RequiresAdminAccess;
+    use WithAdjustablePerPage;
     use WithPagination;
 
     public bool $showCreateModal = false;
@@ -66,23 +70,31 @@ class Index extends Component
 
         if ($role->name === 'admin') {
             $this->addError('delete', 'O role "admin" não pode ser excluído.');
+            $this->toastError('Não foi possível excluir', 'O role "admin" não pode ser excluído.');
+            $this->flushToasts();
 
             return;
         }
 
         if ($role->users()->exists()) {
             $this->addError('delete', 'Não é possível excluir um role em uso por algum usuário.');
+            $this->toastError('Não foi possível excluir', 'Este role está em uso por algum usuário.');
+            $this->flushToasts();
 
             return;
         }
 
+        $name = $role->name;
         $role->delete();
+
+        $this->toastSuccess('Papel excluído', "\"{$name}\" foi excluído.");
+        $this->flushToasts();
     }
 
     public function render(): View
     {
         return view('livewire.admin.roles.index', [
-            'roles' => Role::with('permissions')->orderBy('name')->paginate(15),
+            'roles' => Role::with('permissions')->orderBy('name')->paginate($this->perPage),
             'permissions' => Permission::orderBy('name')->get(),
         ]);
     }

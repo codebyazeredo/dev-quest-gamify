@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Challenges;
 
 use App\Enums\ChallengeType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Challenge;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -10,6 +11,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public Challenge $challenge;
 
     public string $name = '';
@@ -44,9 +47,6 @@ class Edit extends Component
         $this->active = $this->challenge->active;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -77,6 +77,9 @@ class Edit extends Component
             'ends_at' => $validated['ends_at'],
             'active' => $this->active,
         ]);
+
+        $this->toastSuccess('Desafio atualizado', "\"{$validated['name']}\" foi atualizado.");
+        $this->flushToasts();
 
         $this->dispatch('challenge-saved');
     }

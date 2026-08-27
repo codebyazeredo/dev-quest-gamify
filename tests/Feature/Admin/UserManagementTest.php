@@ -97,7 +97,7 @@ class UserManagementTest extends TestCase
 
         $users = Livewire::actingAs($admin)->test(Index::class)->viewData('users');
 
-        $this->assertSame(15, $users->count());
+        $this->assertSame(10, $users->count());
         $this->assertTrue($users->hasMorePages());
     }
 

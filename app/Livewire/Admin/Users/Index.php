@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
+use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -13,7 +15,9 @@ use Livewire\WithPagination;
 #[Layout('components.layouts.app')]
 class Index extends Component
 {
+    use FlushesToasts;
     use RequiresAdminAccess;
+    use WithAdjustablePerPage;
     use WithPagination;
 
     public bool $showCreateModal = false;
@@ -57,17 +61,23 @@ class Index extends Component
 
         if ($user->xpTransactions()->exists()) {
             $this->addError('delete', 'Não é possível excluir um usuário que já possui histórico de atividade.');
+            $this->toastError('Não foi possível excluir', 'Este usuário já possui histórico de atividade.');
+            $this->flushToasts();
 
             return;
         }
 
+        $name = $user->name;
         $user->delete();
+
+        $this->toastSuccess('Usuário excluído', "\"{$name}\" foi excluído.");
+        $this->flushToasts();
     }
 
     public function render(): View
     {
         return view('livewire.admin.users.index', [
-            'users' => User::with('person')->orderBy('name')->paginate(15),
+            'users' => User::with('person')->orderBy('name')->paginate($this->perPage),
         ]);
     }
 }

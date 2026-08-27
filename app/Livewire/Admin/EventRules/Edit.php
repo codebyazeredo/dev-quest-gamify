@@ -3,12 +3,15 @@
 namespace App\Livewire\Admin\EventRules;
 
 use App\Enums\TaskEventType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskEventRule;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public TaskEventRule $rule;
 
     public int $xp_reward = 0;
@@ -25,9 +28,6 @@ class Edit extends Component
         $this->active = $this->rule->active;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -47,6 +47,9 @@ class Edit extends Component
             'xp_reward' => $validated['xp_reward'],
             'active' => $this->active,
         ]);
+
+        $this->toastSuccess('Regra atualizada', "\"{$this->rule->type->label()}\" foi atualizada.");
+        $this->flushToasts();
 
         $this->dispatch('event-rule-saved');
     }

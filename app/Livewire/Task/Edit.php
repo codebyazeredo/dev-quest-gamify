@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public Task $task;
 
     public string $title;
@@ -36,9 +39,6 @@ class Edit extends Component
         $this->due_at = $this->task->due_at?->format('Y-m-d\TH:i');
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -57,6 +57,9 @@ class Edit extends Component
         $validated = $this->validate();
 
         app(TaskService::class)->updateDetails($this->task, $validated);
+
+        $this->toastSuccess('Tarefa atualizada', "\"{$validated['title']}\" foi atualizada.");
+        $this->flushToasts();
 
         $this->dispatch('task-saved');
     }

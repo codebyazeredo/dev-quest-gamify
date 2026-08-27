@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\People;
 
 use App\Enums\Gender;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Address;
 use App\Models\Person;
 use App\Rules\ValidCpf;
@@ -14,6 +15,7 @@ use Livewire\WithFileUploads;
 
 class Create extends Component
 {
+    use FlushesToasts;
     use WithFileUploads;
 
     public string $nome = '';
@@ -49,9 +51,6 @@ class Create extends Component
         $this->authorize('create', Person::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -102,6 +101,9 @@ class Create extends Component
                 'estado' => strtoupper($validated['estado']),
             ]);
         });
+
+        $this->toastSuccess('Pessoa criada', "\"{$validated['nome']}\" foi criada.");
+        $this->flushToasts();
 
         $this->dispatch('person-saved');
     }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Profile;
 
 use App\Enums\Gender;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Address;
 use App\Models\Person;
 use App\Models\User;
@@ -16,13 +17,9 @@ use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-/**
- * Self-service "meus dados" screen — always operates on auth()->user(), never
- * accepts a target id, so there is no separate authorization check needed:
- * a user can only ever reach their own Person/Address/User rows through here.
- */
 class Edit extends Component
 {
+    use FlushesToasts;
     use WithFileUploads;
 
     public User $user;
@@ -57,12 +54,6 @@ class Edit extends Component
 
     public string $estado = '';
 
-    /**
-     * Seeded/legacy accounts may have no Address row at all (only the People
-     * admin Create/Edit flow enforces one). Self-editing shouldn't force a
-     * user to fill in a full address just to fix their phone number, so the
-     * address block only becomes mandatory once one already exists.
-     */
     public bool $hasAddress = false;
 
     public string $login_email = '';
@@ -96,9 +87,6 @@ class Edit extends Component
         $this->login_email = $this->user->email;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -171,6 +159,9 @@ class Edit extends Component
 
         $this->password = '';
         $this->password_confirmation = '';
+
+        $this->toastSuccess('Dados atualizados', 'Suas informações foram salvas com sucesso.');
+        $this->flushToasts();
 
         $this->dispatch('profile-saved');
     }

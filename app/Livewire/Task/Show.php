@@ -67,6 +67,7 @@ class Show extends Component
         app(TaskService::class)->assign($this->task, auth()->user());
 
         $this->task->refresh();
+        $this->toastSuccess('Tarefa assumida', 'Você agora é o responsável por esta tarefa.');
         $this->flushToasts();
     }
 
@@ -82,6 +83,7 @@ class Show extends Component
 
         $this->assignToUserId = null;
         $this->task->refresh();
+        $this->toastSuccess('Responsável atribuído', 'A tarefa foi atribuída com sucesso.');
         $this->flushToasts();
     }
 
@@ -92,6 +94,7 @@ class Show extends Component
         app(TaskService::class)->approve($this->task, auth()->user());
 
         $this->reloadAfterMove();
+        $this->toastSuccess('Tarefa aprovada', 'A tarefa avançou para a próxima etapa.');
         $this->flushToasts();
     }
 
@@ -116,6 +119,7 @@ class Show extends Component
         $this->rejectionReasonInput = '';
         $this->showRejectForm = false;
         $this->reloadAfterMove();
+        $this->toastSuccess('Tarefa reprovada', 'O responsável foi notificado do motivo.');
         $this->flushToasts();
     }
 
@@ -133,6 +137,7 @@ class Show extends Component
         app(TaskService::class)->markHomologationCompleted($this->task, auth()->user());
 
         $this->reloadTaskEvents();
+        $this->toastSuccess('Homologação concluída', 'A tarefa foi movida para Concluído.');
         $this->flushToasts();
     }
 
@@ -143,6 +148,7 @@ class Show extends Component
         app(TaskService::class)->markDeployed($this->task, auth()->user());
 
         $this->reloadTaskEvents();
+        $this->toastSuccess('Implantação registrada', 'A tarefa foi marcada como implantada.');
         $this->flushToasts();
     }
 

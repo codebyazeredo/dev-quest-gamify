@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Priorities;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskPriority;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -9,6 +10,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public TaskPriority $priority;
 
     public string $name = '';
@@ -25,9 +28,6 @@ class Edit extends Component
         $this->multiplier = (string) $this->priority->multiplier;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -47,6 +47,9 @@ class Edit extends Component
             'slug' => Str::slug($validated['name']),
             'multiplier' => $validated['multiplier'],
         ]);
+
+        $this->toastSuccess('Prioridade atualizada', "\"{$validated['name']}\" foi atualizada.");
+        $this->flushToasts();
 
         $this->dispatch('priority-saved');
     }

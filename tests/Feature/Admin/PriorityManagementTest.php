@@ -65,7 +65,7 @@ class PriorityManagementTest extends TestCase
 
         $priorities = Livewire::actingAs($admin)->test(Index::class)->viewData('priorities');
 
-        $this->assertSame(15, $priorities->count());
+        $this->assertSame(10, $priorities->count());
         $this->assertTrue($priorities->hasMorePages());
     }
 

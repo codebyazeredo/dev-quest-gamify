@@ -3,12 +3,15 @@
 namespace App\Livewire\Admin\EventRules;
 
 use App\Enums\TaskEventType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskEventRule;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public ?int $type = null;
 
     public int $xp_reward = 0;
@@ -20,9 +23,6 @@ class Create extends Component
         $this->authorize('create', TaskEventRule::class);
     }
 
-    /**
-     * @return array<int, TaskEventType>
-     */
     protected function availableTypes(): array
     {
         $configured = TaskEventRule::pluck('type')->map(fn (TaskEventType $type) => $type->value)->all();
@@ -30,9 +30,6 @@ class Create extends Component
         return array_values(array_filter(TaskEventType::cases(), fn (TaskEventType $type) => ! in_array($type->value, $configured, true)));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         $isPercentage = $this->type !== null && TaskEventType::from($this->type)->isPercentageBased();
@@ -64,6 +61,9 @@ class Create extends Component
             'xp_reward' => $validated['xp_reward'],
             'active' => $this->active,
         ]);
+
+        $this->toastSuccess('Regra criada', "\"{$type->label()}\" foi criada.");
+        $this->flushToasts();
 
         $this->dispatch('event-rule-saved');
     }

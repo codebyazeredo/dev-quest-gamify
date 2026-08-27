@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin\Titles;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
+use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -13,7 +15,9 @@ use Livewire\WithPagination;
 #[Layout('components.layouts.app')]
 class Index extends Component
 {
+    use FlushesToasts;
     use RequiresAdminAccess;
+    use WithAdjustablePerPage;
     use WithPagination;
 
     public bool $showCreateModal = false;
@@ -57,17 +61,23 @@ class Index extends Component
 
         if ($title->userTitles()->exists()) {
             $this->addError('delete', 'Não é possível excluir um título que usuários já desbloquearam.');
+            $this->toastError('Não foi possível excluir', 'Usuários já desbloquearam este título.');
+            $this->flushToasts();
 
             return;
         }
 
+        $name = $title->name;
         $title->delete();
+
+        $this->toastSuccess('Título excluído', "\"{$name}\" foi excluído.");
+        $this->flushToasts();
     }
 
     public function render(): View
     {
         return view('livewire.admin.titles.index', [
-            'titles' => Title::with('achievement')->orderBy('name')->paginate(15),
+            'titles' => Title::with('achievement')->orderBy('name')->paginate($this->perPage),
         ]);
     }
 }

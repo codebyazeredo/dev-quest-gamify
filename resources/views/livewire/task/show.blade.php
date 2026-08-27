@@ -30,7 +30,12 @@
     <dl class="mt-6 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
         <div>
             <dt class="text-ink-muted">Categoria</dt>
-            <dd class="font-medium text-ink">{{ $task->category->name }}</dd>
+            <dd class="font-medium text-ink">
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $task->category->color }};"></span>
+                    {{ $task->category->name }}
+                </span>
+            </dd>
         </div>
         <div>
             <dt class="text-ink-muted">Prioridade</dt>

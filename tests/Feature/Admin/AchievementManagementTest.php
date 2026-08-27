@@ -52,7 +52,7 @@ class AchievementManagementTest extends TestCase
 
         $achievements = Livewire::actingAs($admin)->test(Index::class)->viewData('achievements');
 
-        $this->assertSame(15, $achievements->count());
+        $this->assertSame(10, $achievements->count());
         $this->assertTrue($achievements->hasMorePages());
     }
 

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Achievements;
 
 use App\Enums\AchievementConditionType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public Achievement $achievement;
 
     public string $name = '';
@@ -42,9 +45,6 @@ class Edit extends Component
         $this->active = $this->achievement->active;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -73,6 +73,9 @@ class Edit extends Component
             'xp_reward' => $validated['xp_reward'],
             'active' => $this->active,
         ]);
+
+        $this->toastSuccess('Conquista atualizada', "\"{$validated['name']}\" foi atualizada.");
+        $this->flushToasts();
 
         $this->dispatch('achievement-saved');
     }

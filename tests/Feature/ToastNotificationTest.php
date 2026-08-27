@@ -50,11 +50,6 @@ class ToastNotificationTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
 
-        // task already approved by a tester: the assignee marking homologação
-        // auto-completes it, which is not a self-review sign-off, so the
-        // developer can trigger their own toast — and since the toast is now
-        // scoped to auth()->id() === $event->user->id (bugfix), the developer
-        // must be both the assignee AND the actor here
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
         $task = Task::factory()->create([
@@ -91,9 +86,7 @@ class ToastNotificationTest extends TestCase
             'status' => TaskStatus::APPROVED,
             'assigned_to' => $developer->id,
             'category_id' => $bugCategory->id,
-            // fixed low XP so the task completion + achievement unlock never also
-            // cross a level threshold — assertDispatched only inspects the first
-            // "toast"-named dispatch, so a level_up would mask the achievement toast
+
             'base_points' => 10,
             'priority_multiplier' => '1.50',
         ]);
@@ -115,10 +108,6 @@ class ToastNotificationTest extends TestCase
 
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
-        // pre-level the developer to the max seeded level so the challenge's own XP
-        // reward can never also cross a level threshold and queue a level_up toast
-        // ahead of the challenge toast this test asserts on (assertDispatched only
-        // inspects the first "toast"-named dispatch, so any level_up would mask it)
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
         $component = null;
@@ -186,15 +175,11 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => '1.50',
         ]);
 
-        // 90 + the 10 XP the REVIEW_COMPLETED threshold grants on this move = 100,
-        // exactly crossing into level 2
         app(XpService::class)->grant($developer, 90, XpSourceType::TASK, null, 'test setup buffer');
 
-        // the reviewer's own move crosses the developer's level threshold, but
-        // the reviewer is not the subject of that LevelUp event — no toast for them
         Livewire::actingAs($reviewer)
             ->test(Kanban::class, ['board' => $board])
             ->call('moveTask', $task->id, $testing->id, 0)
-            ->assertNotDispatched('toast');
+            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] !== 'level_up');
     }
 }

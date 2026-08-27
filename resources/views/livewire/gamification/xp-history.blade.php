@@ -11,7 +11,8 @@
     @endforelse
 
     @if ($paginated)
-        <div class="mt-4">
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <x-per-page-selector />
             {{ $transactions->links() }}
         </div>
     @endif

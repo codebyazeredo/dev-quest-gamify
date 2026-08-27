@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Board;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use Illuminate\Contracts\View\View;
@@ -10,6 +11,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public string $description = '';
@@ -21,9 +24,6 @@ class Create extends Component
         $this->authorize('create', Board::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -46,6 +46,8 @@ class Create extends Component
 
             return $board;
         });
+
+        $this->toastSuccess('Quadro criado', "\"{$board->name}\" foi criado.");
 
         $this->redirectRoute('boards.show', ['board' => $board]);
     }

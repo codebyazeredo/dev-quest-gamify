@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\People;
 
 use App\Enums\Gender;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Address;
 use App\Models\Person;
 use App\Rules\ValidCpf;
@@ -15,6 +16,7 @@ use Livewire\WithFileUploads;
 
 class Edit extends Component
 {
+    use FlushesToasts;
     use WithFileUploads;
 
     public Person $person;
@@ -70,9 +72,6 @@ class Edit extends Component
         $this->estado = $address?->estado ?? '';
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -131,6 +130,9 @@ class Edit extends Component
                 ]
             );
         });
+
+        $this->toastSuccess('Pessoa atualizada', "\"{$validated['nome']}\" foi atualizada.");
+        $this->flushToasts();
 
         $this->dispatch('person-saved');
     }

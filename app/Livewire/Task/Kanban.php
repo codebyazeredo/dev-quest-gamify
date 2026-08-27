@@ -91,6 +91,7 @@ class Kanban extends Component
 
         app(TaskService::class)->move($task, $column, $position, auth()->user());
 
+        $this->toastSuccess('Tarefa movida', "\"{$task->title}\" foi movida para {$column->name}.");
         $this->loadBoard();
         $this->flushToasts();
     }
@@ -120,6 +121,7 @@ class Kanban extends Component
 
         app(TaskService::class)->assign($task, auth()->user());
 
+        $this->toastSuccess('Tarefa assumida', 'Você agora é o responsável por esta tarefa.');
         $this->loadBoard();
         $this->flushToasts();
     }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Challenges;
 
 use App\Enums\ChallengeType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Challenge;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -10,6 +11,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public string $description = '';
@@ -32,9 +35,6 @@ class Create extends Component
         $this->ends_at = now()->endOfWeek()->format('Y-m-d\TH:i');
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -64,6 +64,9 @@ class Create extends Component
             'starts_at' => $validated['starts_at'],
             'ends_at' => $validated['ends_at'],
         ]);
+
+        $this->toastSuccess('Desafio criado', "\"{$validated['name']}\" foi criado.");
+        $this->flushToasts();
 
         $this->dispatch('challenge-saved');
     }

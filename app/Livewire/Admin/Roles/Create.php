@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Roles;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -9,6 +10,8 @@ use Spatie\Permission\Models\Role;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public function mount(): void
@@ -16,9 +19,6 @@ class Create extends Component
         $this->authorize('accessAdminPanel', User::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -33,6 +33,9 @@ class Create extends Component
         $validated = $this->validate();
 
         Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
+
+        $this->toastSuccess('Papel criado', "\"{$validated['name']}\" foi criado.");
+        $this->flushToasts();
 
         $this->dispatch('role-saved');
     }

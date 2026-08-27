@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Gamification;
 
+use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\XpTransaction;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
@@ -10,15 +11,13 @@ use Livewire\WithPagination;
 
 class XpHistory extends Component
 {
+    use WithAdjustablePerPage;
     use WithPagination;
 
     public ?int $limit = null;
 
     #[On('checked-in')]
-    public function refresh(): void
-    {
-        // no-op: Livewire re-renders this component after any listener call
-    }
+    public function refresh(): void {}
 
     public function render(): View
     {
@@ -32,7 +31,7 @@ class XpHistory extends Component
         }
 
         return view('livewire.gamification.xp-history', [
-            'transactions' => $query->paginate(15),
+            'transactions' => $query->paginate($this->perPage),
             'paginated' => true,
         ]);
     }

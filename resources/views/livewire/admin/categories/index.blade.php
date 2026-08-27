@@ -15,6 +15,7 @@
         <table class="w-full text-sm">
             <thead class="bg-line/20 text-left text-ink-muted">
                 <tr>
+                    <th class="px-4 py-3">Cor</th>
                     <th class="px-4 py-3">Nome</th>
                     <th class="px-4 py-3">Pontos base</th>
                     <th class="px-4 py-3"></th>
@@ -23,6 +24,11 @@
             <tbody class="divide-y divide-line/50">
                 @forelse ($categories as $category)
                     <tr wire:key="category-{{ $category->id }}">
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium" style="background-color: {{ $category->color }}; color: {{ $category->text_color }};">
+                                {{ $category->name }}
+                            </span>
+                        </td>
                         <td class="px-4 py-3 text-ink">{{ $category->name }}</td>
                         <td class="px-4 py-3 text-ink">{{ $category->base_points }}</td>
                         <td class="px-4 py-3 text-right">
@@ -32,14 +38,15 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-6 text-center text-ink-muted">Nenhuma categoria cadastrada.</td>
+                        <td colspan="4" class="px-4 py-6 text-center text-ink-muted">Nenhuma categoria cadastrada.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <div class="mt-4">
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <x-per-page-selector />
         {{ $categories->links() }}
     </div>
 

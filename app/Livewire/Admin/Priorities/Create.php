@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Priorities;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\TaskPriority;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -9,6 +10,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public string $multiplier = '1.00';
@@ -18,9 +21,6 @@ class Create extends Component
         $this->authorize('create', TaskPriority::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -40,6 +40,9 @@ class Create extends Component
             'slug' => Str::slug($validated['name']),
             'multiplier' => $validated['multiplier'],
         ]);
+
+        $this->toastSuccess('Prioridade criada', "\"{$validated['name']}\" foi criada.");
+        $this->flushToasts();
 
         $this->dispatch('priority-saved');
     }

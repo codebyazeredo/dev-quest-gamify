@@ -52,7 +52,7 @@ class ChallengeManagementTest extends TestCase
 
         $challenges = Livewire::actingAs($admin)->test(Index::class)->viewData('challenges');
 
-        $this->assertSame(15, $challenges->count());
+        $this->assertSame(10, $challenges->count());
         $this->assertTrue($challenges->hasMorePages());
     }
 

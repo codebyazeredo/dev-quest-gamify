@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Titles;
 
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
 use App\Models\Title;
 use App\Support\FlavorIcons;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use FlushesToasts;
+
     public Title $title;
 
     public string $name = '';
@@ -33,9 +36,6 @@ class Edit extends Component
         $this->active = $this->title->active;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -58,6 +58,9 @@ class Edit extends Component
             'achievement_id' => $validated['achievement_id'],
             'active' => $this->active,
         ]);
+
+        $this->toastSuccess('Título atualizado', "\"{$validated['name']}\" foi atualizado.");
+        $this->flushToasts();
 
         $this->dispatch('title-saved');
     }

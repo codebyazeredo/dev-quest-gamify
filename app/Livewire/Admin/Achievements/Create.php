@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Achievements;
 
 use App\Enums\AchievementConditionType;
+use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Achievement;
 use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use FlushesToasts;
+
     public string $name = '';
 
     public string $description = '';
@@ -28,9 +31,6 @@ class Create extends Component
         $this->authorize('create', Achievement::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function rules(): array
     {
         return [
@@ -58,6 +58,9 @@ class Create extends Component
             'condition_value' => $validated['condition_value'],
             'xp_reward' => $validated['xp_reward'],
         ]);
+
+        $this->toastSuccess('Conquista criada', "\"{$validated['name']}\" foi criada.");
+        $this->flushToasts();
 
         $this->dispatch('achievement-saved');
     }
