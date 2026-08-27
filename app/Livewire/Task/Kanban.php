@@ -51,6 +51,16 @@ class Kanban extends Component
         $this->creatingInColumnId = $columnId;
     }
 
+    #[On('open-create-task')]
+    public function openCreateFromHeader(): void
+    {
+        $backlogColumn = $this->board->columns->firstWhere('status', TaskStatus::BACKLOG);
+
+        if ($backlogColumn) {
+            $this->openCreate($backlogColumn->id);
+        }
+    }
+
     #[On('open-task-edit')]
     public function openEdit(int $taskId): void
     {

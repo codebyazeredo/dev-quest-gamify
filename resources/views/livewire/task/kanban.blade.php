@@ -1,18 +1,4 @@
 <div class="flex flex-1 min-h-0 flex-col">
-    @php
-        $backlogColumn = $board->columns->firstWhere('status', \App\Enums\TaskStatus::BACKLOG);
-    @endphp
-
-    @can('create', \App\Models\Task::class)
-        @if ($backlogColumn)
-            <div class="mb-3 flex shrink-0 justify-end">
-                <button type="button" wire:click="openCreate({{ $backlogColumn->id }})" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
-                    + Nova tarefa
-                </button>
-            </div>
-        @endif
-    @endcan
-
     <div x-data="{ draggingTaskId: null }" class="flex flex-1 min-h-0 gap-4 overflow-x-auto pb-4">
         @foreach ($board->columns as $column)
             <div
