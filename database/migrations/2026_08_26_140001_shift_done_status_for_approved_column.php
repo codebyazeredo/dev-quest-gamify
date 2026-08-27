@@ -5,12 +5,6 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * TaskStatus::DONE moves from 6 to 7 to make room for the new
-     * TaskStatus::APPROVED = 6 case. Existing rows must be shifted before the
-     * new enum takes effect, or they'd silently become "Aprovado" instead of
-     * "Concluído".
-     */
     public function up(): void
     {
         DB::table('tasks')->where('status', 6)->update(['status' => 7]);

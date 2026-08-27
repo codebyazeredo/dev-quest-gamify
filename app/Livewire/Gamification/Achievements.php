@@ -19,7 +19,6 @@ class Achievements extends Component
         $unlockedIds = $user->unlockedAchievements()->pluck('achievement_id')->all();
         $cache = [];
 
-        // Admins are the game's GM — every achievement shows as already unlocked.
         $isAdmin = $user->isAdmin();
 
         $achievements = Achievement::where('active', true)

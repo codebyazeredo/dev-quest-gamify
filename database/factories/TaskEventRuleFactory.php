@@ -3,12 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\TaskEventType;
-use App\Models\TaskEventRule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<TaskEventRule>
- */
 class TaskEventRuleFactory extends Factory
 {
     public function definition(): array

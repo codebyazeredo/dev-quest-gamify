@@ -2,13 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\TaskCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<TaskCategory>
- */
 class TaskCategoryFactory extends Factory
 {
     public function definition(): array

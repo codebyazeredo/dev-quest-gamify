@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Old App\Enums\UserRole backed-int value => new spatie/laravel-permission role name.
-     */
     private const ROLE_MAP = [
         1 => 'admin',
         2 => 'product_owner',

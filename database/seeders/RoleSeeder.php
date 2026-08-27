@@ -8,9 +8,6 @@ use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * @var array<int, string>
-     */
     private const PERMISSIONS = [
         'create-task',
         'move-task',
@@ -22,9 +19,6 @@ class RoleSeeder extends Seeder
         'manage-admin-settings',
     ];
 
-    /**
-     * @var array<string, array<int, string>>
-     */
     private const ROLE_PERMISSIONS = [
         'admin' => self::PERMISSIONS,
         'product_owner' => ['create-task', 'move-task', 'manage-board', 'assign-task'],

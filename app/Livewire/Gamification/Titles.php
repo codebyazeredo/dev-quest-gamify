@@ -29,7 +29,6 @@ class Titles extends Component
     {
         $user = auth()->user();
 
-        // Admins are the game's GM — every title is already available to use.
         $unlockedTitles = $user->isAdmin()
             ? Title::orderBy('name')->get()
             : $user->unlockedTitles()->with('title')->get()->pluck('title');

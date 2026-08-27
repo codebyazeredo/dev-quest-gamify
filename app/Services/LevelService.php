@@ -20,12 +20,6 @@ class LevelService
             ->firstOrFail();
     }
 
-    /**
-     * Admin/PO are leadership, not players — always shown at max level,
-     * regardless of their actual XP total (which is left untouched, no fake
-     * XP is granted). Leveling is the motivation mechanic for the roles that
-     * actually execute the work (dev/tester/suporte) — see participatesInLeveling().
-     */
     public function currentLevelFor(User $user): Level
     {
         if (! $this->participatesInLeveling($user)) {

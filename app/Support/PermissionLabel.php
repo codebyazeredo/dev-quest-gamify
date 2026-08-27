@@ -4,11 +4,6 @@ namespace App\Support;
 
 use Illuminate\Support\Str;
 
-/**
- * PT-BR display labels for permission names seeded by RoleSeeder. Falls back
- * to a title-cased version of the raw name for any future/custom permission
- * an admin creates via /admin/roles, so the UI never shows a blank label.
- */
 class PermissionLabel
 {
     public static function for(string $name): string

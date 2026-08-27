@@ -7,7 +7,6 @@ use App\Models\Address;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Person;
-use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
@@ -16,13 +15,6 @@ use App\Services\TaskService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
-/**
- * Populates the dev database with a realistic day-to-day snapshot: extra
- * people/users across every role, a busy board with tasks spread across
- * every column (some overdue, some completed with a backdated history via
- * the real TaskService/CheckinService flow so XP/achievements/challenges
- * come out fully consistent), and a few days of check-in streaks.
- */
 class DemoDataSeeder extends Seeder
 {
     private TaskService $taskService;
@@ -41,9 +33,6 @@ class DemoDataSeeder extends Seeder
         Carbon::setTestNow();
     }
 
-    /**
-     * @return array<string, array<int, User>>
-     */
     private function seedPeopleAndUsers(): array
     {
         $accounts = [
@@ -110,7 +99,6 @@ class DemoDataSeeder extends Seeder
             $usersByRole[$account['role']][] = $user;
         }
 
-        // fold in the original seeded accounts so the demo pool is bigger
         $usersByRole['dev'][] = User::where('email', 'dev@devquestgamify.test')->first();
         $usersByRole['tester'][] = User::where('email', 'tester@devquestgamify.test')->first();
         $usersByRole['suporte'][] = User::where('email', 'suporte@devquestgamify.test')->first();
@@ -119,9 +107,6 @@ class DemoDataSeeder extends Seeder
         return $usersByRole;
     }
 
-    /**
-     * @param  array<string, array<int, User>>  $users
-     */
     private function seedCheckins(array $users): void
     {
         $streaks = [
@@ -148,9 +133,6 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    /**
-     * @param  array<string, array<int, User>>  $users
-     */
     private function seedTasks(array $users): void
     {
         $board = Board::first();
@@ -165,9 +147,6 @@ class DemoDataSeeder extends Seeder
 
         $pool = $this->titlePool();
 
-        // 1) A healthy batch of fully completed tasks, backdated over the
-        // last few weeks, driven through the real approve/homologate flow so
-        // XP, achievements and challenges come out consistent.
         $completedCount = 14;
 
         for ($i = 0; $i < $completedCount; $i++) {
@@ -207,8 +186,6 @@ class DemoDataSeeder extends Seeder
             Carbon::setTestNow();
         }
 
-        // 2) Tasks spread across every other stage, with a realistic mix of
-        // overdue / due-soon / due-later deadlines.
         $stages = [
             TaskStatus::BACKLOG->value => 9,
             TaskStatus::TODO->value => 6,
@@ -269,9 +246,6 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    /**
-     * @return array<string, array<int, array{0: string, 1: string}>>
-     */
     private function titlePool(): array
     {
         return [
@@ -322,10 +296,6 @@ class DemoDataSeeder extends Seeder
         ];
     }
 
-    /**
-     * @param  array<string, array<int, array{0: string, 1: string}>>  $pool
-     * @return array{0: string, 1: string}
-     */
     private function pickTitle(array $pool, string $category): array
     {
         $options = $pool[$category];

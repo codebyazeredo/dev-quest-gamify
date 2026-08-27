@@ -55,7 +55,7 @@ class ChallengeServiceTest extends TestCase
         $service = app(ChallengeService::class);
         $service->recordProgress($user, ChallengeType::TASKS_COMPLETED, now());
         $service->recordProgress($user, ChallengeType::TASKS_COMPLETED, now());
-        // progress freezes once completed — a third call must not keep incrementing or re-grant XP
+
         $service->recordProgress($user, ChallengeType::TASKS_COMPLETED, now());
 
         $userChallenge = UserChallenge::where('user_id', $user->id)->where('challenge_id', $challenge->id)->first();

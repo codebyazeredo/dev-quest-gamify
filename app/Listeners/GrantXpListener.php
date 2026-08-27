@@ -16,10 +16,7 @@ class GrantXpListener
         $taskEvent = $event->taskEvent;
 
         if ($taskEvent->type->isPercentageBased()) {
-            // APPROVED/CREATION_COMPLETED are granted as a % of the task's own
-            // value once it actually completes, to a different recipient than
-            // the assignee — see TaskService::grantDeferredTesterXp()/
-            // grantDeferredCreatorXp(), not this generic flat-amount path.
+
             return;
         }
 

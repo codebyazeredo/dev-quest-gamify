@@ -10,10 +10,7 @@ use Livewire\Component;
 class LevelProgress extends Component
 {
     #[On('checked-in')]
-    public function refresh(): void
-    {
-        // no-op: Livewire re-renders this component after any listener call
-    }
+    public function refresh(): void {}
 
     public function render(): View
     {

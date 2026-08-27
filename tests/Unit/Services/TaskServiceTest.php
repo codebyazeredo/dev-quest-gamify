@@ -140,9 +140,6 @@ class TaskServiceTest extends TestCase
         $this->assertTrue($task->refresh()->isLate());
     }
 
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
     protected function createTask(Board $board, BoardColumn $column, array $overrides = []): Task
     {
         return Task::factory()->create(array_merge([

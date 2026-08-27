@@ -35,10 +35,7 @@ class History extends Component
     }
 
     #[On('checked-in')]
-    public function refreshCalendar(): void
-    {
-        // no-op: Livewire re-renders this component after any listener call, which is all we need
-    }
+    public function refreshCalendar(): void {}
 
     public function render(): View
     {

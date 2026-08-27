@@ -25,10 +25,7 @@ class Index extends Component
     }
 
     #[On('checked-in')]
-    public function refreshStats(): void
-    {
-        // no-op: Livewire re-renders this component after any listener call, refreshing the stat tiles
-    }
+    public function refreshStats(): void {}
 
     #[On('close-modal')]
     #[On('profile-saved')]

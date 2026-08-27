@@ -8,14 +8,6 @@ use Illuminate\Support\Str;
 
 return new class extends Migration
 {
-    /**
-     * TaskPriority stops being a fixed PHP enum (Baixa/Normal/Alta/Crítica)
-     * and becomes a free-form table, same shape as task_categories — admin
-     * can create/edit/delete priority levels instead of being stuck with 4
-     * hardcoded ones. Any multiplier override already saved in
-     * task_priority_rules (the admin screen from the previous round) is
-     * preserved onto the new row instead of being lost.
-     */
     public function up(): void
     {
         Schema::create('task_priorities', function (Blueprint $table) {

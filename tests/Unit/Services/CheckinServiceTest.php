@@ -54,7 +54,7 @@ class CheckinServiceTest extends TestCase
         $day2 = $service->checkIn($user);
         $this->assertSame(2, $day2->streak_count);
 
-        Carbon::setTestNow('2026-01-04'); // gap: skipped 2026-01-03
+        Carbon::setTestNow('2026-01-04');
         $day4 = $service->checkIn($user);
         $this->assertSame(1, $day4->streak_count);
     }
@@ -70,10 +70,9 @@ class CheckinServiceTest extends TestCase
             Carbon::setTestNow(now()->addDay());
         }
 
-        // 5 daily +1 XP grants, plus one +5 bonus on day 5 = 10 XP
         $this->assertSame(10, $user->xpTransactions()->sum('amount'));
 
-        Carbon::setTestNow(now()->addDays(3)); // break the streak
+        Carbon::setTestNow(now()->addDays(3));
         $service->checkIn($user);
         $this->assertSame(11, $user->xpTransactions()->sum('amount'));
 
@@ -82,7 +81,6 @@ class CheckinServiceTest extends TestCase
             $service->checkIn($user);
         }
 
-        // second streak reaches 5 again: 11 + 4x(+1) + one more +5 bonus = 20
         $this->assertSame(20, $user->xpTransactions()->sum('amount'));
     }
 

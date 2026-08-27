@@ -83,7 +83,6 @@ class AchievementTest extends TestCase
         $service = app(TaskService::class);
         $service->move($task, $done, 0, $developer);
 
-        // bounce it around after completion — should not re-trigger First Blood
         $service->move($task, $review, 0, $developer);
         $service->move($task, $done, 0, $developer);
 
@@ -102,7 +101,7 @@ class AchievementTest extends TestCase
         app(TaskService::class)->markDeployed($task, $developer);
 
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::DEPLOYED->value]);
-        // one deploy isn't enough to unlock Release Master (target 10), just confirms the listener ran without error
+
         $this->assertFalse(
             UserAchievement::whereHas('achievement', fn ($q) => $q->where('slug', 'release-master'))
                 ->where('user_id', $developer->id)->exists()

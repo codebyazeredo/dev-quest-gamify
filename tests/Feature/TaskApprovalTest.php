@@ -177,7 +177,6 @@ class TaskApprovalTest extends TestCase
             ->test(Show::class, ['task' => $task])
             ->call('markHomologationCompleted');
 
-        // xpValue() = 20 * 2.00 = 40; 50% of that = 20
         $this->assertSame(20, (int) XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
     }
 
@@ -197,7 +196,6 @@ class TaskApprovalTest extends TestCase
             ->test(Show::class, ['task' => $task])
             ->call('markHomologationCompleted');
 
-        // xpValue() = 20 * 2.00 = 40; 25% of that = 10
         $this->assertSame(10, (int) XpTransaction::where('user_id', $creator->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
     }
 

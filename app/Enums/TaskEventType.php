@@ -29,13 +29,6 @@ enum TaskEventType: int
         };
     }
 
-    /**
-     * APPROVED (testador) and CREATION_COMPLETED (criador do backlog) are
-     * granted as a % of the task's own xpValue() instead of a flat amount —
-     * see TaskService::grantDeferredTesterXp()/grantDeferredCreatorXp() —
-     * so their reward scales with the task's value like the assignee's does,
-     * instead of being flat regardless of how big/critical the task is.
-     */
     public function isPercentageBased(): bool
     {
         return match ($this) {

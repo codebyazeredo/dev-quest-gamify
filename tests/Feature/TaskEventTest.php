@@ -11,7 +11,6 @@ use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskEvent;
-use App\Models\TaskPriority;
 use App\Models\User;
 use App\Services\TaskService;
 use Database\Seeders\LevelSeeder;
@@ -96,7 +95,6 @@ class TaskEventTest extends TestCase
 
         app(TaskService::class)->move($task, $this->columnFor($board, TaskStatus::DONE), 0, $developer);
 
-        // STARTED(0) + DEVELOPMENT_COMPLETED(10) + REVIEW_COMPLETED(10) + TEST_COMPLETED(5) + COMPLETED(0) + completion bonus (10 x 1.5 = 15)
         $this->assertSame(10 + 10 + 5 + 15, $developer->xpTransactions()->sum('amount'));
     }
 
@@ -141,9 +139,7 @@ class TaskEventTest extends TestCase
         app(TaskService::class)->move($task, $this->columnFor($board, TaskStatus::DONE), 0, $admin);
 
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::COMPLETED->value]);
-        // nobody was assigned, so there's no completion bonus to grant — but the
-        // creator's % bonus (see TaskService::grantDeferredCreatorXp()) doesn't
-        // depend on there being an assignee at all
+
         $this->assertDatabaseCount('xp_transactions', 1);
         $this->assertDatabaseHas('xp_transactions', [
             'user_id' => $creator->id,

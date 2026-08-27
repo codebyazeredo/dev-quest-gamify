@@ -4,13 +4,9 @@ namespace Database\Factories;
 
 use App\Enums\TaskStatus;
 use App\Models\Board;
-use App\Models\BoardColumn;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<BoardColumn>
- */
 class BoardColumnFactory extends Factory
 {
     public function definition(): array

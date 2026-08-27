@@ -4,12 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Challenge;
 use App\Models\User;
-use App\Models\UserChallenge;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<UserChallenge>
- */
 class UserChallengeFactory extends Factory
 {
     public function definition(): array

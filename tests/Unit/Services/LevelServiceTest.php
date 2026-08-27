@@ -77,7 +77,7 @@ class LevelServiceTest extends TestCase
         $this->assertSame($maxLevel->level, $service->currentLevelFor($admin)->level);
         $this->assertNull($service->nextLevelFor($service->currentLevelFor($admin)));
         $this->assertSame($maxLevel->level, $service->currentLevelFor($po)->level);
-        // the real XP total is untouched — only the displayed level is short-circuited
+
         $this->assertSame(1, $service->totalXpFor($admin));
         $this->assertSame(1, $service->totalXpFor($po));
 

@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Fake-but-checksum-valid CPF base digits (first 9) backfilled for the
-     * pre-existing seeded users, keyed by their email, so `person_id` can
-     * become NOT NULL without breaking them. Clearly not real people.
-     */
     private const BACKFILL = [
         'admin@devquestgamify.test' => ['nome' => 'Admin', 'base' => '111444777'],
         'po@devquestgamify.test' => ['nome' => 'Product Owner', 'base' => '222555888'],
@@ -36,7 +31,7 @@ return new class extends Migration
                 'cpf' => $cpf,
                 'rg' => null,
                 'nascimento' => '1990-01-01',
-                'sexo' => 3, // Gender::OTHER — placeholder for backfilled system accounts
+                'sexo' => 3,
                 'email' => $user->email,
                 'telefone1' => '00000000000',
                 'telefone2' => null,

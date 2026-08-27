@@ -21,9 +21,6 @@ class TaskService
 {
     public function __construct(private XpService $xpService) {}
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
     public function create(array $data, User $creator): Task
     {
         return DB::transaction(function () use ($data, $creator) {
@@ -98,10 +95,6 @@ class TaskService
         });
     }
 
-    /**
-     * Move a task from Testing into the "Aprovado" checkpoint column. The only
-     * way out of Testing besides reject() — see TaskPolicy::move()/approve().
-     */
     public function approve(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
@@ -119,10 +112,6 @@ class TaskService
         });
     }
 
-    /**
-     * Send a task back to "A Fazer" with a mandatory reason. The task keeps the
-     * rejection badge until it leaves "A Fazer" again (see move()).
-     */
     public function reject(Task $task, User $actor, string $reason): Task
     {
         return DB::transaction(function () use ($task, $actor, $reason) {
@@ -150,9 +139,6 @@ class TaskService
         return $task;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
     public function updateDetails(Task $task, array $data): Task
     {
         return DB::transaction(function () use ($task, $data) {
@@ -183,12 +169,6 @@ class TaskService
         });
     }
 
-    /**
-     * "Concluído" is never reached by dragging (see TaskPolicy::move()) —
-     * marking homologação on an approved task is what completes it, moving it
-     * there automatically and reusing move()'s existing completion side
-     * effects (XP bonus, deferred tester XP, TaskCompleted event).
-     */
     public function markHomologationCompleted(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
@@ -204,10 +184,6 @@ class TaskService
         });
     }
 
-    /**
-     * Implantação is recorded after the task is already "Concluído" — it's a
-     * tracking flag (see the "não implantado" card badge), not a transition.
-     */
     public function markDeployed(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
@@ -217,10 +193,6 @@ class TaskService
         });
     }
 
-    /**
-     * Record a task lifecycle event exactly once. Returns null if this task
-     * already has an event of this type (idempotency guard — see §27/§53).
-     */
     public function recordEventOnce(Task $task, TaskEventType $type, User $actor): ?TaskEvent
     {
         if (TaskEvent::where('task_id', $task->id)->where('type', $type)->exists()) {
@@ -250,10 +222,7 @@ class TaskService
             $completedEvent = $this->recordEventOnce($task, TaskEventType::COMPLETED, $actor);
 
             if ($completedEvent !== null) {
-                // A late task earns nobody anything — the deal fell through,
-                // so the assignee's, tester's, and creator's rewards (the
-                // latter two being a % of this same figure) all zero out
-                // together rather than only penalizing the assignee.
+
                 $xpAwarded = $task->isLate() ? 0 : $task->xpValue();
 
                 if ($task->assigned_to !== null && $xpAwarded > 0) {
@@ -274,15 +243,6 @@ class TaskService
         }
     }
 
-    /**
-     * The tester who approved this task only earns their XP once the task is
-     * truly finished (see §4 — "só ganha os pontos quando a tarefa for
-     * terminada"), not at the moment of approval. GrantXpListener explicitly
-     * skips TaskEventType::APPROVED for this reason; this is where it's
-     * actually granted — as a % of the task's own value (see
-     * TaskEventType::isPercentageBased()), so approving a Crítica task pays
-     * more than approving a trivial one, same as the assignee's bonus does.
-     */
     private function grantDeferredTesterXp(Task $task, int $taskXp): void
     {
         if ($task->approved_by === null) {
@@ -309,14 +269,6 @@ class TaskService
         );
     }
 
-    /**
-     * The person who created this task (almost always Suporte, curating the
-     * backlog — see TaskPolicy::create()) only earns XP once it's actually
-     * built and delivered, not for the act of creating it — this is what
-     * keeps the backlog from filling up with low-effort tasks just to farm
-     * XP, since an unfinished or worthless task pays nothing. Also a % of
-     * the task's value, same reasoning as the tester's bonus above.
-     */
     private function grantDeferredCreatorXp(Task $task, int $taskXp): void
     {
         $rule = TaskEventRule::where('type', TaskEventType::CREATION_COMPLETED)->first();
@@ -346,9 +298,6 @@ class TaskService
         return (int) round($taskXp * ($rule->xp_reward / 100));
     }
 
-    /**
-     * @return array<int, TaskEventType>
-     */
     protected function thresholdsCrossed(TaskStatus $previous, TaskStatus $new): array
     {
         $ladder = [

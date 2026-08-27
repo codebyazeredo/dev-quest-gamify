@@ -3,12 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\Gender;
-use App\Models\Person;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Person>
- */
 class PersonFactory extends Factory
 {
     public function definition(): array
@@ -26,9 +22,6 @@ class PersonFactory extends Factory
         ];
     }
 
-    /**
-     * A random CPF with a correct checksum (not a real person's document).
-     */
     private function fakeValidCpf(): string
     {
         $base = '';

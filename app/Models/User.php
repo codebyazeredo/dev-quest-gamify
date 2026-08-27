@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,36 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-/**
- * @property int $id
- * @property int $person_id
- * @property string $name
- * @property string $email
- * @property Carbon|null $email_verified_at
- * @property string $password
- * @property int|null $selected_title_id
- * @property string|null $remember_token
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- */
 #[Fillable(['name', 'email', 'password', 'person_id', 'selected_title_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'web';
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -49,9 +28,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
     public function initials(): string
     {
         $initials = Str::initials($this->name, true);
@@ -86,57 +62,36 @@ class User extends Authenticatable
         return $this->hasRole('suporte');
     }
 
-    /**
-     * @return BelongsTo<Person, $this>
-     */
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
     }
 
-    /**
-     * @return HasMany<XpTransaction, $this>
-     */
     public function xpTransactions(): HasMany
     {
         return $this->hasMany(XpTransaction::class);
     }
 
-    /**
-     * @return BelongsTo<Title, $this>
-     */
     public function selectedTitle(): BelongsTo
     {
         return $this->belongsTo(Title::class, 'selected_title_id');
     }
 
-    /**
-     * @return HasMany<UserAchievement, $this>
-     */
     public function unlockedAchievements(): HasMany
     {
         return $this->hasMany(UserAchievement::class);
     }
 
-    /**
-     * @return HasMany<UserTitle, $this>
-     */
     public function unlockedTitles(): HasMany
     {
         return $this->hasMany(UserTitle::class);
     }
 
-    /**
-     * @return HasMany<DailyCheckin, $this>
-     */
     public function dailyCheckins(): HasMany
     {
         return $this->hasMany(DailyCheckin::class);
     }
 
-    /**
-     * @return HasMany<UserChallenge, $this>
-     */
     public function userChallenges(): HasMany
     {
         return $this->hasMany(UserChallenge::class);

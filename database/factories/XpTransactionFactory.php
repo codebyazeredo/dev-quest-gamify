@@ -4,12 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\XpSourceType;
 use App\Models\User;
-use App\Models\XpTransaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<XpTransaction>
- */
 class XpTransactionFactory extends Factory
 {
     public function definition(): array

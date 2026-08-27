@@ -18,8 +18,7 @@ class TaskEventRuleSeeder extends Seeder
             ['type' => TaskEventType::HOMOLOGATION_COMPLETED, 'xp_reward' => 5, 'active' => true],
             ['type' => TaskEventType::DEPLOYED, 'xp_reward' => 20, 'active' => true],
             ['type' => TaskEventType::COMPLETED, 'xp_reward' => 0, 'active' => false],
-            // APPROVED/CREATION_COMPLETED are percentages of the task's own XP
-            // value (see TaskEventType::isPercentageBased()), not flat amounts.
+
             ['type' => TaskEventType::APPROVED, 'xp_reward' => 50, 'active' => true],
             ['type' => TaskEventType::CREATION_COMPLETED, 'xp_reward' => 25, 'active' => true],
         ];

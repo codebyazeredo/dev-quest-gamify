@@ -69,9 +69,6 @@ class TaskAssignmentTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return array{0: Board, 1: BoardColumn}
-     */
     protected function boardWithColumn(): array
     {
         $board = Board::factory()->create();

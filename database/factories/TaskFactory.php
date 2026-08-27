@@ -5,15 +5,11 @@ namespace Database\Factories;
 use App\Enums\TaskStatus;
 use App\Models\Board;
 use App\Models\BoardColumn;
-use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Task>
- */
 class TaskFactory extends Factory
 {
     public function definition(): array

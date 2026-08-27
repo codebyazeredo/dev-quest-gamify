@@ -3,13 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\ChallengeType;
-use App\Models\Challenge;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Challenge>
- */
 class ChallengeFactory extends Factory
 {
     public function definition(): array
