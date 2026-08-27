@@ -136,7 +136,7 @@
             }"
             x-init="toasts.forEach(t => scheduleRemoval(t))"
             x-on:toast.window="addToast($event.detail.toast)"
-            class="fixed right-4 top-4 z-[60] flex w-80 flex-col gap-2"
+            class="fixed right-4 top-20 z-[60] flex w-80 flex-col gap-2"
         >
             <template x-for="t in toasts" :key="t.id">
                 <div
@@ -148,12 +148,12 @@
                     x-transition:leave-start="opacity-100 translate-x-0"
                     x-transition:leave-end="opacity-0 translate-x-4"
                     :class="{
-                        'border-gold bg-gold/10 ring-2 ring-gold scale-105': t.type === 'level_up',
-                        'border-gold/40 bg-gold/10': t.type === 'achievement',
-                        'border-accent/40 bg-accent/10': t.type === 'challenge',
-                        'border-amber-clay/40 bg-amber-clay/10': t.type === 'streak',
-                        'border-terracotta/40 bg-terracotta/10': t.type === 'error',
-                        'border-forest/40 bg-forest/10': t.type === 'checkin',
+                        'border-gold ring-2 ring-gold scale-105': t.type === 'level_up',
+                        'border-gold/40': t.type === 'achievement',
+                        'border-accent/40': t.type === 'challenge',
+                        'border-amber-clay/40': t.type === 'streak',
+                        'border-terracotta/40': t.type === 'error',
+                        'border-forest/40': t.type === 'checkin' || t.type === 'success',
                     }"
                     class="flex items-start gap-3 rounded-xl border p-3 shadow-lg bg-card"
                 >
@@ -172,7 +172,7 @@
                     <span x-show="t.type === 'error'" class="text-terracotta">
                         <x-icon name="alert" class="h-5 w-5" />
                     </span>
-                    <span x-show="t.type === 'checkin'" class="text-forest">
+                    <span x-show="t.type === 'checkin' || t.type === 'success'" class="text-forest">
                         <x-icon name="check" class="h-5 w-5" />
                     </span>
 
