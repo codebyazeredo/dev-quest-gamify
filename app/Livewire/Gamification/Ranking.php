@@ -4,6 +4,7 @@ namespace App\Livewire\Gamification;
 
 use App\Livewire\Concerns\WithAdjustablePerPage;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -19,17 +20,41 @@ class Ranking extends Component
     #[Url]
     public string $activeRole = 'dev';
 
+    #[Url]
+    public string $period = 'total';
+
     public function setRole(string $role): void
     {
         $this->activeRole = $role;
         $this->resetPage();
     }
 
+    public function setPeriod(string $period): void
+    {
+        $this->period = $period;
+        $this->resetPage();
+    }
+
+    private function periodStart(): ?CarbonInterface
+    {
+        return match ($this->period) {
+            'week' => now()->startOfWeek(),
+            'month' => now()->startOfMonth(),
+            default => null,
+        };
+    }
+
     public function render(): View
     {
+        $periodStart = $this->periodStart();
+
         $users = User::query()
             ->role($this->activeRole)
-            ->withSum('xpTransactions as total_xp', 'amount')
+            ->withSum(['xpTransactions as total_xp' => function ($query) use ($periodStart) {
+                if ($periodStart !== null) {
+                    $query->where('created_at', '>=', $periodStart);
+                }
+            }], 'amount')
             ->orderByDesc('total_xp')
             ->paginate($this->perPage);
 
