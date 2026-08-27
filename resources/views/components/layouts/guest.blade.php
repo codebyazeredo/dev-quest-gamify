@@ -33,6 +33,8 @@
             {{ $slot }}
         </div>
 
+        <x-footer class="mt-6 w-full max-w-md" />
+
         @livewireScripts
     </body>
 </html>

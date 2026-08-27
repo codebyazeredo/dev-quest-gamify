@@ -1,4 +1,4 @@
-<div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+<x-card>
     <h3 class="mb-3 text-sm font-semibold text-ink">Atividade recente</h3>
 
     @forelse ($transactions as $transaction)
@@ -16,4 +16,4 @@
             {{ $transactions->links() }}
         </div>
     @endif
-</div>
+</x-card>

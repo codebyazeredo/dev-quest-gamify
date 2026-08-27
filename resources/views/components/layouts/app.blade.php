@@ -88,6 +88,8 @@
             <main class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
                 {{ $slot }}
             </main>
+
+            <x-footer class="border-t border-line bg-card" />
         </div>
 
         @php

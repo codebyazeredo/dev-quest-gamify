@@ -14,9 +14,9 @@
     </x-page-header>
 
     @if ($task->rejection_reason)
-        <div class="mt-3 rounded-xl border border-terracotta/30 bg-terracotta/10 p-3 text-sm text-terracotta">
+        <x-card variant="alert" padding="p-3" class="mt-3 text-sm">
             <strong>Motivo da reprovação:</strong> {{ $task->rejection_reason }}
-        </div>
+        </x-card>
     @endif
 
     <p class="mt-2 text-ink-muted">{{ $task->description }}</p>
@@ -54,7 +54,7 @@
         </div>
     </dl>
 
-    <div class="mt-6 rounded-xl border border-line bg-card p-4">
+    <x-card class="mt-6">
         <h2 class="mb-2 text-sm font-semibold text-ink">Responsável</h2>
 
         @if ($task->assignedTo)
@@ -93,10 +93,10 @@
                 </button>
             </div>
         @endif
-    </div>
+    </x-card>
 
     @if ($task->status === \App\Enums\TaskStatus::TESTING)
-        <div class="mt-6 rounded-xl border border-line bg-card p-4">
+        <x-card class="mt-6">
             <h2 class="mb-2 text-sm font-semibold text-ink">Revisão de teste</h2>
 
             <div class="flex flex-wrap gap-2">
@@ -115,10 +115,7 @@
 
             @if ($showRejectForm)
                 <form wire:submit="reject" class="mt-3 space-y-2">
-                    <label class="block text-sm font-medium text-ink">Motivo da reprovação (obrigatório)</label>
-                    <textarea wire:model="rejectionReasonInput" rows="3" required
-                        class="block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"></textarea>
-                    @error('rejectionReasonInput') <p class="text-sm text-terracotta">{{ $message }}</p> @enderror
+                    <x-textarea name="rejectionReasonInput" label="Motivo da reprovação (obrigatório)" wire:model="rejectionReasonInput" required />
 
                     <div class="flex gap-2">
                         <button type="submit" class="rounded-lg bg-terracotta px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90">
@@ -130,7 +127,7 @@
                     </div>
                 </form>
             @endif
-        </div>
+        </x-card>
     @endif
 
     <div class="mt-6 flex gap-2">

@@ -6,7 +6,7 @@
     @else
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($unlockedTitles as $title)
-                <div class="flex items-center justify-between rounded-xl border p-4 {{ $selectedTitleId === $title->id ? 'border-primary/40 bg-primary/5' : 'border-line bg-card shadow-sm' }}">
+                <x-card :variant="$selectedTitleId === $title->id ? 'active' : 'default'" class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <span class="text-gold">
                             <x-icon :name="$title->icon" class="h-6 w-6" />
@@ -23,7 +23,7 @@
                             Selecionar
                         </button>
                     @endif
-                </div>
+                </x-card>
             @endforeach
         </div>
     @endif

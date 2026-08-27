@@ -1,4 +1,4 @@
-<div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+<x-card>
     @if ($participatesInLeveling)
         <div class="mb-2 flex items-center justify-between">
             <x-level-badge :level="$currentLevel->level" />
@@ -22,4 +22,4 @@
             Esta função não participa da subida de nível — ela é reservada para quem executa as tarefas (Desenvolvedor, Testador, Suporte), como incentivo ao bom desempenho.
         </p>
     @endif
-</div>
+</x-card>

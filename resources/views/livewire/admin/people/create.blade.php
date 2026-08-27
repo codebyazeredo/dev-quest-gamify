@@ -2,65 +2,26 @@
     <form wire:submit="save" class="space-y-4">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-ink">Nome</label>
-                <input type="text" wire:model="nome" autofocus
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('nome') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+                <x-input name="nome" label="Nome" wire:model="nome" autofocus />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-ink">CPF</label>
-                <input type="text" wire:model="cpf" placeholder="00000000000"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('cpf') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="cpf" label="CPF" wire:model="cpf" placeholder="00000000000" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">RG</label>
-                <input type="text" wire:model="rg"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('rg') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="rg" label="RG" wire:model="rg" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Nascimento</label>
-                <input type="date" wire:model="nascimento"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('nascimento') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="nascimento" label="Nascimento" type="date" wire:model="nascimento" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Sexo</label>
-                <select wire:model="sexo"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                    <option value="">Selecione</option>
-                    @foreach ($generos as $genero)
-                        <option value="{{ $genero->value }}">{{ $genero->label() }}</option>
-                    @endforeach
-                </select>
-                @error('sexo') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-select name="sexo" label="Sexo" wire:model="sexo" placeholder="Selecione">
+                @foreach ($generos as $genero)
+                    <option value="{{ $genero->value }}">{{ $genero->label() }}</option>
+                @endforeach
+            </x-select>
 
-            <div>
-                <label class="block text-sm font-medium text-ink">E-mail</label>
-                <input type="email" wire:model="email"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('email') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="email" label="E-mail" type="email" wire:model="email" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Telefone 1</label>
-                <input type="text" wire:model="telefone1"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('telefone1') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="telefone1" label="Telefone 1" wire:model="telefone1" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Telefone 2</label>
-                <input type="text" wire:model="telefone2"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('telefone2') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="telefone2" label="Telefone 2" wire:model="telefone2" />
 
             <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-ink">Foto</label>
@@ -77,49 +38,22 @@
         <h3 class="mt-2 text-sm font-semibold text-ink border-t border-line pt-4">Endereço</h3>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <label class="block text-sm font-medium text-ink">CEP</label>
-                <input type="text" wire:model="cep" placeholder="00000-000"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('cep') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="cep" label="CEP" wire:model="cep" placeholder="00000-000" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Número</label>
-                <input type="text" wire:model="numero" placeholder="Sem número"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('numero') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="numero" label="Número" wire:model="numero" placeholder="Sem número" />
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-ink">Logradouro</label>
-                <input type="text" wire:model="logradouro"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('logradouro') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+                <x-input name="logradouro" label="Logradouro" wire:model="logradouro" />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Cidade</label>
-                <input type="text" wire:model="cidade"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('cidade') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="cidade" label="Cidade" wire:model="cidade" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Estado (UF)</label>
-                <input type="text" wire:model="estado" maxlength="2" placeholder="SP"
-                    class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink uppercase focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('estado') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="estado" label="Estado (UF)" wire:model="estado" maxlength="2" placeholder="SP" class="uppercase" />
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="cancel" class="rounded-lg px-4 py-2 text-sm font-medium text-ink-muted hover:bg-line/20">
-                Cancelar
-            </button>
-            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
-                Salvar pessoa
-            </button>
+            <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
+            <x-button type="submit">Salvar pessoa</x-button>
         </div>
     </form>
 </x-modal>

@@ -5,7 +5,7 @@
         @foreach ($challenges as $row)
             @php [$challenge, $progress, $completed] = [$row['challenge'], $row['progress'], $row['completed']]; @endphp
 
-            <div class="rounded-xl border p-4 {{ $completed ? 'border-primary/40 bg-primary/5' : 'border-line bg-card shadow-sm' }}">
+            <x-card :variant="$completed ? 'active' : 'default'">
                 <div class="flex items-center justify-between">
                     <h2 class="font-semibold text-ink">{{ $challenge->name }}</h2>
                     <span class="text-xs text-ink-muted">termina em {{ $challenge->ends_at->format('d/m/Y') }}</span>
@@ -20,7 +20,7 @@
                 <p class="mt-2 text-xs {{ $completed ? 'font-semibold text-primary' : 'text-ink-muted' }}">
                     {{ $completed ? 'Concluído' : 'Recompensa: +'.$challenge->xp_reward.' XP' }}
                 </p>
-            </div>
+            </x-card>
         @endforeach
 
         @if ($challenges->isEmpty())

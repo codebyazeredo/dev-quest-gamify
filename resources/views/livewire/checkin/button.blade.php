@@ -1,4 +1,4 @@
-<div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+<x-card>
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
             <x-icon-chip icon="fire" color="amber-clay" size="sm" />
@@ -19,4 +19,4 @@
             </button>
         @endif
     </div>
-</div>
+</x-card>

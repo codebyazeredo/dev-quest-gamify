@@ -1,40 +1,21 @@
 <x-modal title="Nova tarefa">
     <form wire:submit="save" class="space-y-4">
-        <div>
-            <label for="task-title" class="block text-sm font-medium text-ink">Título</label>
-            <input id="task-title" type="text" wire:model="title" required autofocus
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-            @error('title') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-        </div>
+        <x-input name="title" label="Título" wire:model="title" required autofocus />
 
-        <div>
-            <label for="task-description" class="block text-sm font-medium text-ink">Descrição</label>
-            <textarea id="task-description" wire:model="description" rows="3"
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"></textarea>
-        </div>
+        <x-textarea name="description" label="Descrição" wire:model="description" />
 
         <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label for="task-category" class="block text-sm font-medium text-ink">Categoria</label>
-                <select id="task-category" wire:model="category_id" class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                    <option value="">Selecionar...</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
-                @error('category_id') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-select name="category_id" label="Categoria" wire:model="category_id" placeholder="Selecionar...">
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </x-select>
 
-            <div>
-                <label for="task-priority" class="block text-sm font-medium text-ink">Prioridade</label>
-                <select id="task-priority" wire:model="priority_id" class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                    <option value="">Selecionar...</option>
-                    @foreach ($priorities as $priorityOption)
-                        <option value="{{ $priorityOption->id }}">{{ $priorityOption->name }}</option>
-                    @endforeach
-                </select>
-                @error('priority_id') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-select name="priority_id" label="Prioridade" wire:model="priority_id" placeholder="Selecionar...">
+                @foreach ($priorities as $priorityOption)
+                    <option value="{{ $priorityOption->id }}">{{ $priorityOption->name }}</option>
+                @endforeach
+            </x-select>
         </div>
 
         @if ($developers->isNotEmpty())
@@ -46,20 +27,11 @@
             </div>
         @endif
 
-        <div>
-            <label for="task-due-at" class="block text-sm font-medium text-ink">Prazo</label>
-            <input id="task-due-at" type="datetime-local" wire:model="due_at"
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-            @error('due_at') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-        </div>
+        <x-input name="due_at" label="Prazo" type="datetime-local" wire:model="due_at" />
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="cancel" class="rounded-lg px-4 py-2 text-sm font-medium text-ink-muted hover:bg-line/20">
-                Cancelar
-            </button>
-            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
-                Criar tarefa
-            </button>
+            <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
+            <x-button type="submit">Criar tarefa</x-button>
         </div>
     </form>
 </x-modal>

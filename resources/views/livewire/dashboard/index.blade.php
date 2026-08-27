@@ -30,7 +30,7 @@
     <livewire:checkin.button />
 
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="check" color="forest" size="sm" />
                 <div>
@@ -38,8 +38,8 @@
                     <p class="text-lg font-semibold text-ink">{{ $tasksCompleted }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="bolt" color="accent" size="sm" />
                 <div>
@@ -47,8 +47,8 @@
                     <p class="text-lg font-semibold text-ink">{{ number_format($xpThisWeek) }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="medal" color="gold" size="sm" />
                 <div>
@@ -56,8 +56,8 @@
                     <p class="text-lg font-semibold text-ink">#{{ $rankingPosition }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="star" color="gold" size="sm" />
                 <div>
@@ -65,8 +65,8 @@
                     <p class="text-lg font-semibold text-ink">{{ number_format($totalXp) }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="trophy" color="gold" size="sm" />
                 <div>
@@ -74,8 +74,8 @@
                     <p class="text-lg font-semibold text-ink">{{ $achievementsCount }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="rocket" color="accent" size="sm" />
                 <div>
@@ -83,8 +83,8 @@
                     <p class="text-lg font-semibold text-ink">{{ $titlesCount }}</p>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl border border-line/60 bg-card p-4 shadow-sm">
+        </x-card>
+        <x-card>
             <div class="flex items-center gap-3">
                 <x-icon-chip icon="fire" color="amber-clay" size="sm" />
                 <div>
@@ -92,7 +92,7 @@
                     <p class="text-lg font-semibold text-ink">{{ $currentStreak }}</p>
                 </div>
             </div>
-        </div>
+        </x-card>
     </div>
 
     <livewire:gamification.xp-history :limit="5" />

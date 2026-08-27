@@ -3,7 +3,7 @@
 
     <livewire:checkin.button />
 
-    <div class="mx-auto mt-6 w-full max-w-lg rounded-2xl border border-line/60 bg-card p-6 shadow-sm">
+    <x-card rounded="rounded-2xl" padding="p-6" class="mx-auto mt-6 w-full max-w-lg">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-ink">{{ $monthLabel }}</h2>
 
@@ -53,5 +53,5 @@
             <span class="flex items-center gap-1.5"><span class="text-forest"><x-icon name="check" class="h-4 w-4" /></span> Feito</span>
             <span class="flex items-center gap-1.5"><span class="h-4 w-4 rounded-full border border-line"></span> Sem check-in</span>
         </div>
-    </div>
+    </x-card>
 </div>

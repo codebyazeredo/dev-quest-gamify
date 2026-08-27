@@ -5,23 +5,12 @@
             <p class="mt-1 text-sm text-ink">{{ $user->name }}</p>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-ink">E-mail</label>
-            <input type="email" wire:model="email" class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-            @error('email') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-        </div>
+        <x-input name="email" label="E-mail" type="email" wire:model="email" />
 
         <div class="grid grid-cols-2 gap-3">
-            <div>
-                <label class="block text-sm font-medium text-ink">Nova senha (opcional)</label>
-                <input type="password" wire:model="password" class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-                @error('password') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
-            </div>
+            <x-input name="password" label="Nova senha (opcional)" type="password" wire:model="password" />
 
-            <div>
-                <label class="block text-sm font-medium text-ink">Confirmar senha</label>
-                <input type="password" wire:model="password_confirmation" class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
-            </div>
+            <x-input name="password_confirmation" label="Confirmar senha" type="password" wire:model="password_confirmation" />
         </div>
 
         <div>
@@ -38,12 +27,8 @@
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="cancel" class="rounded-lg px-4 py-2 text-sm font-medium text-ink-muted hover:bg-line/20">
-                Cancelar
-            </button>
-            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
-                Salvar alterações
-            </button>
+            <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
+            <x-button type="submit">Salvar alterações</x-button>
         </div>
     </form>
 </x-modal>
