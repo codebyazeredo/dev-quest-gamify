@@ -105,4 +105,18 @@
             <path d="M6 6l12 12M18 6l-12 12" />
         </svg>
         @break
+
+    @case('chevrons-left')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <path d="M13 6l-6 6 6 6" />
+            <path d="M19 6l-6 6 6 6" />
+        </svg>
+        @break
+
+    @case('chevrons-right')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <path d="M11 6l6 6-6 6" />
+            <path d="M5 6l6 6-6 6" />
+        </svg>
+        @break
 @endswitch
