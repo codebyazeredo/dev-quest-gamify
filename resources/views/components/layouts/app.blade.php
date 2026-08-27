@@ -15,31 +15,29 @@
         @livewireStyles
     </head>
     <body class="h-screen overflow-hidden bg-surface text-ink">
-        <div x-data="{ sidebarOpen: false }" class="flex h-screen flex-col">
-            <nav class="flex items-center justify-between bg-primary px-4 py-3 sm:px-6">
-                <div class="flex items-center gap-3">
-                    <button type="button" @click="sidebarOpen = true" class="rounded-lg p-1.5 text-white/70 transition-colors hover:bg-white/10 lg:hidden" aria-label="Abrir menu">
-                        <x-icon name="menu" class="h-5 w-5" />
-                    </button>
-
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                        @if ($appSettings->logoUrl())
-                            <img src="{{ $appSettings->logoUrl() }}" alt="" class="h-7 w-auto">
-                        @endif
-                        {{ $appSettings->displayName() }}
-                    </a>
-                </div>
+        <div class="flex h-screen flex-col">
+            <nav class="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-6">
+                <a href="{{ route('boards.index') }}" class="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-white">
+                    @if ($appSettings->logoUrl())
+                        <img src="{{ $appSettings->logoUrl() }}" alt="" class="h-7 w-auto">
+                    @endif
+                    <span class="hidden sm:inline">{{ $appSettings->displayName() }}</span>
+                </a>
 
                 <div class="flex items-center gap-1">
-                    <a href="{{ route('ranking') }}" title="Ranking" aria-label="Ranking" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('ranking') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                    <a href="{{ route('boards.index') }}" title="Quadros" aria-label="Quadros" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('boards.*') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                        <x-icon name="columns" class="h-[18px] w-[18px]" />
+                    </a>
+
+                    <a href="{{ route('ranking') }}" title="Ranking" aria-label="Ranking" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('ranking') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                         <x-icon name="trophy" class="h-[18px] w-[18px]" />
                     </a>
 
-                    <a href="{{ route('challenges') }}" title="Desafios" aria-label="Desafios" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('challenges') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                    <a href="{{ route('challenges') }}" title="Desafios" aria-label="Desafios" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('challenges') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                         <x-icon name="flag" class="h-[18px] w-[18px]" />
                     </a>
 
-                    <a href="{{ route('checkin') }}" title="Check-in" aria-label="Check-in" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('checkin') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                    <a href="{{ route('checkin') }}" title="Check-in" aria-label="Check-in" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('checkin') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                         <x-icon name="fire" class="h-[18px] w-[18px]" />
                     </a>
 
@@ -68,6 +66,12 @@
                                 Minha conta
                             </a>
 
+                            @can('accessAdminPanel', \App\Models\User::class)
+                                <a href="{{ route('admin.index') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('admin.*') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                                    Configurações
+                                </a>
+                            @endcan
+
                             <hr class="my-1 border-line">
 
                             <form method="POST" action="{{ route('logout') }}">
@@ -81,37 +85,9 @@
                 </div>
             </nav>
 
-            <div class="flex flex-1 min-h-0">
-                <div x-show="sidebarOpen" x-cloak x-transition.opacity @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-ink/50 lg:hidden"></div>
-
-                <aside
-                    x-show="sidebarOpen"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 -translate-x-4"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-x-0"
-                    x-transition:leave-end="opacity-0 -translate-x-4"
-                    class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-ink px-4 py-6 lg:hidden"
-                >
-                    <div class="min-h-0 flex-1 overflow-y-auto">
-                        <x-sidebar-nav />
-                    </div>
-                    <x-sidebar-footer />
-                </aside>
-
-                <aside class="hidden shrink-0 flex-col bg-ink px-4 py-6 lg:flex lg:w-56">
-                    <div class="min-h-0 flex-1 overflow-y-auto">
-                        <x-sidebar-nav />
-                    </div>
-                    <x-sidebar-footer />
-                </aside>
-
-                <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
-                    {{ $slot }}
-                </main>
-            </div>
+            <main class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+                {{ $slot }}
+            </main>
         </div>
 
         @php
