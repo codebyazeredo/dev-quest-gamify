@@ -1,14 +1,20 @@
 <div class="space-y-6">
-    <div>
-        <h1 class="text-2xl font-bold tracking-tight text-ink">{{ auth()->user()->name }}</h1>
-        @if ($selectedTitle)
-            <p class="flex items-center gap-1.5 text-sm text-ink-muted">
-                <span class="text-gold"><x-icon :name="$selectedTitle->icon" class="h-4 w-4" /></span>
-                {{ $selectedTitle->name }}
-            </p>
-        @else
-            <p class="text-sm text-ink-muted">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</p>
-        @endif
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-ink">{{ auth()->user()->name }}</h1>
+            @if ($selectedTitle)
+                <p class="flex items-center gap-1.5 text-sm text-ink-muted">
+                    <span class="text-gold"><x-icon :name="$selectedTitle->icon" class="h-4 w-4" /></span>
+                    {{ $selectedTitle->name }}
+                </p>
+            @else
+                <p class="text-sm text-ink-muted">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</p>
+            @endif
+        </div>
+
+        <button type="button" wire:click="toggleEditProfile" title="Editar meus dados" aria-label="Editar meus dados" class="shrink-0 rounded-lg border border-line bg-card p-2 text-ink-muted hover:bg-line/20">
+            <x-icon name="pencil" class="h-4 w-4" />
+        </button>
     </div>
 
     <div class="flex gap-2">
@@ -91,4 +97,8 @@
     </div>
 
     <livewire:gamification.xp-history :limit="5" />
+
+    @if ($showEditProfile)
+        <livewire:profile.edit wire:key="profile-edit" />
+    @endif
 </div>

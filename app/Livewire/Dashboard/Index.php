@@ -17,10 +17,24 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 class Index extends Component
 {
+    public bool $showEditProfile = false;
+
+    public function toggleEditProfile(): void
+    {
+        $this->showEditProfile = ! $this->showEditProfile;
+    }
+
     #[On('checked-in')]
     public function refreshStats(): void
     {
         // no-op: Livewire re-renders this component after any listener call, refreshing the stat tiles
+    }
+
+    #[On('close-modal')]
+    #[On('profile-saved')]
+    public function closeModal(): void
+    {
+        $this->showEditProfile = false;
     }
 
     public function render(): View
