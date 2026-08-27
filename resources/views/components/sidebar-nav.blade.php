@@ -1,5 +1,5 @@
 <nav class="flex flex-col gap-1">
-    <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+    <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
         Quadros
     </a>
 
@@ -30,7 +30,7 @@
 
         <x-sidebar-group label="Gestão" :active="collect($gestaoLinks)->contains('active', true)">
             @foreach ($gestaoLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -38,7 +38,7 @@
 
         <x-sidebar-group label="Gamificação" :active="collect($gamificacaoLinks)->contains('active', true)">
             @foreach ($gamificacaoLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -46,7 +46,7 @@
 
         <x-sidebar-group label="Sistema" :active="collect($sistemaLinks)->contains('active', true)">
             @foreach ($sistemaLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach

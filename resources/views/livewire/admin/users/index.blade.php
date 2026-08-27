@@ -17,7 +17,7 @@
 
     @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line">
+    <div class="overflow-x-auto rounded-xl border border-line bg-card">
         <table class="w-full text-sm">
             <thead class="bg-line/20 text-left text-ink-muted">
                 <tr>

@@ -6,7 +6,7 @@
 
         @php $appSettings = \App\Models\AppSetting::current(); @endphp
 
-        <title>{{ $title ?? $appSettings->company_name ?: config('app.name', 'Dev Quest') }}</title>
+        <title>{{ $title ?? $appSettings->displayName() }}</title>
 
         @fonts
 
@@ -16,23 +16,23 @@
     </head>
     <body class="h-screen overflow-hidden bg-surface text-ink">
         <div x-data="{ sidebarOpen: false }" class="flex h-screen flex-col">
-            <nav class="flex items-center justify-between border-b border-line bg-card px-4 py-3 sm:px-6">
+            <nav class="flex items-center justify-between bg-primary px-4 py-3 sm:px-6">
                 <div class="flex items-center gap-3">
-                    <button type="button" @click="sidebarOpen = true" class="rounded-md p-1.5 text-ink-muted hover:bg-line/30 lg:hidden" aria-label="Abrir menu">
+                    <button type="button" @click="sidebarOpen = true" class="rounded-md p-1.5 text-white/70 hover:bg-white/10 lg:hidden" aria-label="Abrir menu">
                         <x-icon name="menu" class="h-5 w-5" />
                     </button>
 
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-bold tracking-tight text-ink">
-                        @if ($appSettings->logo_path)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($appSettings->logo_path) }}" alt="" class="h-7 w-auto">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
+                        @if ($appSettings->logoUrl())
+                            <img src="{{ $appSettings->logoUrl() }}" alt="" class="h-7 w-auto">
                         @endif
-                        {{ $appSettings->company_name ?: config('app.name', 'Dev Quest') }}
+                        {{ $appSettings->displayName() }}
                     </a>
                 </div>
 
                 <div class="flex items-center gap-1">
                     <div class="relative" x-data="{ open: false }">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-ink hover:bg-line/30">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-white hover:bg-white/10">
                             @if (auth()->user()->person?->foto_path)
                                 <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
                             @else
@@ -47,7 +47,7 @@
                                     {{ auth()->user()->selectedTitle->name }}
                                 </span>
                             @else
-                                <span class="hidden text-xs text-ink-muted sm:inline">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
+                                <span class="hidden text-xs text-white/60 sm:inline">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
                             @endif
                         </button>
 
@@ -93,13 +93,19 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 translate-x-0"
                     x-transition:leave-end="opacity-0 -translate-x-4"
-                    class="fixed inset-y-0 left-0 z-50 w-64 shrink-0 overflow-y-auto border-r border-line bg-card px-4 py-6 lg:hidden"
+                    class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-ink px-4 py-6 lg:hidden"
                 >
-                    <x-sidebar-nav />
+                    <div class="min-h-0 flex-1 overflow-y-auto">
+                        <x-sidebar-nav />
+                    </div>
+                    <x-sidebar-footer />
                 </aside>
 
-                <aside class="hidden shrink-0 overflow-y-auto border-r border-line bg-card px-4 py-6 lg:block lg:w-56">
-                    <x-sidebar-nav />
+                <aside class="hidden shrink-0 flex-col bg-ink px-4 py-6 lg:flex lg:w-56">
+                    <div class="min-h-0 flex-1 overflow-y-auto">
+                        <x-sidebar-nav />
+                    </div>
+                    <x-sidebar-footer />
                 </aside>
 
                 <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
