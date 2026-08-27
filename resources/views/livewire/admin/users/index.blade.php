@@ -1,19 +1,15 @@
 <div>
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-ink">Usuários</h1>
+    <x-page-header title="Usuários" :back="route('admin.index')" backLabel="Configurações">
+        <a href="{{ route('admin.people') }}" class="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
+            Gerenciar pessoas
+        </a>
 
-        <div class="flex items-center gap-2">
-            <a href="{{ route('admin.people') }}" class="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-                Gerenciar pessoas
-            </a>
-
-            @can('create', \App\Models\User::class)
-                <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                    + Novo usuário
-                </button>
-            @endcan
-        </div>
-    </div>
+        @can('create', \App\Models\User::class)
+            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
+                + Novo usuário
+            </button>
+        @endcan
+    </x-page-header>
 
     @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
 

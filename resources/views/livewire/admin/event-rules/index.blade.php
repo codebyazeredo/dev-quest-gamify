@@ -1,7 +1,5 @@
 <div>
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-ink">Regras de XP</h1>
-
+    <x-page-header title="Regras de XP" :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\TaskEventRule::class)
             @if ($hasUnconfiguredTypes)
                 <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
@@ -9,7 +7,7 @@
                 </button>
             @endif
         @endcan
-    </div>
+    </x-page-header>
 
     <div class="overflow-x-auto rounded-xl border border-line bg-card">
         <table class="w-full text-sm">

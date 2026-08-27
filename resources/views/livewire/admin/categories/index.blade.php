@@ -1,13 +1,11 @@
 <div>
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-ink">Categorias</h1>
-
+    <x-page-header title="Categorias" :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\TaskCategory::class)
-            <button type="button" wire:click="toggleCreate" class="self-start rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
+            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
                 + Nova categoria
             </button>
         @endcan
-    </div>
+    </x-page-header>
 
     @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
 

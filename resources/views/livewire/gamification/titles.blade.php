@@ -1,9 +1,5 @@
 <div>
-    <a href="{{ route('dashboard') }}" class="mb-4 inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-        ← Minha conta
-    </a>
-
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Títulos</h1>
+    <x-page-header title="Títulos" :back="route('dashboard')" backLabel="Minha conta" />
 
     @if ($unlockedTitles->isEmpty())
         <p class="text-sm text-ink-muted">Você ainda não desbloqueou nenhum título.</p>

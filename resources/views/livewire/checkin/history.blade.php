@@ -1,5 +1,5 @@
 <div>
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Check-in</h1>
+    <x-page-header title="Check-in" />
 
     <livewire:checkin.button />
 

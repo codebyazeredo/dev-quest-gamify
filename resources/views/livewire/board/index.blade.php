@@ -1,13 +1,11 @@
 <div>
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-ink">Quadros</h1>
-
+    <x-page-header title="Quadros">
         @can('create', \App\Models\Board::class)
             <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
                 + Novo quadro
             </button>
         @endcan
-    </div>
+    </x-page-header>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($boards as $board)

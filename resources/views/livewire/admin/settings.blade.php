@@ -1,5 +1,5 @@
 <div>
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Configurações</h1>
+    <x-page-header title="Identidade da empresa" :back="route('admin.index')" backLabel="Configurações" />
 
     <form wire:submit="save" class="max-w-md space-y-4 rounded-xl border border-line bg-card p-5">
         <div>

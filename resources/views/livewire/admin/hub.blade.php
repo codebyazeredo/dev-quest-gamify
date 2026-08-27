@@ -1,5 +1,5 @@
 <div>
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Configurações</h1>
+    <x-page-header title="Configurações" />
 
     <div class="space-y-8">
         @foreach ($sections as $section)

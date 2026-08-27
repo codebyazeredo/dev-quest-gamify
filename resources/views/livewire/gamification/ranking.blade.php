@@ -1,20 +1,20 @@
 <div>
-    <h1 class="mb-4 text-2xl font-bold tracking-tight text-ink">Ranking</h1>
-
-    <div class="mb-4 flex gap-1 rounded-lg border border-line bg-card p-1">
-        <button type="button" wire:click="setPeriod('week')"
-            class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'week' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
-            Semanal
-        </button>
-        <button type="button" wire:click="setPeriod('month')"
-            class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'month' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
-            Mensal
-        </button>
-        <button type="button" wire:click="setPeriod('total')"
-            class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'total' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
-            Total
-        </button>
-    </div>
+    <x-page-header title="Ranking">
+        <div class="flex gap-1 rounded-lg border border-line bg-card p-1">
+            <button type="button" wire:click="setPeriod('week')"
+                class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'week' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
+                Semanal
+            </button>
+            <button type="button" wire:click="setPeriod('month')"
+                class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'month' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
+                Mensal
+            </button>
+            <button type="button" wire:click="setPeriod('total')"
+                class="rounded-md px-3 py-1.5 text-sm font-medium {{ $period === 'total' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-line/20' }}">
+                Total
+            </button>
+        </div>
+    </x-page-header>
 
     <div class="mb-4 flex flex-wrap gap-2">
         <button type="button" wire:click="setRole('dev')"

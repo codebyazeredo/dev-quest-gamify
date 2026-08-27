@@ -1,21 +1,20 @@
 <div class="space-y-6">
-    <div class="flex items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink">{{ auth()->user()->name }}</h1>
+    <x-page-header :title="auth()->user()->name">
+        <x-slot:subtitle>
             @if ($selectedTitle)
-                <p class="flex items-center gap-1.5 text-sm text-ink-muted">
+                <span class="flex items-center gap-1.5">
                     <span class="text-gold"><x-icon :name="$selectedTitle->icon" class="h-4 w-4" /></span>
                     {{ $selectedTitle->name }}
-                </p>
+                </span>
             @else
-                <p class="text-sm text-ink-muted">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</p>
+                {{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}
             @endif
-        </div>
+        </x-slot:subtitle>
 
-        <button type="button" wire:click="toggleEditProfile" title="Editar meus dados" aria-label="Editar meus dados" class="shrink-0 rounded-lg border border-line bg-card p-2 text-ink-muted hover:bg-line/20">
+        <button type="button" wire:click="toggleEditProfile" title="Editar meus dados" aria-label="Editar meus dados" class="rounded-lg border border-line bg-card p-2 text-ink-muted hover:bg-line/20">
             <x-icon name="pencil" class="h-4 w-4" />
         </button>
-    </div>
+    </x-page-header>
 
     <div class="flex gap-2">
         <a href="{{ route('achievements') }}" class="rounded-lg border border-line bg-card px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">

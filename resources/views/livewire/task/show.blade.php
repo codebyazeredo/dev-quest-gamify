@@ -1,23 +1,17 @@
 <div>
-    <a href="{{ route('boards.show', $task->board) }}" class="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-        &larr; {{ $task->board->name }}
-    </a>
-
-    <div class="mt-2 flex items-start justify-between">
-        <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink">{{ $task->title }}</h1>
-
-            @if ($task->rejection_reason)
+    <x-page-header :title="$task->title" :back="route('boards.show', $task->board)" :backLabel="$task->board->name">
+        @if ($task->rejection_reason)
+            <x-slot:subtitle>
                 <x-badge color="terracotta">Reprovada</x-badge>
-            @endif
-        </div>
+            </x-slot:subtitle>
+        @endif
 
         @can('update', $task)
             <button type="button" wire:click="toggleEdit" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-2 text-ink-muted hover:bg-line/20">
                 <x-icon name="pencil" class="h-4 w-4" />
             </button>
         @endcan
-    </div>
+    </x-page-header>
 
     @if ($task->rejection_reason)
         <div class="mt-3 rounded-xl border border-terracotta/30 bg-terracotta/10 p-3 text-sm text-terracotta">

@@ -1,5 +1,5 @@
 <div>
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Desafios</h1>
+    <x-page-header title="Desafios" />
 
     <div class="space-y-4">
         @foreach ($challenges as $row)

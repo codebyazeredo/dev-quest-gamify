@@ -1,13 +1,11 @@
 <div>
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-ink">Pessoas</h1>
-
+    <x-page-header title="Pessoas" :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\Person::class)
             <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
                 + Nova pessoa
             </button>
         @endcan
-    </div>
+    </x-page-header>
 
     @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
 

@@ -1,9 +1,5 @@
 <div>
-    <a href="{{ route('dashboard') }}" class="mb-4 inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-        ← Minha conta
-    </a>
-
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">Conquistas</h1>
+    <x-page-header title="Conquistas" :back="route('dashboard')" backLabel="Minha conta" />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($achievements as $row)
