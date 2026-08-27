@@ -87,7 +87,7 @@ class Create extends Component
             'categories' => TaskCategory::orderBy('name')->get(),
             'priorities' => TaskPriority::orderBy('multiplier')->get(),
             'developers' => (auth()->user()->isAdmin() || auth()->user()->isProductOwner())
-                ? User::orderBy('name')->get()
+                ? User::with(['person', 'selectedTitle'])->orderBy('name')->get()
                 : collect(),
         ]);
     }

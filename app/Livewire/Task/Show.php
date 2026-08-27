@@ -34,7 +34,7 @@ class Show extends Component
         $this->authorize('view', $task);
 
         $this->task = $task->load([
-            'board', 'column', 'category', 'assignedTo', 'createdBy',
+            'board', 'column', 'category', 'assignedTo.person', 'assignedTo.selectedTitle', 'createdBy',
             'taskEvents.user', 'taskEvents.xpTransaction',
             'movements.user', 'movements.fromColumn', 'movements.toColumn',
         ]);
@@ -158,7 +158,7 @@ class Show extends Component
             ->first();
 
         return view('livewire.task.show', [
-            'developers' => auth()->user()->isAdmin() ? User::orderBy('name')->get() : collect(),
+            'developers' => auth()->user()->isAdmin() ? User::with(['person', 'selectedTitle'])->orderBy('name')->get() : collect(),
             'completionBonus' => $completionBonus,
             'hasHomologation' => $this->task->taskEvents->contains(fn ($e) => $e->type === TaskEventType::HOMOLOGATION_COMPLETED),
             'hasDeployed' => $this->task->taskEvents->contains(fn ($e) => $e->type === TaskEventType::DEPLOYED),
