@@ -1,7 +1,23 @@
+@php
+    $topLinks = [
+        ['routeName' => 'dashboard', 'activePattern' => 'dashboard', 'label' => 'Painel', 'icon' => 'home'],
+        ['routeName' => 'boards.index', 'activePattern' => 'boards.*', 'label' => 'Quadros', 'icon' => 'columns'],
+        ['routeName' => 'ranking', 'activePattern' => 'ranking', 'label' => 'Ranking', 'icon' => 'trophy'],
+        ['routeName' => 'challenges', 'activePattern' => 'challenges', 'label' => 'Desafios', 'icon' => 'flag'],
+        ['routeName' => 'checkin', 'activePattern' => 'checkin', 'label' => 'Check-in', 'icon' => 'fire'],
+    ];
+@endphp
+
 <nav class="flex flex-col gap-1">
-    <a href="{{ route('boards.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('boards.*') ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-        Quadros
-    </a>
+    @foreach ($topLinks as $link)
+        <a
+            href="{{ route($link['routeName']) }}"
+            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs($link['activePattern']) ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}"
+        >
+            <x-icon :name="$link['icon']" class="h-[18px] w-[18px] shrink-0" />
+            {{ $link['label'] }}
+        </a>
+    @endforeach
 
     @if (auth()->user()->isAdmin())
         @php
@@ -30,7 +46,7 @@
 
         <x-sidebar-group label="Gestão" :active="collect($gestaoLinks)->contains('active', true)">
             @foreach ($gestaoLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -38,7 +54,7 @@
 
         <x-sidebar-group label="Gamificação" :active="collect($gamificacaoLinks)->contains('active', true)">
             @foreach ($gamificacaoLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -46,7 +62,7 @@
 
         <x-sidebar-group label="Sistema" :active="collect($sistemaLinks)->contains('active', true)">
             @foreach ($sistemaLinks as $link)
-                <a href="{{ route($link['route']) }}" class="rounded-md px-3 py-2 text-sm font-medium {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                <a href="{{ route($link['route']) }}" class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ $link['active'] ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach

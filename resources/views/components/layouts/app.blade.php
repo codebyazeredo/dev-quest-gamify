@@ -18,7 +18,7 @@
         <div x-data="{ sidebarOpen: false }" class="flex h-screen flex-col">
             <nav class="flex items-center justify-between bg-primary px-4 py-3 sm:px-6">
                 <div class="flex items-center gap-3">
-                    <button type="button" @click="sidebarOpen = true" class="rounded-md p-1.5 text-white/70 hover:bg-white/10 lg:hidden" aria-label="Abrir menu">
+                    <button type="button" @click="sidebarOpen = true" class="rounded-lg p-1.5 text-white/70 transition-colors hover:bg-white/10 lg:hidden" aria-label="Abrir menu">
                         <x-icon name="menu" class="h-5 w-5" />
                     </button>
 
@@ -31,8 +31,20 @@
                 </div>
 
                 <div class="flex items-center gap-1">
-                    <div class="relative" x-data="{ open: false }">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-white hover:bg-white/10">
+                    <a href="{{ route('ranking') }}" title="Ranking" aria-label="Ranking" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('ranking') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                        <x-icon name="trophy" class="h-[18px] w-[18px]" />
+                    </a>
+
+                    <a href="{{ route('challenges') }}" title="Desafios" aria-label="Desafios" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('challenges') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                        <x-icon name="flag" class="h-[18px] w-[18px]" />
+                    </a>
+
+                    <a href="{{ route('checkin') }}" title="Check-in" aria-label="Check-in" class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors sm:flex {{ request()->routeIs('checkin') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                        <x-icon name="fire" class="h-[18px] w-[18px]" />
+                    </a>
+
+                    <div class="relative ml-1" x-data="{ open: false }">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-white transition-colors hover:bg-white/10">
                             @if (auth()->user()->person?->foto_path)
                                 <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
                             @else
@@ -54,18 +66,6 @@
                         <div x-show="open" x-cloak x-transition class="absolute right-0 mt-2 w-48 rounded-xl border border-line bg-card py-1 shadow-lg">
                             <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('dashboard') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
                                 Minha conta
-                            </a>
-
-                            <a href="{{ route('ranking') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('ranking') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
-                                Ranking
-                            </a>
-
-                            <a href="{{ route('checkin') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('checkin') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
-                                Check-in
-                            </a>
-
-                            <a href="{{ route('challenges') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('challenges') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
-                                Desafios
                             </a>
 
                             <hr class="my-1 border-line">

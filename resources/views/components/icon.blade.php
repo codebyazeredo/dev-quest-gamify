@@ -119,4 +119,19 @@
             <path d="M5 6l6 6-6 6" />
         </svg>
         @break
+
+    @case('home')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <path d="M4 11l8-7 8 7" />
+            <path d="M6 9.5V20h12V9.5" />
+            <path d="M10 20v-6h4v6" />
+        </svg>
+        @break
+
+    @case('columns')
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="{{ $class }}">
+            <rect x="3.5" y="4" width="17" height="16" rx="2" />
+            <path d="M9 4v16M15 4v16" />
+        </svg>
+        @break
 @endswitch
