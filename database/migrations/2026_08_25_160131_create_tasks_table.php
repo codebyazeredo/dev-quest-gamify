@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('priority');
-            $table->unsignedTinyInteger('status');
+            $table->unsignedTinyInteger('status')->nullable();
             $table->unsignedInteger('position');
             $table->unsignedInteger('base_points');
             $table->decimal('priority_multiplier', 4, 2);

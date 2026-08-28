@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'title', 'description', 'status', 'position',
     'base_points', 'priority_multiplier', 'due_at',
     'rejection_reason', 'rejected_at', 'approved_by',
-    'started_at', 'completed_at',
+    'started_at', 'completed_at', 'archived_at',
 ])]
 class Task extends Model
 {
@@ -30,6 +30,7 @@ class Task extends Model
             'rejected_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -90,6 +91,11 @@ class Task extends Model
             && $this->completed_at->gt($this->due_at);
     }
 
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if (! $user->isDeveloper()) {
@@ -99,10 +105,16 @@ class Task extends Model
         return $query->where(function (Builder $visible) use ($user) {
             $visible->where(function (Builder $backlog) {
                 $backlog->where('status', TaskStatus::BACKLOG)->whereNull('assigned_to');
-            })->orWhere('status', TaskStatus::REVIEW)
+            })
+                ->orWhere('status', TaskStatus::REVIEW)
+                ->orWhere(function (Builder $untaggedUnassigned) {
+                    $untaggedUnassigned->whereNull('status')->whereNull('assigned_to');
+                })
                 ->orWhere(function (Builder $mine) use ($user) {
-                    $mine->whereNotIn('status', [TaskStatus::BACKLOG, TaskStatus::REVIEW])
-                        ->where('assigned_to', $user->id);
+                    $mine->where(function (Builder $notBacklogOrReview) {
+                        $notBacklogOrReview->whereNotIn('status', [TaskStatus::BACKLOG, TaskStatus::REVIEW])
+                            ->orWhereNull('status');
+                    })->where('assigned_to', $user->id);
                 });
         });
     }

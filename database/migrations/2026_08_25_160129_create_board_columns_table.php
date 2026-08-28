@@ -15,11 +15,12 @@ return new class extends Migration
             $table->string('slug', 60);
             $table->unsignedInteger('position');
             $table->boolean('is_final')->default(false);
-            $table->unsignedTinyInteger('status');
+            $table->unsignedTinyInteger('status')->nullable();
             $table->timestamps();
 
             $table->index(['board_id', 'position']);
             $table->unique(['board_id', 'slug']);
+            $table->unique(['board_id', 'status']);
         });
     }
 

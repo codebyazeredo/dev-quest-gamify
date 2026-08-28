@@ -32,4 +32,14 @@ class BoardColumnFactory extends Factory
             'status' => $status,
         ]);
     }
+
+    public function untagged(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => fake()->words(2, true),
+            'slug' => Str::slug(fake()->words(2, true)).'-'.fake()->unique()->numberBetween(1, 100000),
+            'is_final' => false,
+            'status' => null,
+        ]);
+    }
 }

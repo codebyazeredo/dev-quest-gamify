@@ -199,6 +199,25 @@ class TaskApprovalTest extends TestCase
         $this->assertSame(10, (int) XpTransaction::where('user_id', $creator->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
     }
 
+    public function test_approving_on_a_board_with_no_approved_column_shows_an_error_instead_of_crashing(): void
+    {
+        $tester = User::factory()->tester()->create();
+        $board = Board::factory()->create();
+        $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+        $task = Task::factory()->create([
+            'board_id' => $board->id,
+            'column_id' => $testing->id,
+            'status' => TaskStatus::TESTING,
+        ]);
+
+        Livewire::actingAs($tester)
+            ->test(Show::class, ['task' => $task])
+            ->call('approve')
+            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+
+        $this->assertSame(TaskStatus::TESTING, $task->refresh()->status);
+    }
+
     public function test_late_task_zeroes_the_tester_and_creator_bonuses_too(): void
     {
         $tester = User::factory()->tester()->create();

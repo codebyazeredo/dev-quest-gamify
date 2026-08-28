@@ -78,8 +78,11 @@ class TaskEventTest extends TestCase
         $this->assertSame(10, $developer->xpTransactions()->sum('amount'));
     }
 
-    public function test_moving_directly_from_todo_to_done_grants_all_crossed_milestones_and_completion_bonus(): void
+    public function test_moving_directly_from_todo_to_done_only_grants_the_milestone_actually_reached(): void
     {
+        // Colunas livres não fazem mais "backfill" de marcos pulados: pular direto
+        // de A Fazer pra Concluído só credita o que a coluna de destino dispara
+        // (teste concluído + bônus de conclusão), não os marcos intermediários.
         $board = $this->boardWithStandardColumns();
         $developer = User::factory()->developer()->create();
         $category = TaskCategory::factory()->create(['base_points' => 10]);
@@ -95,7 +98,23 @@ class TaskEventTest extends TestCase
 
         app(TaskService::class)->move($task, $this->columnFor($board, TaskStatus::DONE), 0, $developer);
 
-        $this->assertSame(10 + 10 + 5 + 15, $developer->xpTransactions()->sum('amount'));
+        $this->assertDatabaseMissing('task_events', ['task_id' => $task->id, 'type' => TaskEventType::DEVELOPMENT_COMPLETED->value]);
+        $this->assertDatabaseMissing('task_events', ['task_id' => $task->id, 'type' => TaskEventType::REVIEW_COMPLETED->value]);
+        $this->assertSame(5 + 15, $developer->xpTransactions()->sum('amount'));
+    }
+
+    public function test_moving_through_an_untagged_column_grants_no_xp_or_events(): void
+    {
+        $board = $this->boardWithStandardColumns();
+        $developer = User::factory()->developer()->create();
+        $freeColumn = BoardColumn::factory()->for($board)->untagged()->create();
+        $task = $this->taskIn($board, TaskStatus::DOING, $developer);
+
+        app(TaskService::class)->move($task, $freeColumn, 0, $developer);
+
+        $this->assertNull($task->refresh()->status);
+        $this->assertSame(0, TaskEvent::where('task_id', $task->id)->count());
+        $this->assertSame(0, $developer->xpTransactions()->sum('amount'));
     }
 
     public function test_reaching_final_column_dispatches_task_completed_and_creates_task_sourced_transaction(): void

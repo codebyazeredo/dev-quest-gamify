@@ -1,4 +1,4 @@
-@props(['task'])
+@props(['task', 'readOnly' => false])
 
 @php
     $bg = $task->category->color;
@@ -6,21 +6,25 @@
 @endphp
 
 <div
-    draggable="true"
-    x-on:dragstart="draggingTaskId = {{ $task->id }}"
+    @unless ($readOnly)
+        draggable="true"
+        x-on:dragstart="draggingTaskId = {{ $task->id }}"
+    @endunless
     style="background-color: {{ $bg }}; color: {{ $fg }}; border-color: {{ $fg }}33;"
-    class="cursor-move rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
+    class="{{ $readOnly ? '' : 'cursor-move' }} rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
 >
     <div class="flex items-start justify-between gap-2">
         <a href="{{ route('tasks.show', $task) }}" class="text-sm font-medium hover:underline">
             {{ $task->title }}
         </a>
 
-        @can('update', $task)
-            <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="shrink-0 rounded-md p-1 opacity-70 hover:bg-black/10 hover:opacity-100">
-                <x-icon name="pencil" class="h-3.5 w-3.5" />
-            </button>
-        @endcan
+        @unless ($readOnly)
+            @can('update', $task)
+                <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="shrink-0 rounded-md p-1 opacity-70 hover:bg-black/10 hover:opacity-100">
+                    <x-icon name="pencil" class="h-3.5 w-3.5" />
+                </button>
+            @endcan
+        @endunless
     </div>
 
     <div class="mt-2 flex items-center justify-between text-xs">
@@ -62,10 +66,12 @@
             <span class="opacity-50">Não atribuído</span>
         @endif
 
-        @can('claim', $task)
-            <button type="button" wire:click="claim({{ $task->id }})" class="rounded-md px-2 py-0.5 font-medium hover:opacity-80" style="background-color: {{ $fg }}1a;">
-                Assumir
-            </button>
-        @endcan
+        @unless ($readOnly)
+            @can('claim', $task)
+                <button type="button" wire:click="claim({{ $task->id }})" class="rounded-md px-2 py-0.5 font-medium hover:opacity-80" style="background-color: {{ $fg }}1a;">
+                    Assumir
+                </button>
+            @endcan
+        @endunless
     </div>
 </div>

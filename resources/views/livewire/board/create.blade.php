@@ -9,6 +9,11 @@
             Ativo
         </label>
 
+        <label class="flex items-center gap-2 text-sm text-ink-muted">
+            <input type="checkbox" wire:model="seedDefaultColumns" class="rounded border-line">
+            Criar colunas padrão de desenvolvimento (Backlog, A Fazer, Em Andamento, Em Revisão, Em Teste, Aprovado, Concluído)
+        </label>
+
         <div class="flex justify-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Criar quadro</x-button>

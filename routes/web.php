@@ -11,6 +11,7 @@ use App\Livewire\Admin\Roles\Index as AdminRoles;
 use App\Livewire\Admin\Settings as AdminSettings;
 use App\Livewire\Admin\Titles\Index as AdminTitles;
 use App\Livewire\Admin\Users\Index as AdminUsers;
+use App\Livewire\Board\Archive as BoardArchive;
 use App\Livewire\Board\Index as BoardIndex;
 use App\Livewire\Board\Show as BoardShow;
 use App\Livewire\Checkin\History as CheckinHistory;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
     Route::get('/boards', BoardIndex::class)->name('boards.index');
     Route::get('/boards/{board}', BoardShow::class)->name('boards.show');
+    Route::get('/boards/{board}/archive', BoardArchive::class)->name('boards.archive');
     Route::get('/tasks/{task}', TaskShow::class)->name('tasks.show');
     Route::get('/ranking', Ranking::class)->name('ranking');
     Route::get('/achievements', Achievements::class)->name('achievements');

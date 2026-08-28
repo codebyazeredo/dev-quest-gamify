@@ -19,6 +19,8 @@ class Create extends Component
 
     public bool $is_active = true;
 
+    public bool $seedDefaultColumns = true;
+
     public function mount(): void
     {
         $this->authorize('create', Board::class);
@@ -42,7 +44,9 @@ class Create extends Component
         $board = DB::transaction(function () use ($validated) {
             $board = Board::create($validated);
 
-            BoardColumn::seedDefaultsFor($board);
+            if ($this->seedDefaultColumns) {
+                BoardColumn::seedDefaultsFor($board);
+            }
 
             return $board;
         });

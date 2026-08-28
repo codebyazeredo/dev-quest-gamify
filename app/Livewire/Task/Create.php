@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Task;
 
-use App\Enums\TaskStatus;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
@@ -40,7 +39,7 @@ class Create extends Component
 
         $column = BoardColumn::findOrFail($columnId);
 
-        if ($column->board_id !== $board->id || $column->status !== TaskStatus::BACKLOG) {
+        if ($column->board_id !== $board->id) {
             abort(404);
         }
 

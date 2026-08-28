@@ -1,10 +1,34 @@
 <div>
     <x-page-header :title="$task->title" :back="route('boards.show', $task->board)" :backLabel="$task->board->name">
-        @if ($task->rejection_reason)
+        @if ($task->rejection_reason || $task->isArchived())
             <x-slot:subtitle>
-                <x-badge color="terracotta">Reprovada</x-badge>
+                <div class="flex flex-wrap gap-2">
+                    @if ($task->rejection_reason)
+                        <x-badge color="terracotta">Reprovada</x-badge>
+                    @endif
+
+                    @if ($task->isArchived())
+                        <x-badge color="neutral">Arquivada</x-badge>
+                    @endif
+                </div>
             </x-slot:subtitle>
         @endif
+
+        @can('unarchive', $task)
+            @if ($task->isArchived())
+                <button type="button" wire:click="unarchive" class="rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-line/20">
+                    Desarquivar
+                </button>
+            @endif
+        @endcan
+
+        @can('archive', $task)
+            @unless ($task->isArchived())
+                <button type="button" wire:click="archive" wire:confirm="Arquivar esta tarefa? Ela sairá do quadro, mas continuará acessível pelo arquivo." class="rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-line/20">
+                    Arquivar
+                </button>
+            @endunless
+        @endcan
 
         @can('update', $task)
             <button type="button" wire:click="toggleEdit" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-2 text-ink-muted hover:bg-line/20">
@@ -37,7 +61,7 @@
         </div>
         <div>
             <dt class="text-ink-muted">Status</dt>
-            <dd class="font-medium text-ink">{{ $task->status->label() }}</dd>
+            <dd class="font-medium text-ink">{{ $task->status?->label() ?? 'Sem marco' }}</dd>
         </div>
         <div>
             <dt class="text-ink-muted">Pontos</dt>

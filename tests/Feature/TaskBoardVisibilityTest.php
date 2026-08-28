@@ -71,6 +71,25 @@ class TaskBoardVisibilityTest extends TestCase
         $this->assertTrue($tasks->contains('id', $someoneElses->id));
     }
 
+    public function test_developer_sees_unassigned_tasks_in_untagged_columns(): void
+    {
+        $developer = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+        $freeColumn = BoardColumn::factory()->for($board)->untagged()->create();
+
+        $unassigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => null]);
+        $assignedToSomeoneElse = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => User::factory()->developer()->create()->id]);
+        $assignedToSelf = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => $developer->id]);
+
+        $tasks = Livewire::actingAs($developer)
+            ->test(Kanban::class, ['board' => $board])
+            ->get('board')->columns->first()->tasks;
+
+        $this->assertTrue($tasks->contains('id', $unassigned->id));
+        $this->assertFalse($tasks->contains('id', $assignedToSomeoneElse->id));
+        $this->assertTrue($tasks->contains('id', $assignedToSelf->id));
+    }
+
     public function test_admin_sees_every_task_unfiltered(): void
     {
         $admin = User::factory()->admin()->create();

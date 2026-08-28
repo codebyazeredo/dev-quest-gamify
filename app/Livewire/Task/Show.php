@@ -4,6 +4,7 @@ namespace App\Livewire\Task;
 
 use App\Enums\TaskEventType;
 use App\Enums\XpSourceType;
+use App\Exceptions\MissingMilestoneColumnException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Task;
 use App\Models\User;
@@ -91,7 +92,14 @@ class Show extends Component
     {
         $this->authorize('approve', $this->task);
 
-        app(TaskService::class)->approve($this->task, auth()->user());
+        try {
+            app(TaskService::class)->approve($this->task, auth()->user());
+        } catch (MissingMilestoneColumnException $e) {
+            $this->toastError('Não foi possível aprovar', $e->getMessage());
+            $this->flushToasts();
+
+            return;
+        }
 
         $this->reloadAfterMove();
         $this->toastSuccess('Tarefa aprovada', 'A tarefa avançou para a próxima etapa.');
@@ -114,7 +122,14 @@ class Show extends Component
             'rejectionReasonInput' => ['required', 'string', 'min:3', 'max:1000'],
         ], [], ['rejectionReasonInput' => 'motivo']);
 
-        app(TaskService::class)->reject($this->task, auth()->user(), $validated['rejectionReasonInput']);
+        try {
+            app(TaskService::class)->reject($this->task, auth()->user(), $validated['rejectionReasonInput']);
+        } catch (MissingMilestoneColumnException $e) {
+            $this->toastError('Não foi possível reprovar', $e->getMessage());
+            $this->flushToasts();
+
+            return;
+        }
 
         $this->rejectionReasonInput = '';
         $this->showRejectForm = false;
@@ -149,6 +164,28 @@ class Show extends Component
 
         $this->reloadTaskEvents();
         $this->toastSuccess('Implantação registrada', 'A tarefa foi marcada como implantada.');
+        $this->flushToasts();
+    }
+
+    public function archive(): void
+    {
+        $this->authorize('archive', $this->task);
+
+        app(TaskService::class)->archive($this->task);
+
+        $this->task->refresh();
+        $this->toastSuccess('Tarefa arquivada', 'A tarefa foi movida para o arquivo do quadro.');
+        $this->flushToasts();
+    }
+
+    public function unarchive(): void
+    {
+        $this->authorize('unarchive', $this->task);
+
+        app(TaskService::class)->unarchive($this->task);
+
+        $this->task->refresh();
+        $this->toastSuccess('Tarefa desarquivada', 'A tarefa voltou para o quadro.');
         $this->flushToasts();
     }
 

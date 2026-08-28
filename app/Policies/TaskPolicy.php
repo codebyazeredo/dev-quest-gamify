@@ -26,7 +26,7 @@ class TaskPolicy
         }
 
         if ($user->isSuporte()) {
-            return $task->status === TaskStatus::BACKLOG;
+            return in_array($task->status, [null, TaskStatus::BACKLOG], true);
         }
 
         return false;
@@ -64,7 +64,7 @@ class TaskPolicy
             return false;
         }
 
-        $isSignOff = $task->status->value < TaskStatus::TESTING->value
+        $isSignOff = ($task->status?->value ?? 0) < TaskStatus::TESTING->value
             && $destination->status === TaskStatus::TESTING;
 
         if ($isSignOff) {
@@ -110,5 +110,15 @@ class TaskPolicy
         }
 
         return $user->isDeveloper() && $task->assigned_to === $user->id;
+    }
+
+    public function archive(User $user, Task $task): bool
+    {
+        return $user->isAdmin() || $user->isProductOwner();
+    }
+
+    public function unarchive(User $user, Task $task): bool
+    {
+        return $user->isAdmin() || $user->isProductOwner();
     }
 }

@@ -7,6 +7,8 @@ use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
 use App\Events\TaskCompleted;
 use App\Events\TaskEventCreated;
+use App\Exceptions\MissingMilestoneColumnException;
+use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskCategory;
@@ -15,11 +17,15 @@ use App\Models\TaskEventRule;
 use App\Models\TaskMovement;
 use App\Models\TaskPriority;
 use App\Models\User;
+use App\Repositories\BoardColumnRepository;
 use Illuminate\Support\Facades\DB;
 
 class TaskService
 {
-    public function __construct(private XpService $xpService) {}
+    public function __construct(
+        private XpService $xpService,
+        private BoardColumnRepository $columns,
+    ) {}
 
     public function create(array $data, User $creator): Task
     {
@@ -98,7 +104,11 @@ class TaskService
     public function approve(Task $task, User $actor): Task
     {
         return DB::transaction(function () use ($task, $actor) {
-            $destination = $this->columnFor($task, TaskStatus::APPROVED);
+            $destination = $this->columnTaggedWith($task->board, TaskStatus::APPROVED);
+
+            if ($destination === null) {
+                throw new MissingMilestoneColumnException('Este quadro não tem uma coluna marcada como "Aprovado".');
+            }
 
             $task->rejection_reason = null;
             $task->rejected_at = null;
@@ -115,7 +125,11 @@ class TaskService
     public function reject(Task $task, User $actor, string $reason): Task
     {
         return DB::transaction(function () use ($task, $actor, $reason) {
-            $destination = $this->columnFor($task, TaskStatus::TODO);
+            $destination = $this->columnTaggedWith($task->board, TaskStatus::TODO);
+
+            if ($destination === null) {
+                throw new MissingMilestoneColumnException('Este quadro não tem uma coluna marcada como "A Fazer".');
+            }
 
             $task->rejection_reason = $reason;
             $task->rejected_at = now();
@@ -125,11 +139,9 @@ class TaskService
         });
     }
 
-    private function columnFor(Task $task, TaskStatus $status): BoardColumn
+    private function columnTaggedWith(Board $board, TaskStatus $status): ?BoardColumn
     {
-        return BoardColumn::where('board_id', $task->board_id)
-            ->where('status', $status)
-            ->firstOrFail();
+        return $this->columns->findTaggedWith($board, $status);
     }
 
     public function assign(Task $task, ?User $user): Task
@@ -174,7 +186,7 @@ class TaskService
         return DB::transaction(function () use ($task, $actor) {
             $this->recordEventOnce($task, TaskEventType::HOMOLOGATION_COMPLETED, $actor);
 
-            $done = BoardColumn::where('board_id', $task->board_id)->where('status', TaskStatus::DONE)->first();
+            $done = $this->columnTaggedWith($task->board, TaskStatus::DONE);
 
             if ($done !== null && $task->column_id !== $done->id) {
                 $this->move($task, $done, $done->tasks()->count(), $actor);
@@ -182,6 +194,20 @@ class TaskService
 
             return $task->refresh();
         });
+    }
+
+    public function archive(Task $task): Task
+    {
+        $task->update(['archived_at' => now()]);
+
+        return $task;
+    }
+
+    public function unarchive(Task $task): Task
+    {
+        $task->update(['archived_at' => null]);
+
+        return $task;
     }
 
     public function markDeployed(Task $task, User $actor): Task
@@ -211,10 +237,12 @@ class TaskService
         return $taskEvent;
     }
 
-    protected function recordLifecycleEvents(Task $task, BoardColumn $destination, TaskStatus $previousStatus, User $actor): void
+    protected function recordLifecycleEvents(Task $task, BoardColumn $destination, ?TaskStatus $previousStatus, User $actor): void
     {
-        foreach ($this->thresholdsCrossed($previousStatus, $task->status) as $type) {
-            $this->recordEventOnce($task, $type, $actor);
+        $milestoneEvent = $this->milestoneEventFor($destination->status);
+
+        if ($milestoneEvent !== null) {
+            $this->recordEventOnce($task, $milestoneEvent, $actor);
         }
 
         if ($destination->is_final || $task->status === TaskStatus::DONE) {
@@ -298,23 +326,14 @@ class TaskService
         return (int) round($taskXp * ($rule->xp_reward / 100));
     }
 
-    protected function thresholdsCrossed(TaskStatus $previous, TaskStatus $new): array
+    protected function milestoneEventFor(?TaskStatus $status): ?TaskEventType
     {
-        $ladder = [
-            TaskStatus::DOING->value => TaskEventType::STARTED,
-            TaskStatus::REVIEW->value => TaskEventType::DEVELOPMENT_COMPLETED,
-            TaskStatus::TESTING->value => TaskEventType::REVIEW_COMPLETED,
-        ];
-
-        $events = [];
-
-        foreach ($ladder as $threshold => $type) {
-            if ($new->value >= $threshold && $previous->value < $threshold) {
-                $events[] = $type;
-            }
-        }
-
-        return $events;
+        return match ($status) {
+            TaskStatus::DOING => TaskEventType::STARTED,
+            TaskStatus::REVIEW => TaskEventType::DEVELOPMENT_COMPLETED,
+            TaskStatus::TESTING => TaskEventType::REVIEW_COMPLETED,
+            default => null,
+        };
     }
 
     protected function closeGap(int $columnId, int $vacatedPosition): void
@@ -362,7 +381,7 @@ class TaskService
             $task->completed_at = null;
         }
 
-        if ($task->started_at === null && $destination->status !== TaskStatus::BACKLOG) {
+        if ($task->started_at === null && $destination->status !== null && $destination->status !== TaskStatus::BACKLOG) {
             $task->started_at = now();
         }
     }

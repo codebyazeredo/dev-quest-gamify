@@ -3,10 +3,13 @@
 namespace App\Livewire\Task;
 
 use App\Enums\TaskStatus;
+use App\Exceptions\DeletionBlockedException;
+use App\Exceptions\DuplicateEntryException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
+use App\Services\BoardColumnService;
 use App\Services\TaskService;
 use App\Support\ToastCollector;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -24,6 +27,10 @@ class Kanban extends Component
 
     public ?int $editingTaskId = null;
 
+    public ?int $confirmingDeleteColumnId = null;
+
+    public string $newColumnName = '';
+
     public function mount(Board $board): void
     {
         $this->board = $board;
@@ -34,7 +41,9 @@ class Kanban extends Component
     protected function loadBoard(): void
     {
         $this->board->load([
-            'columns.tasks' => fn ($query) => $query->visibleTo(auth()->user())->with(['category', 'assignedTo', 'taskEvents']),
+            'columns.tasks' => fn ($query) => $query->whereNull('archived_at')
+                ->visibleTo(auth()->user())
+                ->with(['category', 'assignedTo', 'taskEvents']),
         ]);
     }
 
@@ -44,21 +53,11 @@ class Kanban extends Component
 
         $column = $this->board->columns->firstWhere('id', $columnId);
 
-        if (! $column || $column->status !== TaskStatus::BACKLOG) {
+        if (! $column) {
             abort(404);
         }
 
         $this->creatingInColumnId = $columnId;
-    }
-
-    #[On('open-create-task')]
-    public function openCreateFromHeader(): void
-    {
-        $backlogColumn = $this->board->columns->firstWhere('status', TaskStatus::BACKLOG);
-
-        if ($backlogColumn) {
-            $this->openCreate($backlogColumn->id);
-        }
     }
 
     #[On('open-task-edit')]
@@ -81,6 +80,7 @@ class Kanban extends Component
     {
         $this->creatingInColumnId = null;
         $this->editingTaskId = null;
+        $this->confirmingDeleteColumnId = null;
     }
 
     public function moveTask(int $taskId, int $columnId, int $position): void
@@ -138,8 +138,108 @@ class Kanban extends Component
         $this->flushToasts();
     }
 
+    public function addColumn(): void
+    {
+        $this->authorize('update', $this->board);
+
+        $this->validate(['newColumnName' => ['required', 'string', 'max:60']]);
+
+        app(BoardColumnService::class)->create($this->board, $this->newColumnName);
+
+        $this->newColumnName = '';
+        $this->loadBoard();
+    }
+
+    public function renameColumn(int $columnId, string $name): void
+    {
+        $this->authorize('update', $this->board);
+
+        $name = trim($name);
+
+        if ($name === '' || mb_strlen($name) > 60) {
+            return;
+        }
+
+        $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
+
+        app(BoardColumnService::class)->rename($column, $name);
+
+        $this->loadBoard();
+    }
+
+    public function setMilestone(int $columnId, ?int $status): void
+    {
+        $this->authorize('update', $this->board);
+
+        $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
+
+        try {
+            app(BoardColumnService::class)->setMilestone($column, $status !== null ? TaskStatus::from($status) : null);
+        } catch (DuplicateEntryException $e) {
+            $this->toastError('Não foi possível marcar', $e->getMessage());
+            $this->flushToasts();
+
+            return;
+        }
+
+        $this->loadBoard();
+    }
+
+    public function moveColumnUp(int $columnId): void
+    {
+        $this->authorize('update', $this->board);
+
+        $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
+
+        app(BoardColumnService::class)->moveUp($column);
+
+        $this->loadBoard();
+    }
+
+    public function moveColumnDown(int $columnId): void
+    {
+        $this->authorize('update', $this->board);
+
+        $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
+
+        app(BoardColumnService::class)->moveDown($column);
+
+        $this->loadBoard();
+    }
+
+    public function confirmDeleteColumn(int $columnId): void
+    {
+        $this->authorize('update', $this->board);
+
+        $this->confirmingDeleteColumnId = $columnId;
+    }
+
+    public function deleteColumn(int $columnId): void
+    {
+        $this->authorize('update', $this->board);
+
+        $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
+
+        $this->confirmingDeleteColumnId = null;
+
+        try {
+            app(BoardColumnService::class)->delete($column);
+        } catch (DeletionBlockedException $e) {
+            $this->toastError('Não foi possível excluir', $e->getMessage());
+            $this->flushToasts();
+
+            return;
+        }
+
+        $this->toastSuccess('Coluna excluída', 'A coluna foi removida do quadro.');
+        $this->loadBoard();
+        $this->flushToasts();
+    }
+
     public function render(): View
     {
-        return view('livewire.task.kanban');
+        return view('livewire.task.kanban', [
+            'statuses' => TaskStatus::cases(),
+        ]);
     }
 }
