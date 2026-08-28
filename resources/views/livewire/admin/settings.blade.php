@@ -24,6 +24,27 @@
             @error('logo') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-ink">Tamanho da logo na tela de login</label>
+
+            <div class="mt-2 grid grid-cols-3 gap-2">
+                @foreach (\App\Enums\LogoSize::cases() as $size)
+                    <label class="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border p-3 text-sm {{ $logo_size === $size->value ? 'border-primary bg-primary/5 text-primary' : 'border-line text-ink-muted hover:bg-surface' }}">
+                        <input type="radio" wire:model.live="logo_size" value="{{ $size->value }}" class="sr-only">
+                        <span class="flex h-8 items-center">
+                            <span class="rounded bg-current" style="{{ match ($size) {
+                                \App\Enums\LogoSize::SMALL => 'width: 1.1rem; height: 0.9rem;',
+                                \App\Enums\LogoSize::MEDIUM => 'width: 1.6rem; height: 1.3rem;',
+                                \App\Enums\LogoSize::LARGE => 'width: 2.2rem; height: 1.8rem;',
+                            } }} opacity: 0.25;"></span>
+                        </span>
+                        <span class="font-medium">{{ $size->label() }}</span>
+                    </label>
+                @endforeach
+            </div>
+            @error('logo_size') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+        </div>
+
         <x-button type="submit">Salvar</x-button>
     </form>
 </div>

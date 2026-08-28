@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\LogoSize;
 use App\Livewire\Admin\Settings;
 use App\Models\AppSetting;
 use App\Models\User;
@@ -31,6 +32,20 @@ class SettingsManagementTest extends TestCase
         $this->assertSame('Acme Corp', $setting->company_name);
         $this->assertNotNull($setting->logo_path);
         Storage::disk('public')->assertExists($setting->logo_path);
+    }
+
+    public function test_logo_defaults_to_large_and_admin_can_change_it(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->assertSame(LogoSize::LARGE, AppSetting::current()->logo_size);
+
+        Livewire::actingAs($admin)
+            ->test(Settings::class)
+            ->set('logo_size', LogoSize::SMALL->value)
+            ->call('save');
+
+        $this->assertSame(LogoSize::SMALL, AppSetting::current()->logo_size);
     }
 
     public function test_developer_gets_forbidden_on_the_route(): void

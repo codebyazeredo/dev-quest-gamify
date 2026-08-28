@@ -8,32 +8,51 @@
 
         <title>{{ $title ?? $appSettings->displayName() }}</title>
 
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         @livewireStyles
     </head>
-    <body class="flex min-h-screen flex-col items-center justify-center bg-linear-to-r from-primary to-accent px-4 text-ink">
-        @if (session('status'))
-            <div class="mb-4 w-full max-w-md rounded-xl border border-forest/30 bg-forest/10 p-4 text-sm text-forest">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        <div class="w-full max-w-md rounded-2xl border border-line bg-card p-8 shadow-sm">
-            <div class="mb-6 flex items-center justify-center">
+    <body class="min-h-screen text-ink lg:h-screen lg:overflow-hidden">
+        <div class="flex min-h-screen flex-col lg:h-full lg:flex-row">
+            <div class="flex shrink-0 flex-col items-center justify-center gap-3 bg-linear-to-r from-primary to-accent px-6 py-8 lg:order-2 lg:flex-1 lg:gap-8 lg:px-8 lg:py-10">
                 @if ($appSettings->logoUrl())
-                    <img src="{{ $appSettings->logoUrl() }}" alt="{{ $appSettings->displayName() }}" class="h-28 max-h-[22vh] w-auto max-w-full">
+                    @php
+                        $logoSizeClasses = match ($appSettings->logo_size) {
+                            \App\Enums\LogoSize::SMALL => 'lg:w-full lg:max-w-[45%] lg:max-h-[30vh]',
+                            \App\Enums\LogoSize::MEDIUM => 'lg:w-full lg:max-w-[65%] lg:max-h-[45vh]',
+                            \App\Enums\LogoSize::LARGE => 'lg:w-full lg:max-w-[85%] lg:max-h-[60vh]',
+                        };
+                    @endphp
+                    <img src="{{ $appSettings->logoUrl() }}" alt="{{ $appSettings->displayName() }}" class="h-16 w-auto max-w-full lg:h-auto {{ $logoSizeClasses }}">
                 @else
-                    <span class="text-2xl font-bold tracking-tight text-ink">{{ $appSettings->displayName() }}</span>
+                    <span class="text-xl font-bold tracking-tight text-white lg:text-4xl">{{ $appSettings->displayName() }}</span>
                 @endif
+
+                <p class="hidden max-w-md text-center text-xl font-medium text-white/90 lg:block">
+                    Transforme tarefas em conquistas: gamificação de verdade para o seu time de desenvolvimento.
+                </p>
             </div>
 
-            {{ $slot }}
-        </div>
+            <div class="flex flex-1 flex-col justify-center bg-card px-6 py-10 lg:order-1 lg:flex-none lg:w-[42%] lg:overflow-y-auto lg:px-16">
+                <div class="mx-auto w-full max-w-sm">
+                    @if (session('status'))
+                        <div class="mb-4 rounded-xl border border-forest/30 bg-forest/10 p-4 text-sm text-forest">
+                            {{ session('status') }}
+                        </div>
+                    @endif
 
-        <x-footer variant="inverted" class="mt-6 w-full max-w-md" />
+                    {{ $slot }}
+                </div>
+
+                <x-footer class="mx-auto mt-10 w-full max-w-sm" />
+            </div>
+        </div>
 
         @livewireScripts
     </body>

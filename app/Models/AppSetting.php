@@ -2,20 +2,28 @@
 
 namespace App\Models;
 
+use App\Enums\LogoSize;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['company_name', 'logo_path'])]
+#[Fillable(['company_name', 'logo_path', 'logo_size'])]
 class AppSetting extends Model
 {
     public const DEFAULT_NAME = 'Dev Quest - Gamify';
 
     public const DEFAULT_LOGO_URL = '/images/devquestlogo.png';
 
+    protected function casts(): array
+    {
+        return [
+            'logo_size' => LogoSize::class,
+        ];
+    }
+
     public static function current(): self
     {
-        return static::query()->firstOrCreate([]);
+        return static::query()->firstOrCreate([], ['logo_size' => LogoSize::LARGE]);
     }
 
     public function isConfigured(): bool
