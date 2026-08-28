@@ -56,6 +56,18 @@
                             </div>
                         </div>
                     @endcan
+
+                    @can('create', \App\Models\Task::class)
+                        <button
+                            type="button"
+                            wire:click="openCreate({{ $column->id }})"
+                            title="Adicionar tarefa"
+                            aria-label="Adicionar tarefa"
+                            class="shrink-0 rounded p-1 text-ink-muted hover:bg-line/30"
+                        >
+                            <x-icon name="plus" class="h-4 w-4" />
+                        </button>
+                    @endcan
                 </div>
 
                 <div class="min-h-0 flex-1 space-y-2 overflow-y-auto">
