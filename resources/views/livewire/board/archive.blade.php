@@ -1,39 +1,43 @@
-<div class="flex flex-1 min-h-0 flex-col" x-data="{ draggingTaskId: null }">
+<div x-data="{ draggingTaskId: null }">
     <x-page-header title="Arquivo" :subtitle="$board->name" :back="route('boards.show', $board)" backLabel="Voltar ao quadro" />
 
-    <div class="min-h-0 flex-1 space-y-8 overflow-y-auto pb-4">
-        <section>
-            <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-forest">
-                <span class="h-2.5 w-2.5 rounded-full bg-forest"></span>
-                Concluídas ({{ $completed->count() }})
-            </h3>
+    <section class="mb-5">
+        <h2 class="h6 d-flex align-items-center gap-2 text-success-emphasis mb-3">
+            <i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i>
+            Concluídas
+            <x-badge color="success">{{ $completed->count() }}</x-badge>
+        </h2>
 
-            @if ($completed->isEmpty())
-                <p class="text-sm text-ink-muted">Nenhuma tarefa concluída arquivada.</p>
-            @else
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($completed as $task)
+        @if ($completed->isEmpty())
+            <p class="small text-body-secondary">Nenhuma tarefa concluída arquivada.</p>
+        @else
+            <div class="row g-3">
+                @foreach ($completed as $task)
+                    <div class="col-12 col-md-6 col-xl-4">
                         <x-task-card :task="$task" :read-only="true" wire:key="archived-completed-{{ $task->id }}" />
-                    @endforeach
-                </div>
-            @endif
-        </section>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </section>
 
-        <section>
-            <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-terracotta">
-                <span class="h-2.5 w-2.5 rounded-full bg-terracotta"></span>
-                Não concluídas ({{ $notCompleted->count() }})
-            </h3>
+    <section>
+        <h2 class="h6 d-flex align-items-center gap-2 text-danger-emphasis mb-3">
+            <i class="bi bi-x-circle-fill text-danger" aria-hidden="true"></i>
+            Não concluídas
+            <x-badge color="danger">{{ $notCompleted->count() }}</x-badge>
+        </h2>
 
-            @if ($notCompleted->isEmpty())
-                <p class="text-sm text-ink-muted">Nenhuma tarefa não concluída arquivada.</p>
-            @else
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($notCompleted as $task)
+        @if ($notCompleted->isEmpty())
+            <p class="small text-body-secondary">Nenhuma tarefa não concluída arquivada.</p>
+        @else
+            <div class="row g-3">
+                @foreach ($notCompleted as $task)
+                    <div class="col-12 col-md-6 col-xl-4">
                         <x-task-card :task="$task" :read-only="true" wire:key="archived-not-completed-{{ $task->id }}" />
-                    @endforeach
-                </div>
-            @endif
-        </section>
-    </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </section>
 </div>

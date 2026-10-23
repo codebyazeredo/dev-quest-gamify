@@ -1,10 +1,10 @@
 @props(['model', 'icons'])
 
-<div class="flex flex-wrap gap-2">
+<div class="d-flex flex-wrap gap-2">
     @foreach ($icons as $iconName)
-        <label class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-line text-ink-muted hover:bg-line/20 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
-            <input type="radio" wire:model="{{ $model }}" value="{{ $iconName }}" class="sr-only">
-            <x-icon :name="$iconName" class="h-6 w-6" />
+        <input type="radio" class="btn-check" id="{{ $model }}-icon-{{ $iconName }}" wire:model="{{ $model }}" value="{{ $iconName }}" autocomplete="off">
+        <label class="btn btn-outline-secondary btn-icon fs-5" for="{{ $model }}-icon-{{ $iconName }}" title="{{ $iconName }}">
+            <x-icon :name="$iconName" />
         </label>
     @endforeach
 </div>

@@ -1,18 +1,305 @@
-@import 'tailwindcss';
-@import './colors.css';
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.min.css';
 
-@source '../views';
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+/*
+ * Tokens do Bootstrap (variáveis CSS nativas do 5.3).
+ * A cor primária é sobrescrita em runtime por <x-theme-style> a partir das configurações da empresa.
+ */
+:root {
+    --bs-body-font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --bs-body-bg: #f4f6fa;
+    --bs-body-color: #1f2937;
+    --bs-border-color: #e3e7ee;
+    --bs-border-radius: 0.625rem;
+    --bs-border-radius-lg: 0.875rem;
+    --bs-box-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
+    --bs-box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+    --app-sidebar-width: 15.5rem;
 }
 
-body {
-    background-color: var(--color-surface);
-    color: var(--color-ink);
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.015em;
 }
 
 [x-cloak] {
-    display: none;
+    display: none !important;
+}
+
+/* ---------- Cor primária configurável ----------
+ * O Bootstrap compila várias cores literais; aqui elas passam a derivar de --bs-primary.
+ */
+.btn-primary {
+    --bs-btn-color: var(--app-primary-contrast, #fff);
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-color: var(--app-primary-contrast, #fff);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--bs-primary) 86%, black);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--bs-primary) 80%, black);
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+    --bs-btn-active-color: var(--app-primary-contrast, #fff);
+    --bs-btn-active-bg: color-mix(in srgb, var(--bs-primary) 76%, black);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--bs-primary) 70%, black);
+    --bs-btn-disabled-color: var(--app-primary-contrast, #fff);
+    --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-color: var(--app-primary-contrast, #fff);
+    --bs-btn-hover-bg: var(--bs-primary);
+    --bs-btn-hover-border-color: var(--bs-primary);
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+    --bs-btn-active-color: var(--app-primary-contrast, #fff);
+    --bs-btn-active-bg: var(--bs-primary);
+    --bs-btn-active-border-color: var(--bs-primary);
+    --bs-btn-disabled-color: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+.text-bg-primary {
+    color: var(--app-primary-contrast, #fff) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: color-mix(in srgb, var(--bs-primary) 55%, white);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.form-check-input:checked,
+.form-check-input[type='checkbox']:indeterminate {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.form-check-input:focus {
+    border-color: color-mix(in srgb, var(--bs-primary) 55%, white);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.page-item.active .page-link,
+.dropdown-item.active,
+.dropdown-item:active,
+.list-group-item.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--app-primary-contrast, #fff);
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--bs-primary);
+    color: var(--app-primary-contrast, #fff);
+}
+
+/* ---------- Componentes do app ---------- */
+.min-h-0 { min-height: 0; }
+.min-w-0 { min-width: 0; }
+
+.card {
+    --bs-card-border-color: var(--bs-border-color);
+    --bs-card-cap-bg: transparent;
+    box-shadow: var(--bs-box-shadow-sm);
+}
+
+.card-hover {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--bs-box-shadow);
+    border-color: rgba(var(--bs-primary-rgb), 0.45);
+}
+
+.form-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 576px) {
+    .form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .form-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 768px) {
+    .form-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.btn-icon {
+    --bs-btn-padding-x: 0;
+    --bs-btn-padding-y: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-sm {
+    width: 1.75rem;
+    height: 1.75rem;
+    --bs-btn-font-size: 0.8125rem;
+}
+
+.avatar {
+    --avatar-size: 2.25rem;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    font-size: calc(var(--avatar-size) * 0.38);
+    font-weight: 600;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-sm { --avatar-size: 1.5rem; }
+.avatar-lg { --avatar-size: 3.5rem; }
+.avatar-xl { --avatar-size: 5rem; }
+
+.icon-chip {
+    --chip-size: 2.5rem;
+    width: var(--chip-size);
+    height: var(--chip-size);
+    font-size: calc(var(--chip-size) * 0.45);
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.icon-chip-sm { --chip-size: 2rem; }
+.icon-chip-lg { --chip-size: 3rem; }
+
+.progress {
+    --bs-progress-height: 0.625rem;
+    --bs-progress-border-radius: 999px;
+    --bs-progress-bg: var(--bs-secondary-bg);
+    --bs-progress-bar-bg: var(--bs-primary);
+}
+
+/* ---------- Estrutura (sidebar + conteúdo) ---------- */
+.app-sidebar .offcanvas-lg {
+    --bs-offcanvas-bg: #14171f;
+    --bs-offcanvas-width: 17rem;
+}
+
+@media (min-width: 992px) {
+    .app-sidebar {
+        width: var(--app-sidebar-width);
+        background: #14171f;
+    }
+}
+
+.app-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--bs-border-radius);
+    color: rgba(255, 255, 255, 0.68);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.app-sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+}
+
+.app-sidebar .nav-link.active {
+    background: var(--bs-primary);
+    color: var(--app-primary-contrast, #fff);
+}
+
+.app-sidebar .nav-link .bi {
+    font-size: 1.05rem;
+}
+
+.sidebar-heading {
+    padding: 0 0.85rem;
+    margin: 1.25rem 0 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.toast-stack {
+    z-index: 1090;
+    width: min(22rem, 100vw - 2rem);
+}
+
+/* ---------- Kanban ---------- */
+.kanban-board {
+    scroll-snap-type: x proximity;
+}
+
+.kanban-column {
+    width: 18.5rem;
+    flex: 0 0 18.5rem;
+    max-height: 100%;
+    background: var(--bs-secondary-bg);
+    border: 1px solid transparent;
+    border-radius: var(--bs-border-radius-lg);
+    scroll-snap-align: start;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.kanban-column--over {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary-bg-subtle);
+}
+
+.kanban-column--new {
+    background: transparent;
+    border: 2px dashed var(--bs-border-color);
+}
+
+.kanban-column-name {
+    font-weight: 600;
+    background: transparent;
+    border-color: transparent;
+    text-overflow: ellipsis;
+}
+
+.kanban-column-name:not(:disabled):hover {
+    background: var(--bs-body-bg);
+}
+
+.kanban-card {
+    border-left: 4px solid var(--card-accent, var(--bs-border-color));
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.kanban-card[draggable='true'] {
+    cursor: grab;
+}
+
+.kanban-card:hover {
+    box-shadow: var(--bs-box-shadow);
+}
+
+.kanban-card--dragging {
+    opacity: 0.45;
+    transform: rotate(1.5deg);
+}
+
+/* ---------- Check-in (calendário) ---------- */
+.checkin-day {
+    aspect-ratio: 1;
+    min-height: 2.75rem;
+}
+
+.checkin-day--today {
+    box-shadow: 0 0 0 2px var(--bs-primary);
 }

@@ -1,19 +1,21 @@
-<x-card>
-    <h3 class="mb-3 text-sm font-semibold text-ink">Atividade recente</h3>
+<div class="card">
+    <div class="card-header bg-body fw-semibold"><i class="bi bi-activity me-1" aria-hidden="true"></i> Atividade recente</div>
 
-    @forelse ($transactions as $transaction)
-        <div class="flex items-center justify-between border-b border-line/50 py-2 text-sm last:border-0" wire:key="xp-{{ $transaction->id }}">
-            <span class="text-ink-muted">{{ $transaction->description }}</span>
-            <x-xp-badge :amount="$transaction->amount" />
-        </div>
-    @empty
-        <p class="text-sm text-ink-muted">Nenhuma atividade ainda.</p>
-    @endforelse
+    <ul class="list-group list-group-flush">
+        @forelse ($transactions as $transaction)
+            <li class="list-group-item d-flex align-items-center justify-content-between gap-3" wire:key="xp-{{ $transaction->id }}">
+                <span class="small text-body-secondary">{{ $transaction->description }}</span>
+                <x-xp-badge :amount="$transaction->amount" />
+            </li>
+        @empty
+            <li class="list-group-item small text-body-secondary py-4 text-center">Nenhuma atividade ainda.</li>
+        @endforelse
+    </ul>
 
     @if ($paginated)
-        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="card-footer bg-body d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
             <x-per-page-selector />
             {{ $transactions->links() }}
         </div>
     @endif
-</x-card>
+</div>

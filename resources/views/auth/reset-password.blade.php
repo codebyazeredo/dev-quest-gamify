@@ -1,9 +1,9 @@
 <x-layouts.guest :title="__('Redefinir senha')">
-    <h1 class="mb-6 text-lg font-bold tracking-tight text-ink">Redefinir senha</h1>
+    <h1 class="h2 mb-4">Redefinir senha</h1>
 
     @if ($errors->any())
-        <div class="mb-4 rounded-xl border border-terracotta/30 bg-terracotta/10 p-4 text-sm text-terracotta">
-            <ul class="list-inside list-disc">
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0 ps-3">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -11,31 +11,26 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('password.store') }}" class="space-y-4">
+    <form method="POST" action="{{ route('password.store') }}" class="vstack gap-3">
         @csrf
 
         <input type="hidden" name="token" value="{{ $token }}">
 
         <div>
-            <label for="email" class="block text-sm font-medium text-ink">E-mail</label>
-            <input id="email" type="email" name="email" value="{{ old('email', $email) }}" required autofocus autocomplete="username"
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
+            <label for="email" class="form-label fw-medium small mb-1">E-mail</label>
+            <input id="email" type="email" name="email" value="{{ old('email', $email) }}" class="form-control form-control-lg" required autofocus autocomplete="username">
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-ink">Nova senha</label>
-            <input id="password" type="password" name="password" required autocomplete="new-password"
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
+            <label for="password" class="form-label fw-medium small mb-1">Nova senha</label>
+            <input id="password" type="password" name="password" class="form-control form-control-lg" required autocomplete="new-password">
         </div>
 
         <div>
-            <label for="password_confirmation" class="block text-sm font-medium text-ink">Confirmar nova senha</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                class="mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30">
+            <label for="password_confirmation" class="form-label fw-medium small mb-1">Confirmar nova senha</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" class="form-control form-control-lg" required autocomplete="new-password">
         </div>
 
-        <button type="submit" class="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
-            Redefinir senha
-        </button>
+        <button type="submit" class="btn btn-primary btn-lg w-100">Redefinir senha</button>
     </form>
 </x-layouts.guest>

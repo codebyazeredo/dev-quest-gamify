@@ -1,101 +1,69 @@
-<div class="space-y-6">
-    <x-page-header :title="auth()->user()->name">
-        <x-slot:subtitle>
-            @if ($selectedTitle)
-                <span class="flex items-center gap-1.5">
-                    <span class="text-gold"><x-icon :name="$selectedTitle->icon" class="h-4 w-4" /></span>
-                    {{ $selectedTitle->name }}
-                </span>
-            @else
-                {{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}
-            @endif
-        </x-slot:subtitle>
+<div>
+    <div class="card text-bg-primary bg-gradient border-0 mb-4">
+        <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center gap-4">
+            <x-avatar :user="auth()->user()" size="xl" class="border border-3 border-white border-opacity-50" />
 
-        <button type="button" wire:click="toggleEditProfile" title="Editar meus dados" aria-label="Editar meus dados" class="rounded-lg border border-line bg-card p-2 text-ink-muted hover:bg-line/20">
-            <x-icon name="pencil" class="h-4 w-4" />
-        </button>
-    </x-page-header>
+            <div class="flex-grow-1 min-w-0">
+                <p class="small text-uppercase fw-semibold opacity-75 mb-1">Minha conta</p>
+                <h1 class="h2 mb-1 text-truncate">{{ auth()->user()->name }}</h1>
+                <p class="mb-0 d-flex align-items-center gap-2 opacity-90">
+                    @if ($selectedTitle)
+                        <x-icon :name="$selectedTitle->icon" />
+                        {{ $selectedTitle->name }}
+                    @else
+                        {{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}
+                    @endif
+                </p>
+            </div>
 
-    <div class="flex gap-2">
-        <a href="{{ route('achievements') }}" class="rounded-lg border border-line bg-card px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-            Conquistas
-        </a>
-        <a href="{{ route('titles') }}" class="rounded-lg border border-line bg-card px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-            Títulos
-        </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('achievements') }}" class="btn btn-light">
+                    <i class="bi bi-award" aria-hidden="true"></i> Conquistas
+                </a>
+                <a href="{{ route('titles') }}" class="btn btn-light">
+                    <i class="bi bi-patch-check" aria-hidden="true"></i> Títulos
+                </a>
+                <button type="button" wire:click="toggleEditProfile" class="btn btn-outline-light">
+                    <x-icon name="pencil" /> Editar dados
+                </button>
+            </div>
+        </div>
     </div>
 
-    <livewire:gamification.level-progress />
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="check" color="success" label="Tarefas concluídas" :value="$tasksCompleted" />
+                </div>
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="bolt" color="info" label="XP nesta semana" :value="number_format($xpThisWeek)" />
+                </div>
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="medal" color="warning" label="Ranking" :value="'#'.$rankingPosition" />
+                </div>
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="star" color="warning" label="XP total" :value="number_format($totalXp)" />
+                </div>
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="trophy" color="primary" label="Conquistas" :value="$achievementsCount" />
+                </div>
+                <div class="col-6 col-md-4">
+                    <x-stat-tile icon="rocket" color="info" label="Títulos" :value="$titlesCount" />
+                </div>
+            </div>
 
-    <livewire:checkin.button />
+            <livewire:gamification.xp-history :limit="5" />
+        </div>
 
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="check" color="forest" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">Tarefas concluídas</p>
-                    <p class="text-lg font-semibold text-ink">{{ $tasksCompleted }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="bolt" color="accent" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">XP nesta semana</p>
-                    <p class="text-lg font-semibold text-ink">{{ number_format($xpThisWeek) }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="medal" color="gold" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">Ranking</p>
-                    <p class="text-lg font-semibold text-ink">#{{ $rankingPosition }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="star" color="gold" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">XP total</p>
-                    <p class="text-lg font-semibold text-ink">{{ number_format($totalXp) }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="trophy" color="gold" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">Conquistas</p>
-                    <p class="text-lg font-semibold text-ink">{{ $achievementsCount }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="rocket" color="accent" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">Títulos</p>
-                    <p class="text-lg font-semibold text-ink">{{ $titlesCount }}</p>
-                </div>
-            </div>
-        </x-card>
-        <x-card>
-            <div class="flex items-center gap-3">
-                <x-icon-chip icon="fire" color="amber-clay" size="sm" />
-                <div>
-                    <p class="text-xs text-ink-muted">Sequência</p>
-                    <p class="text-lg font-semibold text-ink">{{ $currentStreak }}</p>
-                </div>
-            </div>
-        </x-card>
+        <div class="col-xl-4 vstack gap-4">
+            <livewire:gamification.level-progress />
+
+            <livewire:checkin.button />
+
+            <x-stat-tile icon="fire" color="danger" label="Dias seguidos de check-in" :value="$currentStreak" />
+        </div>
     </div>
-
-    <livewire:gamification.xp-history :limit="5" />
 
     @if ($showEditProfile)
         <livewire:profile.edit wire:key="profile-edit" />

@@ -1,23 +1,26 @@
 <div>
-    <x-page-header title="Configurações" />
+    <x-page-header title="Configurações" subtitle="Gerencie pessoas, regras de pontuação e a identidade do sistema." />
 
-    <div class="space-y-8">
-        @foreach ($sections as $section)
-            <section>
-                <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ $section['label'] }}</h2>
+    @foreach ($sections as $section)
+        <section class="mb-4">
+            <h2 class="h6 text-body-secondary text-uppercase mb-3">{{ $section['label'] }}</h2>
 
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($section['items'] as $item)
-                        <a href="{{ route($item['route']) }}" class="flex items-start gap-3 rounded-xl border border-line bg-card p-4 shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5">
-                            <x-icon-chip :icon="$item['icon']" />
-                            <span>
-                                <span class="block text-sm font-semibold text-ink">{{ $item['label'] }}</span>
-                                <span class="block text-xs text-ink-muted">{{ $item['description'] }}</span>
-                            </span>
+            <div class="row g-3">
+                @foreach ($section['items'] as $item)
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <a href="{{ route($item['route']) }}" class="card card-hover h-100 text-decoration-none text-body">
+                            <div class="card-body d-flex align-items-start gap-3">
+                                <x-icon-chip :icon="$item['icon']" />
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-semibold">{{ $item['label'] }}</div>
+                                    <div class="small text-body-secondary">{{ $item['description'] }}</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-tertiary align-self-center" aria-hidden="true"></i>
+                            </div>
                         </a>
-                    @endforeach
-                </div>
-            </section>
-        @endforeach
-    </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endforeach
 </div>

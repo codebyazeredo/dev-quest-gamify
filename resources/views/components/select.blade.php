@@ -6,12 +6,12 @@
 
 <div>
     @if ($label)
-        <label for="{{ $id }}" class="block text-sm font-medium text-ink">{{ $label }}</label>
+        <label for="{{ $id }}" class="form-label fw-medium small mb-1">{{ $label }}</label>
     @endif
 
     <select
         id="{{ $id }}"
-        {{ $attributes->whereDoesntStartWith('id')->merge(['class' => 'mt-1 block w-full rounded-lg border border-line bg-card px-3 py-2.5 text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 disabled:bg-line/10 disabled:text-ink-muted']) }}
+        {{ $attributes->whereDoesntStartWith('id')->class(['form-select', 'is-invalid' => $errors->has($name)]) }}
     >
         @if ($placeholder)
             <option value="">{{ $placeholder }}</option>
@@ -19,5 +19,5 @@
         {{ $slot }}
     </select>
 
-    @error($name) <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error($name) <div class="invalid-feedback">{{ $message }}</div> @enderror
 </div>

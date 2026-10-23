@@ -1,52 +1,37 @@
 <div>
-    <x-page-header title="Categorias" :back="route('admin.index')" backLabel="Configurações">
+    <x-page-header title="Categorias" subtitle="Tipos de tarefa e as cores exibidas no Kanban." :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\TaskCategory::class)
-            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                + Nova categoria
-            </button>
+            <x-button wire:click="toggleCreate"><x-icon name="plus" /> Nova categoria</x-button>
         @endcan
     </x-page-header>
 
-    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error('delete') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line bg-card">
-        <table class="w-full text-sm">
-            <thead class="bg-line/20 text-left text-ink-muted">
-                <tr>
-                    <th class="px-4 py-3">Cor</th>
-                    <th class="px-4 py-3">Nome</th>
-                    <th class="px-4 py-3">Pontos base</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-line/50">
-                @forelse ($categories as $category)
-                    <tr wire:key="category-{{ $category->id }}">
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium" style="background-color: {{ $category->color }}; color: {{ $category->text_color }};">
-                                {{ $category->name }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-ink">{{ $category->name }}</td>
-                        <td class="px-4 py-3 text-ink">{{ $category->base_points }}</td>
-                        <td class="px-4 py-3 text-right">
-                            <button type="button" wire:click="edit({{ $category->id }})" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-1.5 text-ink-muted hover:bg-line/20"><x-icon name="pencil" class="h-4 w-4" /></button>
-                            <button type="button" wire:click="delete({{ $category->id }})" wire:confirm="Excluir esta categoria?" title="Excluir" aria-label="Excluir" class="ml-2 rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10"><x-icon name="trash" class="h-4 w-4" /></button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-ink-muted">Nenhuma categoria cadastrada.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :paginator="$categories">
+        <x-slot:head>
+            <th class="ps-4">Categoria</th>
+            <th>Pontos base</th>
+            <th class="text-end pe-4"></th>
+        </x-slot:head>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-per-page-selector />
-        {{ $categories->links() }}
-    </div>
+        @forelse ($categories as $category)
+            <tr wire:key="category-{{ $category->id }}">
+                <td class="ps-4">
+                    <span class="badge rounded-pill fw-medium px-3 py-2" style="background-color: {{ $category->color }}; color: {{ $category->text_color }};">
+                        {{ $category->name }}
+                    </span>
+                </td>
+                <td>{{ $category->base_points }}</td>
+                <td class="text-end pe-4">
+                    <x-row-actions :edit="'edit('.$category->id.')'" :delete="'delete('.$category->id.')'" confirm="Excluir esta categoria?" />
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="3" class="text-center text-body-secondary py-5">Nenhuma categoria cadastrada.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     @if ($showCreateModal)
         <livewire:admin.categories.create wire:key="category-create" />

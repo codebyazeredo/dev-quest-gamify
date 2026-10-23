@@ -1,59 +1,48 @@
 <div>
-    <x-page-header title="Conquistas" :back="route('admin.index')" backLabel="Configurações">
+    <x-page-header title="Conquistas" subtitle="Condições e recompensas das conquistas." :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\Achievement::class)
-            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                + Nova conquista
-            </button>
+            <x-button wire:click="toggleCreate"><x-icon name="plus" /> Nova conquista</x-button>
         @endcan
     </x-page-header>
 
-    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error('delete') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line bg-card">
-        <table class="w-full text-sm">
-            <thead class="bg-line/20 text-left text-ink-muted">
-                <tr>
-                    <th class="px-4 py-3">Nome</th>
-                    <th class="px-4 py-3">Condição</th>
-                    <th class="px-4 py-3">XP</th>
-                    <th class="px-4 py-3">Ativo</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-line/50">
-                @forelse ($achievements as $achievement)
-                    <tr wire:key="achievement-{{ $achievement->id }}">
-                        <td class="flex items-center gap-2 px-4 py-3 text-ink">
-                            <span class="text-gold"><x-icon :name="$achievement->icon" class="h-4 w-4" /></span>
-                            {{ $achievement->name }}
-                        </td>
-                        <td class="px-4 py-3 text-ink">{{ $achievement->condition_type->label() }} ({{ $achievement->condition_value }})</td>
-                        <td class="px-4 py-3 text-ink">{{ $achievement->xp_reward }}</td>
-                        <td class="px-4 py-3">
-                            @if ($achievement->active)
-                                <x-badge color="forest">Ativo</x-badge>
-                            @else
-                                <x-badge>Inativo</x-badge>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <button type="button" wire:click="edit({{ $achievement->id }})" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-1.5 text-ink-muted hover:bg-line/20"><x-icon name="pencil" class="h-4 w-4" /></button>
-                            <button type="button" wire:click="delete({{ $achievement->id }})" wire:confirm="Excluir esta conquista?" title="Excluir" aria-label="Excluir" class="ml-2 rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10"><x-icon name="trash" class="h-4 w-4" /></button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-ink-muted">Nenhuma conquista cadastrada.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :paginator="$achievements">
+        <x-slot:head>
+            <th class="ps-4">Nome</th>
+            <th>Condição</th>
+            <th>XP</th>
+            <th>Status</th>
+            <th class="text-end pe-4"></th>
+        </x-slot:head>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-per-page-selector />
-        {{ $achievements->links() }}
-    </div>
+        @forelse ($achievements as $achievement)
+            <tr wire:key="achievement-{{ $achievement->id }}">
+                <td class="ps-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <x-icon-chip :icon="$achievement->icon" color="warning" size="sm" />
+                        <span class="fw-medium">{{ $achievement->name }}</span>
+                    </div>
+                </td>
+                <td>{{ $achievement->condition_type->label() }} ({{ $achievement->condition_value }})</td>
+                <td>{{ $achievement->xp_reward }}</td>
+                <td>
+                    @if ($achievement->active)
+                        <x-badge color="success">Ativo</x-badge>
+                    @else
+                        <x-badge>Inativo</x-badge>
+                    @endif
+                </td>
+                <td class="text-end pe-4">
+                    <x-row-actions :edit="'edit('.$achievement->id.')'" :delete="'delete('.$achievement->id.')'" confirm="Excluir esta conquista?" />
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center text-body-secondary py-5">Nenhuma conquista cadastrada.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     @if ($showCreateModal)
         <livewire:admin.achievements.create wire:key="achievement-create" />

@@ -1,8 +1,8 @@
 <x-modal title="Editar regra de XP">
-    <form wire:submit="save" class="space-y-4">
+    <form wire:submit="save" class="vstack gap-3">
         <div>
-            <label class="block text-sm font-medium text-ink">Evento</label>
-            <p class="mt-1 text-sm text-ink">{{ $rule->type->label() }}</p>
+            <label class="form-label fw-medium small mb-1">Evento</label>
+            <p class="mb-0">{{ $rule->type->label() }}</p>
         </div>
 
         @php
@@ -19,12 +19,12 @@
             autofocus
         />
 
-        <label class="flex items-center gap-2 text-sm text-ink-muted">
-            <input type="checkbox" wire:model="active" class="rounded border-line">
-            Ativo
-        </label>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="active-switch" wire:model="active">
+            <label class="form-check-label" for="active-switch">Ativo</label>
+        </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Salvar alterações</x-button>
         </div>

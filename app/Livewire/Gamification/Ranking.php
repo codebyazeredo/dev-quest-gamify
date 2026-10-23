@@ -49,6 +49,7 @@ class Ranking extends Component
         $periodStart = $this->periodStart();
 
         $users = User::query()
+            ->with('person')
             ->role($this->activeRole)
             ->withSum(['xpTransactions as total_xp' => function ($query) use ($periodStart) {
                 if ($periodStart !== null) {

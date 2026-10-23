@@ -7,7 +7,7 @@ Plataforma de gestão de tarefas para equipes de desenvolvimento com sistema de 
 - PHP 8.3+
 - Laravel 13
 - Livewire 4 (Blaze)
-- Tailwind CSS 4 + Vite
+- Bootstrap 5.3 + Bootstrap Icons + Vite
 - MySQL 8
 - Spatie Laravel Permission (RBAC)
 - PHPUnit
@@ -30,7 +30,8 @@ Ao adicionar uma funcionalidade nova, mantenha essa cadeia. Não chame `Model::q
 
 Outros pontos relevantes:
 
-- Não há sidebar. A navegação principal fica em ícones na navbar. Telas administrativas ficam centralizadas em `/admin` (`AdminHub`).
+- A navegação principal fica em uma sidebar fixa (offcanvas no mobile), definida em `components/layouts/app.blade.php`. Telas administrativas ficam centralizadas em `/admin` (`AdminHub`).
+- A UI usa apenas Bootstrap 5.3 (classes utilitárias, componentes e Bootstrap Icons). A cor primária é configurável em Configurações > Identidade da empresa (`app_settings.primary_color`) e aplicada em runtime pelo componente `x-theme-style`, que sobrescreve as variáveis CSS `--bs-primary*`.
 - Autorização usa `spatie/laravel-permission`. Há um `Gate::before` global em [AppServiceProvider.php](app/Providers/AppServiceProvider.php) que libera qualquer ability para quem tem a role `admin`, exceto a ability `move` (que tem regra estrutural própria e não deve ser bypassada por permissão).
 - O quadro Kanban usa colunas livres por board (estilo Trello), não um pipeline fixo de status. Tarefas podem ser arquivadas individualmente por admin/PO; cada board tem uma página de arquivo separada em concluídas/não concluídas.
 

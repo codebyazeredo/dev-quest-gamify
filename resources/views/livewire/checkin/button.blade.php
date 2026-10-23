@@ -1,20 +1,19 @@
 <x-card>
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <x-icon-chip icon="fire" color="amber-clay" size="sm" />
+    <div class="d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <x-icon-chip icon="fire" color="danger" />
             <div>
-                <p class="text-sm font-semibold text-ink">Check-in diário</p>
-                <p class="text-xs text-ink-muted">Sequência de {{ $currentStreak }} dias</p>
+                <p class="fw-semibold mb-0">Check-in diário</p>
+                <p class="small text-body-secondary mb-0">Sequência de {{ $currentStreak }} dias</p>
             </div>
         </div>
 
         @if ($checkedInToday)
-            <span class="flex items-center gap-1.5 rounded-lg bg-forest/10 px-3 py-1.5 text-sm font-medium text-forest">
-                <x-icon name="check" class="h-4 w-4" />
-                Check-in feito
-            </span>
+            <x-badge color="success" class="px-3 py-2">
+                <x-icon name="check" /> Feito
+            </x-badge>
         @else
-            <button type="button" wire:click="checkIn" class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">
+            <button type="button" wire:click="checkIn" class="btn btn-primary btn-sm">
                 Fazer check-in
             </button>
         @endif

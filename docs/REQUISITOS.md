@@ -1767,6 +1767,6 @@ E tecnicamente:
 
 Para esse projeto, o stack está fechado em:
 
-**Laravel 13 + Blade + Livewire + Alpine.js + Tailwind + MySQL, sem API separada e sem SPA.**
+**Laravel 13 + Blade + Livewire + Alpine.js + Bootstrap + MySQL, sem API separada e sem SPA.**
 
 Isso também deixa o projeto mais interessante para o objetivo: o backend e o frontend passam a ser um único domínio, explorando de fato o modelo reativo do Livewire — inclusive componentes de página, componentes aninhados e atualização parcial da interface.

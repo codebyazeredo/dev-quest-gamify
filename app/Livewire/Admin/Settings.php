@@ -27,6 +27,8 @@ class Settings extends Component
 
     public string $logo_size = 'large';
 
+    public string $primary_color = AppSetting::DEFAULT_PRIMARY_COLOR;
+
     public function mount(): void
     {
         $this->ensureAdminAccess();
@@ -34,6 +36,7 @@ class Settings extends Component
         $setting = AppSetting::current();
         $this->company_name = (string) $setting->company_name;
         $this->logo_size = $setting->logo_size->value;
+        $this->primary_color = $setting->primaryColor();
     }
 
     public function save(): void
@@ -44,11 +47,16 @@ class Settings extends Component
             'company_name' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'logo_size' => ['required', new Enum(LogoSize::class)],
+            'primary_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ], [
+            'primary_color.required' => 'Escolha a cor primária do sistema.',
+            'primary_color.regex' => 'A cor primária deve ser um hexadecimal válido no formato #RRGGBB (ex.: #0d6efd).',
         ]);
 
         $setting = AppSetting::current();
         $setting->company_name = $this->company_name !== '' ? $this->company_name : null;
         $setting->logo_size = LogoSize::from($validated['logo_size']);
+        $setting->primary_color = strtolower($validated['primary_color']);
 
         if ($this->logo !== null) {
             if ($setting->logo_path) {
@@ -70,6 +78,7 @@ class Settings extends Component
     {
         return view('livewire.admin.settings', [
             'setting' => AppSetting::current(),
+            'colorPresets' => AppSetting::PRIMARY_COLOR_PRESETS,
         ]);
     }
 }

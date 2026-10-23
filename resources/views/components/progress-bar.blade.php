@@ -3,18 +3,18 @@
 @php
     $percent = $max > 0 ? min(100, max(0, ($value / $max) * 100)) : 0;
     $fillClass = match ($color) {
-        'gold' => 'bg-gold',
+        'gold' => 'bg-warning',
         default => 'bg-primary',
     };
 @endphp
 
 <div>
-    <div class="h-3 w-full overflow-hidden rounded-full bg-line/40">
-        <div class="h-full rounded-full {{ $fillClass }} transition-[width] duration-500 ease-out" style="width: {{ $percent }}%"></div>
+    <div class="progress" role="progressbar" aria-valuenow="{{ round($percent) }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar {{ $fillClass }}" style="width: {{ $percent }}%"></div>
     </div>
 
     @if ($showLabel)
-        <p class="mt-1 text-xs text-ink-muted">
+        <p class="small text-body-secondary mt-1 mb-0">
             {{ number_format($value) }} / {{ number_format($max) }}
         </p>
     @endif

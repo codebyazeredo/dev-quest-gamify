@@ -1,15 +1,15 @@
 @props(['title', 'subtitle' => null, 'back' => null, 'backLabel' => 'Voltar'])
 
-<div class="mb-5 flex flex-col gap-3 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
-    <div class="flex min-w-0 items-start gap-3">
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3 min-w-0">
         @if ($back)
-            <x-back-link :href="$back" :label="$backLabel" class="mt-0.5" />
+            <x-back-link :href="$back" :label="$backLabel" />
         @endif
 
         <div class="min-w-0">
-            <h1 class="text-xl font-bold tracking-tight text-ink">{{ $title }}</h1>
+            <h1 class="h3 mb-0 text-truncate">{{ $title }}</h1>
             @if ($subtitle)
-                <div class="mt-0.5 text-sm text-ink-muted">
+                <div class="text-body-secondary small mt-1">
                     @if ($subtitle instanceof \Illuminate\View\ComponentSlot)
                         {!! $subtitle !!}
                     @else
@@ -21,7 +21,7 @@
     </div>
 
     @if ($slot->isNotEmpty())
-        <div class="flex shrink-0 flex-wrap items-center gap-2">
+        <div class="d-flex flex-shrink-0 flex-wrap align-items-center gap-2">
             {{ $slot }}
         </div>
     @endif

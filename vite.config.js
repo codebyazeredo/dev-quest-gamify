@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -13,11 +12,10 @@ export default defineConfig(({ mode }) => {
                 refresh: true,
                 fonts: [
                     bunny('Instrument Sans', {
-                        weights: [400, 500, 600],
+                        weights: [400, 500, 600, 700],
                     }),
                 ],
             }),
-            tailwindcss(),
         ],
         server: {
             host: '0.0.0.0',

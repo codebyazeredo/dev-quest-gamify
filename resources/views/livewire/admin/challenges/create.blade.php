@@ -1,6 +1,6 @@
-<x-modal title="Novo desafio" max-width="max-w-2xl">
-    <form wire:submit="save" class="space-y-4">
-        <div class="grid grid-cols-2 gap-3">
+<x-modal title="Novo desafio" size="lg">
+    <form wire:submit="save" class="vstack gap-3">
+        <div class="form-grid form-grid-2">
             <x-input name="name" label="Nome" wire:model="name" autofocus />
 
             <x-select name="type" label="Tipo" wire:model="type">
@@ -12,7 +12,7 @@
 
         <x-textarea name="description" label="Descrição" wire:model="description" rows="2" />
 
-        <div class="grid grid-cols-4 gap-3">
+        <div class="form-grid form-grid-4">
             <x-input name="target" label="Meta" type="number" min="1" wire:model="target" />
 
             <x-input name="xp_reward" label="Recompensa de XP" type="number" min="0" wire:model="xp_reward" />
@@ -22,7 +22,7 @@
             <x-input name="ends_at" label="Fim" type="datetime-local" wire:model="ends_at" />
         </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Criar desafio</x-button>
         </div>

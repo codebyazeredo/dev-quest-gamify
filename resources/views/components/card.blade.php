@@ -1,14 +1,16 @@
-@props(['variant' => 'default', 'padding' => 'p-4', 'rounded' => 'rounded-xl'])
+@props(['variant' => 'default', 'padding' => 'p-3'])
 
 @php
     $variantClasses = match ($variant) {
-        'highlight' => 'border-2 border-gold/40 bg-gold/5 shadow-md shadow-gold/10 ring-1 ring-gold/20',
-        'active' => 'border-primary/40 bg-primary/5',
-        'alert' => 'border-terracotta/30 bg-terracotta/10 text-terracotta',
-        default => 'border-line/60 bg-card shadow-sm',
+        'highlight' => 'border-warning bg-warning-subtle',
+        'active' => 'border-primary bg-primary-subtle',
+        'alert' => 'border-danger-subtle bg-danger-subtle text-danger-emphasis',
+        default => '',
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => "{$rounded} border {$padding} {$variantClasses}"]) }}>
-    {{ $slot }}
+<div {{ $attributes->merge(['class' => "card {$variantClasses}"]) }}>
+    <div class="card-body {{ $padding }}">
+        {{ $slot }}
+    </div>
 </div>

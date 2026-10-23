@@ -1,57 +1,46 @@
 <div>
-    <x-page-header title="Títulos" :back="route('admin.index')" backLabel="Configurações">
+    <x-page-header title="Títulos" subtitle="Títulos desbloqueáveis por conquistas." :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\Title::class)
-            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                + Novo título
-            </button>
+            <x-button wire:click="toggleCreate"><x-icon name="plus" /> Novo título</x-button>
         @endcan
     </x-page-header>
 
-    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error('delete') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line bg-card">
-        <table class="w-full text-sm">
-            <thead class="bg-line/20 text-left text-ink-muted">
-                <tr>
-                    <th class="px-4 py-3">Nome</th>
-                    <th class="px-4 py-3">Conquista</th>
-                    <th class="px-4 py-3">Ativo</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-line/50">
-                @forelse ($titles as $title)
-                    <tr wire:key="title-{{ $title->id }}">
-                        <td class="flex items-center gap-2 px-4 py-3 text-ink">
-                            <span class="text-gold"><x-icon :name="$title->icon" class="h-4 w-4" /></span>
-                            {{ $title->name }}
-                        </td>
-                        <td class="px-4 py-3 text-ink">{{ $title->achievement?->name ?? '—' }}</td>
-                        <td class="px-4 py-3">
-                            @if ($title->active)
-                                <x-badge color="forest">Ativo</x-badge>
-                            @else
-                                <x-badge>Inativo</x-badge>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <button type="button" wire:click="edit({{ $title->id }})" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-1.5 text-ink-muted hover:bg-line/20"><x-icon name="pencil" class="h-4 w-4" /></button>
-                            <button type="button" wire:click="delete({{ $title->id }})" wire:confirm="Excluir este título?" title="Excluir" aria-label="Excluir" class="ml-2 rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10"><x-icon name="trash" class="h-4 w-4" /></button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-ink-muted">Nenhum título cadastrado.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :paginator="$titles">
+        <x-slot:head>
+            <th class="ps-4">Nome</th>
+            <th>Conquista</th>
+            <th>Status</th>
+            <th class="text-end pe-4"></th>
+        </x-slot:head>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-per-page-selector />
-        {{ $titles->links() }}
-    </div>
+        @forelse ($titles as $title)
+            <tr wire:key="title-{{ $title->id }}">
+                <td class="ps-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <x-icon-chip :icon="$title->icon" color="warning" size="sm" />
+                        <span class="fw-medium">{{ $title->name }}</span>
+                    </div>
+                </td>
+                <td>{{ $title->achievement?->name ?? '—' }}</td>
+                <td>
+                    @if ($title->active)
+                        <x-badge color="success">Ativo</x-badge>
+                    @else
+                        <x-badge>Inativo</x-badge>
+                    @endif
+                </td>
+                <td class="text-end pe-4">
+                    <x-row-actions :edit="'edit('.$title->id.')'" :delete="'delete('.$title->id.')'" confirm="Excluir este título?" />
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" class="text-center text-body-secondary py-5">Nenhum título cadastrado.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     @if ($showCreateModal)
         <livewire:admin.titles.create wire:key="title-create" />

@@ -1,7 +1,7 @@
 <x-modal title="Nova regra de XP">
-    <form wire:submit="save" class="space-y-4">
+    <form wire:submit="save" class="vstack gap-3">
         @if (empty($availableTypes))
-            <p class="text-sm text-ink-muted">Todos os eventos já possuem uma regra configurada.</p>
+            <p class="text-body-secondary mb-0">Todos os eventos já possuem uma regra configurada.</p>
         @else
             <x-select name="type" label="Evento" wire:model="type" autofocus placeholder="Selecione...">
                 @foreach ($availableTypes as $availableType)
@@ -11,18 +11,18 @@
 
             <div>
                 <x-input name="xp_reward" label="Recompensa de XP" type="number" min="0" wire:model="xp_reward" />
-                <p class="mt-1 text-xs text-ink-muted">
+                <div class="form-text">
                     Para "Aprovado pelo testador" e "Tarefa criada concluída", o valor é uma porcentagem (0-100) do XP da tarefa. Para os demais eventos, é XP fixo.
-                </p>
+                </div>
             </div>
 
-            <label class="flex items-center gap-2 text-sm text-ink-muted">
-                <input type="checkbox" wire:model="active" class="rounded border-line">
-                Ativo
-            </label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="active-switch" wire:model="active">
+                <label class="form-check-label" for="active-switch">Ativo</label>
+            </div>
         @endif
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             @if (! empty($availableTypes))
                 <x-button type="submit">Criar regra</x-button>

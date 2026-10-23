@@ -2,13 +2,13 @@
     <x-page-header :title="$task->title" :back="route('boards.show', $task->board)" :backLabel="$task->board->name">
         @if ($task->rejection_reason || $task->isArchived())
             <x-slot:subtitle>
-                <div class="flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2">
                     @if ($task->rejection_reason)
-                        <x-badge color="terracotta">Reprovada</x-badge>
+                        <x-badge color="danger">Reprovada</x-badge>
                     @endif
 
                     @if ($task->isArchived())
-                        <x-badge color="neutral">Arquivada</x-badge>
+                        <x-badge color="secondary">Arquivada</x-badge>
                     @endif
                 </div>
             </x-slot:subtitle>
@@ -16,211 +16,210 @@
 
         @can('unarchive', $task)
             @if ($task->isArchived())
-                <button type="button" wire:click="unarchive" class="rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-line/20">
-                    Desarquivar
+                <button type="button" wire:click="unarchive" class="btn btn-outline-secondary bg-body">
+                    <x-icon name="archive" /> Desarquivar
                 </button>
             @endif
         @endcan
 
         @can('archive', $task)
             @unless ($task->isArchived())
-                <button type="button" wire:click="archive" wire:confirm="Arquivar esta tarefa? Ela sairá do quadro, mas continuará acessível pelo arquivo." class="rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-line/20">
-                    Arquivar
+                <button type="button" wire:click="archive" wire:confirm="Arquivar esta tarefa? Ela sairá do quadro, mas continuará acessível pelo arquivo." class="btn btn-outline-secondary bg-body">
+                    <x-icon name="archive" /> Arquivar
                 </button>
             @endunless
         @endcan
 
         @can('update', $task)
-            <button type="button" wire:click="toggleEdit" title="Editar" aria-label="Editar" class="rounded-lg border border-line p-2 text-ink-muted hover:bg-line/20">
-                <x-icon name="pencil" class="h-4 w-4" />
+            <button type="button" wire:click="toggleEdit" class="btn btn-outline-secondary bg-body">
+                <x-icon name="pencil" /> Editar
             </button>
         @endcan
     </x-page-header>
 
     @if ($task->rejection_reason)
-        <x-card variant="alert" padding="p-3" class="mt-3 text-sm">
-            <strong>Motivo da reprovação:</strong> {{ $task->rejection_reason }}
-        </x-card>
+        <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <div><strong>Motivo da reprovação:</strong> {{ $task->rejection_reason }}</div>
+        </div>
     @endif
 
-    <p class="mt-2 text-ink-muted">{{ $task->description }}</p>
+    <div class="row g-4">
+        <div class="col-lg-8 vstack gap-4">
+            <x-card>
+                <h2 class="h6 text-body-secondary text-uppercase mb-2">Descrição</h2>
+                <p class="mb-0" style="white-space: pre-line;">{{ $task->description ?: 'Sem descrição.' }}</p>
+            </x-card>
 
-    <dl class="mt-6 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-        <div>
-            <dt class="text-ink-muted">Categoria</dt>
-            <dd class="font-medium text-ink">
-                <span class="inline-flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $task->category->color }};"></span>
-                    {{ $task->category->name }}
-                </span>
-            </dd>
-        </div>
-        <div>
-            <dt class="text-ink-muted">Prioridade</dt>
-            <dd class="font-medium text-ink">{{ $task->priority->name }}</dd>
-        </div>
-        <div>
-            <dt class="text-ink-muted">Status</dt>
-            <dd class="font-medium text-ink">{{ $task->status?->label() ?? 'Sem marco' }}</dd>
-        </div>
-        <div>
-            <dt class="text-ink-muted">Pontos</dt>
-            <dd class="font-medium text-ink"><x-xp-badge :amount="$task->xpValue()" /></dd>
-        </div>
-        <div>
-            <dt class="text-ink-muted">Prazo</dt>
-            <dd class="font-medium text-ink">
-                {{ $task->due_at?->format('d/m/Y H:i') ?? '—' }}
-                @if ($task->isLate())
-                    <x-badge color="terracotta">Atrasada</x-badge>
-                @endif
-            </dd>
-        </div>
-    </dl>
+            @if ($task->status === \App\Enums\TaskStatus::TESTING)
+                <x-card variant="highlight">
+                    <h2 class="h6 mb-3"><i class="bi bi-clipboard2-check me-1" aria-hidden="true"></i> Revisão de teste</h2>
 
-    <x-card class="mt-6">
-        <h2 class="mb-2 text-sm font-semibold text-ink">Responsável</h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        @can('approve', $task)
+                            <x-button variant="success" wire:click="approve" wire:confirm="Aprovar esta tarefa?">
+                                <x-icon name="check" /> Aprovar
+                            </x-button>
+                        @endcan
 
-        @if ($task->assignedTo)
-            <div class="flex items-center gap-2">
-                @if ($task->assignedTo->person?->foto_path)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($task->assignedTo->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
-                @else
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
-                        {{ $task->assignedTo->initials() }}
-                    </span>
-                @endif
-                <span>
-                    <span class="block text-sm font-medium text-ink">{{ $task->assignedTo->name }}</span>
-                    @if ($task->assignedTo->selectedTitle)
-                        <span class="block text-xs text-gold">{{ $task->assignedTo->selectedTitle->name }}</span>
-                    @endif
-                </span>
-            </div>
-        @else
-            <p class="text-sm text-ink-muted">Não atribuído</p>
-        @endif
-
-        @can('claim', $task)
-            <button type="button" wire:click="claim" class="mt-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                Assumir esta tarefa
-            </button>
-        @endcan
-
-        @if ($developers->isNotEmpty())
-            <div class="mt-3 flex items-center gap-2">
-                <div class="flex-1">
-                    <x-user-picker :users="$developers" model="assignToUserId" placeholder="Selecionar desenvolvedor..." />
-                </div>
-                <button type="button" wire:click="assignTo" class="rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-line/20">
-                    Atribuir
-                </button>
-            </div>
-        @endif
-    </x-card>
-
-    @if ($task->status === \App\Enums\TaskStatus::TESTING)
-        <x-card class="mt-6">
-            <h2 class="mb-2 text-sm font-semibold text-ink">Revisão de teste</h2>
-
-            <div class="flex flex-wrap gap-2">
-                @can('approve', $task)
-                    <button type="button" wire:click="approve" wire:confirm="Aprovar esta tarefa?" class="rounded-lg bg-forest px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90">
-                        Aprovar
-                    </button>
-                @endcan
-
-                @can('reject', $task)
-                    <button type="button" wire:click="toggleRejectForm" class="rounded-lg border border-terracotta/30 px-3 py-1.5 text-sm font-medium text-terracotta hover:bg-terracotta/10">
-                        Reprovar
-                    </button>
-                @endcan
-            </div>
-
-            @if ($showRejectForm)
-                <form wire:submit="reject" class="mt-3 space-y-2">
-                    <x-textarea name="rejectionReasonInput" label="Motivo da reprovação (obrigatório)" wire:model="rejectionReasonInput" required />
-
-                    <div class="flex gap-2">
-                        <button type="submit" class="rounded-lg bg-terracotta px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90">
-                            Confirmar reprovação
-                        </button>
-                        <button type="button" wire:click="toggleRejectForm" class="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-                            Cancelar
-                        </button>
+                        @can('reject', $task)
+                            <button type="button" wire:click="toggleRejectForm" class="btn btn-outline-danger">
+                                <x-icon name="close" /> Reprovar
+                            </button>
+                        @endcan
                     </div>
-                </form>
-            @endif
-        </x-card>
-    @endif
 
-    <div class="mt-6 flex gap-2">
-        @can('markHomologationCompleted', $task)
-            @unless ($hasHomologation)
-                <button type="button" wire:click="markHomologationCompleted" class="rounded-lg border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/20">
-                    Marcar homologação como concluída
-                </button>
-            @endunless
-        @endcan
+                    @if ($showRejectForm)
+                        <form wire:submit="reject" class="vstack gap-2 mt-3">
+                            <x-textarea name="rejectionReasonInput" label="Motivo da reprovação (obrigatório)" wire:model="rejectionReasonInput" required />
 
-        @can('markDeployed', $task)
-            @unless ($hasDeployed)
-                <button type="button" wire:click="markDeployed" class="rounded-lg border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/20">
-                    Marcar como implantado
-                </button>
-            @endunless
-        @endcan
-    </div>
-
-    <div class="mt-6">
-        <h2 class="mb-2 text-sm font-semibold text-ink">Histórico</h2>
-
-        <div class="space-y-2">
-            @foreach ($task->taskEvents as $event)
-                <div class="flex items-center justify-between rounded-lg border border-line/60 px-3 py-2 text-sm" wire:key="event-{{ $event->id }}">
-                    <span class="text-ink-muted">
-                        {{ $event->user->name }} &middot; {{ $event->type->label() }} &middot; {{ $event->occurred_at->format('d/m/Y H:i') }}
-                    </span>
-
-                    @if ($event->xpTransaction)
-                        <x-xp-badge :amount="$event->xpTransaction->amount" />
+                            <div class="d-flex gap-2">
+                                <x-button type="submit" variant="danger">Confirmar reprovação</x-button>
+                                <x-button variant="secondary" wire:click="toggleRejectForm">Cancelar</x-button>
+                            </div>
+                        </form>
                     @endif
-                </div>
-            @endforeach
+                </x-card>
+            @endif
 
-            @if ($completionBonus)
-                <div class="flex items-center justify-between rounded-lg border border-line/60 px-3 py-2 text-sm">
-                    <span class="text-ink-muted">Tarefa concluída &middot; pontuação base concedida</span>
-                    <x-xp-badge :amount="$completionBonus->amount" />
+            @if ((auth()->user()->can('markHomologationCompleted', $task) && ! $hasHomologation) || (auth()->user()->can('markDeployed', $task) && ! $hasDeployed))
+                <div class="d-flex flex-wrap gap-2">
+                    @can('markHomologationCompleted', $task)
+                        @unless ($hasHomologation)
+                            <button type="button" wire:click="markHomologationCompleted" class="btn btn-outline-primary">
+                                <i class="bi bi-patch-check" aria-hidden="true"></i> Marcar homologação como concluída
+                            </button>
+                        @endunless
+                    @endcan
+
+                    @can('markDeployed', $task)
+                        @unless ($hasDeployed)
+                            <button type="button" wire:click="markDeployed" class="btn btn-outline-primary">
+                                <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i> Marcar como implantado
+                            </button>
+                        @endunless
+                    @endcan
                 </div>
             @endif
 
-            @if ($task->taskEvents->isEmpty() && ! $completionBonus)
-                <p class="text-sm text-ink-muted">Nenhuma atividade ainda.</p>
-            @endif
+            <div class="card">
+                <div class="card-header bg-body fw-semibold"><i class="bi bi-clock-history me-1" aria-hidden="true"></i> Histórico</div>
+                <ul class="list-group list-group-flush">
+                    @foreach ($task->taskEvents as $event)
+                        <li class="list-group-item d-flex align-items-center justify-content-between gap-3" wire:key="event-{{ $event->id }}">
+                            <span class="small">
+                                <span class="fw-medium">{{ $event->user->name }}</span>
+                                <span class="text-body-secondary">&middot; {{ $event->type->label() }} &middot; {{ $event->occurred_at->format('d/m/Y H:i') }}</span>
+                            </span>
+
+                            @if ($event->xpTransaction)
+                                <x-xp-badge :amount="$event->xpTransaction->amount" />
+                            @endif
+                        </li>
+                    @endforeach
+
+                    @if ($completionBonus)
+                        <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+                            <span class="small text-body-secondary">Tarefa concluída &middot; pontuação base concedida</span>
+                            <x-xp-badge :amount="$completionBonus->amount" />
+                        </li>
+                    @endif
+
+                    @if ($task->taskEvents->isEmpty() && ! $completionBonus)
+                        <li class="list-group-item small text-body-secondary">Nenhuma atividade ainda.</li>
+                    @endif
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-body fw-semibold"><i class="bi bi-arrow-left-right me-1" aria-hidden="true"></i> Movimentações</div>
+                <ul class="list-group list-group-flush">
+                    @forelse ($task->movements as $movement)
+                        <li class="list-group-item" wire:key="movement-{{ $movement->id }}">
+                            <span class="small">
+                                <span class="fw-medium">{{ $movement->user->name }}</span>
+                                <span class="text-body-secondary">moveu de</span>
+                                <x-badge>{{ $movement->fromColumn?->name ?? '—' }}</x-badge>
+                                <span class="text-body-secondary">para</span>
+                                <x-badge color="primary">{{ $movement->toColumn->name }}</x-badge>
+                                <span class="text-body-secondary">&middot; {{ $movement->created_at->format('d/m/Y H:i') }}</span>
+                            </span>
+
+                            @if ($movement->note)
+                                <p class="small text-body-secondary mt-1 mb-0">{{ $movement->note }}</p>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="list-group-item small text-body-secondary">Nenhuma movimentação registrada ainda.</li>
+                    @endforelse
+                </ul>
+            </div>
         </div>
-    </div>
 
-    <div class="mt-6">
-        <h2 class="mb-2 text-sm font-semibold text-ink">Movimentações</h2>
+        <div class="col-lg-4 vstack gap-4">
+            <div class="card">
+                <div class="card-header bg-body fw-semibold">Detalhes</div>
+                <dl class="list-group list-group-flush mb-0">
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <dt class="small text-body-secondary fw-normal">Categoria</dt>
+                        <dd class="mb-0">
+                            <span class="badge rounded-pill fw-medium" style="background-color: {{ $task->category->color }}; color: {{ $task->category->text_color }};">{{ $task->category->name }}</span>
+                        </dd>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <dt class="small text-body-secondary fw-normal">Prioridade</dt>
+                        <dd class="mb-0 fw-medium">{{ $task->priority->name }}</dd>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <dt class="small text-body-secondary fw-normal">Status</dt>
+                        <dd class="mb-0 fw-medium">{{ $task->status?->label() ?? 'Sem marco' }}</dd>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <dt class="small text-body-secondary fw-normal">Pontos</dt>
+                        <dd class="mb-0"><x-xp-badge :amount="$task->xpValue()" /></dd>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <dt class="small text-body-secondary fw-normal">Prazo</dt>
+                        <dd class="mb-0 fw-medium text-end">
+                            {{ $task->due_at?->format('d/m/Y H:i') ?? '—' }}
+                            @if ($task->isLate())
+                                <x-badge color="danger">Atrasada</x-badge>
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+            </div>
 
-        <div class="space-y-2">
-            @forelse ($task->movements as $movement)
-                <div class="rounded-lg border border-line/60 px-3 py-2 text-sm" wire:key="movement-{{ $movement->id }}">
-                    <span class="text-ink-muted">
-                        {{ $movement->user->name }} moveu de
-                        <strong>{{ $movement->fromColumn?->name ?? '—' }}</strong> para
-                        <strong>{{ $movement->toColumn->name }}</strong>
-                        &middot; {{ $movement->created_at->format('d/m/Y H:i') }}
-                    </span>
+            <x-card>
+                <h2 class="h6 text-body-secondary text-uppercase mb-3">Responsável</h2>
 
-                    @if ($movement->note)
-                        <p class="mt-1 text-xs text-ink-muted">{{ $movement->note }}</p>
-                    @endif
-                </div>
-            @empty
-                <p class="text-sm text-ink-muted">Nenhuma movimentação registrada ainda.</p>
-            @endforelse
+                @if ($task->assignedTo)
+                    <div class="d-flex align-items-center gap-3">
+                        <x-avatar :user="$task->assignedTo" size="lg" />
+                        <div class="min-w-0">
+                            <div class="fw-semibold text-truncate">{{ $task->assignedTo->name }}</div>
+                            @if ($task->assignedTo->selectedTitle)
+                                <div class="small text-warning-emphasis">{{ $task->assignedTo->selectedTitle->name }}</div>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <p class="small text-body-secondary mb-0">Não atribuído</p>
+                @endif
+
+                @can('claim', $task)
+                    <button type="button" wire:click="claim" class="btn btn-primary w-100 mt-3">
+                        <i class="bi bi-hand-index-thumb" aria-hidden="true"></i> Assumir esta tarefa
+                    </button>
+                @endcan
+
+                @if ($developers->isNotEmpty())
+                    <div class="vstack gap-2 mt-3 pt-3 border-top">
+                        <x-user-picker :users="$developers" model="assignToUserId" placeholder="Selecionar desenvolvedor..." />
+                        <button type="button" wire:click="assignTo" class="btn btn-outline-secondary">Atribuir</button>
+                    </div>
+                @endif
+            </x-card>
         </div>
     </div>
 

@@ -1,57 +1,59 @@
-<div class="flex flex-1 min-h-0 flex-col">
-    <div x-data="{ draggingTaskId: null }" class="flex flex-1 min-h-0 gap-4 overflow-x-auto pb-4">
+<div class="d-flex flex-column flex-grow-1 min-h-0">
+    <div x-data="{ draggingTaskId: null, overColumnId: null }" class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2">
         @foreach ($board->columns as $column)
-            <div
-                class="flex w-64 flex-shrink-0 flex-col rounded-xl border border-line bg-line/20 p-3"
-                x-on:dragover.prevent
-                x-on:drop="$wire.moveTask(draggingTaskId, {{ $column->id }}, {{ $column->tasks->count() }})"
+            <section
+                class="kanban-column d-flex flex-column p-2"
+                :class="{ 'kanban-column--over': overColumnId === {{ $column->id }} }"
+                x-on:dragover.prevent="overColumnId = {{ $column->id }}"
+                x-on:drop="overColumnId = null; $wire.moveTask(draggingTaskId, {{ $column->id }}, {{ $column->tasks->count() }})"
                 wire:key="column-{{ $column->id }}"
             >
-                <div class="mb-3 flex shrink-0 items-start justify-between gap-2 border-b border-line pb-2">
-                    <div class="min-w-0 flex-1">
+                <header class="d-flex align-items-center gap-1 px-1 pb-2 flex-shrink-0">
+                    <div class="flex-grow-1 min-w-0">
                         <input
                             type="text"
                             value="{{ $column->name }}"
                             wire:change="renameColumn({{ $column->id }}, $event.target.value)"
+                            aria-label="Nome da coluna"
                             @can('update', $board) @else disabled @endcan
-                            class="w-full min-w-0 truncate rounded bg-transparent px-1 text-sm font-semibold text-ink focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary/40"
+                            class="form-control form-control-sm kanban-column-name px-2"
                         >
                         @if ($column->status)
-                            <span class="mt-1 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                                {{ $column->status->label() }}
-                            </span>
+                            <x-badge color="primary" class="mt-1 ms-1">{{ $column->status->label() }}</x-badge>
                         @endif
                     </div>
 
-                    <span class="shrink-0 rounded-full bg-card px-1.5 py-0.5 text-xs text-ink-muted">{{ $column->tasks->count() }}</span>
+                    <span class="badge rounded-pill text-bg-light border flex-shrink-0">{{ $column->tasks->count() }}</span>
 
                     @can('update', $board)
-                        <div class="relative shrink-0" x-data="{ open: false }" @click.outside="open = false">
-                            <button type="button" @click="open = !open" title="Configurações da coluna" aria-label="Configurações da coluna" class="rounded p-1 text-ink-muted hover:bg-line/30">
-                                <x-icon name="gear" class="h-4 w-4" />
+                        <div class="position-relative flex-shrink-0" x-data="{ open: false }" @click.outside="open = false">
+                            <button type="button" @click="open = !open" title="Configurações da coluna" aria-label="Configurações da coluna" class="btn btn-sm btn-link text-body-secondary btn-icon btn-icon-sm">
+                                <x-icon name="gear" />
                             </button>
 
-                            <div x-show="open" x-cloak x-transition class="absolute right-0 z-10 mt-1 w-56 space-y-3 rounded-xl border border-line bg-card p-3 text-sm shadow-lg">
-                                <div>
-                                    <label class="mb-1 block text-xs font-medium text-ink-muted">Marco de pontuação</label>
-                                    <select
-                                        wire:change="setMilestone({{ $column->id }}, $event.target.value === '' ? null : $event.target.value)"
-                                        class="w-full rounded-lg border border-line bg-card px-2 py-1 text-sm text-ink"
-                                    >
-                                        <option value="" @selected(! $column->status)>Nenhum (livre)</option>
-                                        @foreach ($statuses as $status)
-                                            <option value="{{ $status->value }}" @selected($column->status === $status)>{{ $status->label() }}</option>
-                                        @endforeach
-                                    </select>
+                            <div x-show="open" x-cloak x-transition class="dropdown-menu dropdown-menu-end show p-3 shadow" style="width: 16rem;">
+                                <label class="form-label small text-body-secondary mb-1">Marco de pontuação</label>
+                                <select
+                                    wire:change="setMilestone({{ $column->id }}, $event.target.value === '' ? null : $event.target.value)"
+                                    class="form-select form-select-sm"
+                                >
+                                    <option value="" @selected(! $column->status)>Nenhum (livre)</option>
+                                    @foreach ($statuses as $status)
+                                        <option value="{{ $status->value }}" @selected($column->status === $status)>{{ $status->label() }}</option>
+                                    @endforeach
+                                </select>
+
+                                <div class="btn-group w-100 mt-3" role="group" aria-label="Mover coluna">
+                                    <button type="button" @click="open = false" wire:click="moveColumnUp({{ $column->id }})" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-arrow-left" aria-hidden="true"></i> Mover
+                                    </button>
+                                    <button type="button" @click="open = false" wire:click="moveColumnDown({{ $column->id }})" class="btn btn-sm btn-outline-secondary">
+                                        Mover <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                    </button>
                                 </div>
 
-                                <div class="flex items-center justify-between gap-1">
-                                    <button type="button" @click="open = false" wire:click="moveColumnUp({{ $column->id }})" class="flex-1 rounded px-2 py-1 text-ink-muted hover:bg-line/20">&larr; Mover</button>
-                                    <button type="button" @click="open = false" wire:click="moveColumnDown({{ $column->id }})" class="flex-1 rounded px-2 py-1 text-ink-muted hover:bg-line/20">Mover &rarr;</button>
-                                </div>
-
-                                <button type="button" @click="open = false" wire:click="confirmDeleteColumn({{ $column->id }})" class="w-full rounded px-2 py-1 text-left text-terracotta hover:bg-terracotta/10">
-                                    Excluir lista
+                                <button type="button" @click="open = false" wire:click="confirmDeleteColumn({{ $column->id }})" class="btn btn-sm btn-outline-danger w-100 mt-2">
+                                    <x-icon name="trash" /> Excluir lista
                                 </button>
                             </div>
                         </div>
@@ -63,45 +65,50 @@
                             wire:click="openCreate({{ $column->id }})"
                             title="Adicionar tarefa"
                             aria-label="Adicionar tarefa"
-                            class="shrink-0 rounded p-1 text-ink-muted hover:bg-line/30"
+                            class="btn btn-sm btn-link text-body-secondary btn-icon btn-icon-sm flex-shrink-0"
                         >
-                            <x-icon name="plus" class="h-4 w-4" />
+                            <x-icon name="plus" />
                         </button>
                     @endcan
-                </div>
+                </header>
 
-                <div class="min-h-0 flex-1 space-y-2 overflow-y-auto">
-                    @foreach ($column->tasks as $task)
+                <div class="flex-grow-1 min-h-0 overflow-y-auto vstack gap-2 px-1 pb-1">
+                    @forelse ($column->tasks as $task)
                         <x-task-card :task="$task" wire:key="task-{{ $task->id }}" />
-                    @endforeach
+                    @empty
+                        <div class="text-center small text-body-tertiary border border-2 rounded-3 py-4" style="border-style: dashed !important;">
+                            Sem tarefas
+                        </div>
+                    @endforelse
                 </div>
 
                 @can('create', \App\Models\Task::class)
                     <button
                         type="button"
                         wire:click="openCreate({{ $column->id }})"
-                        class="mt-2 shrink-0 rounded-lg px-2 py-1.5 text-left text-sm text-ink-muted hover:bg-line/30"
+                        class="btn btn-sm btn-link text-body-secondary text-decoration-none text-start flex-shrink-0 mt-1"
                     >
-                        + Adicionar tarefa
+                        <x-icon name="plus" /> Adicionar tarefa
                     </button>
                 @endcan
-            </div>
+            </section>
         @endforeach
 
         @can('update', $board)
-            <div class="w-64 flex-shrink-0 rounded-xl border border-dashed border-line p-3">
-                <form wire:submit="addColumn" class="flex items-center gap-2">
+            <div class="kanban-column kanban-column--new p-3 align-self-start">
+                <form wire:submit="addColumn" class="input-group input-group-sm">
                     <input
                         type="text"
                         wire:model="newColumnName"
-                        placeholder="+ Adicionar coluna"
-                        class="min-w-0 flex-1 rounded-lg border border-line bg-card px-2 py-1.5 text-sm text-ink"
+                        placeholder="Nova coluna"
+                        aria-label="Nome da nova coluna"
+                        class="form-control @error('newColumnName') is-invalid @enderror"
                     >
-                    <button type="submit" class="shrink-0 rounded-lg bg-primary px-2 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                        Adicionar
+                    <button type="submit" class="btn btn-primary">
+                        <x-icon name="plus" /> Adicionar
                     </button>
                 </form>
-                @error('newColumnName') <p class="mt-1 text-xs text-terracotta">{{ $message }}</p> @enderror
+                @error('newColumnName') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
         @endcan
     </div>
@@ -117,12 +124,12 @@
     @if ($confirmingDeleteColumnId)
         @php $columnToDelete = $board->columns->firstWhere('id', $confirmingDeleteColumnId) @endphp
         @if ($columnToDelete)
-            <x-modal title="Excluir coluna" max-width="max-w-sm">
-                <p class="text-sm text-ink-muted">
+            <x-modal title="Excluir coluna" size="sm">
+                <p class="text-body-secondary mb-0">
                     Tem certeza que deseja excluir a coluna "{{ $columnToDelete->name }}"? Essa ação não pode ser desfeita.
                 </p>
 
-                <div class="mt-6 flex justify-end gap-2">
+                <div class="d-flex justify-content-end gap-2 mt-4">
                     <x-button variant="secondary" wire:click="$dispatch('close-modal')">Cancelar</x-button>
                     <x-button variant="danger" wire:click="deleteColumn({{ $columnToDelete->id }})">Excluir</x-button>
                 </div>

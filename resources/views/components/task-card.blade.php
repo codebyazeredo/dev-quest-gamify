@@ -1,75 +1,85 @@
 @props(['task', 'readOnly' => false])
 
 @php
-    $bg = $task->category->color;
-    $fg = $task->category->text_color;
+    $categoryBackground = $task->category->color;
+    $categoryText = $task->category->text_color;
+    $notApprovedByHomologation = $task->status === \App\Enums\TaskStatus::APPROVED
+        && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::HOMOLOGATION_COMPLETED);
+    $notDeployed = $task->status === \App\Enums\TaskStatus::DONE
+        && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::DEPLOYED);
 @endphp
 
 <div
     @unless ($readOnly)
         draggable="true"
         x-on:dragstart="draggingTaskId = {{ $task->id }}"
+        x-on:dragend="draggingTaskId = null; overColumnId = null"
+        :class="{ 'kanban-card--dragging': draggingTaskId === {{ $task->id }} }"
     @endunless
-    style="background-color: {{ $bg }}; color: {{ $fg }}; border-color: {{ $fg }}33;"
-    class="{{ $readOnly ? '' : 'cursor-move' }} rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
+    style="--card-accent: {{ $categoryBackground }};"
+    class="card kanban-card"
 >
-    <div class="flex items-start justify-between gap-2">
-        <a href="{{ route('tasks.show', $task) }}" class="text-sm font-medium hover:underline">
+    <div class="card-body p-3">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+            <span class="badge rounded-pill fw-medium" style="background-color: {{ $categoryBackground }}; color: {{ $categoryText }};">
+                {{ $task->category->name }}
+            </span>
+
+            @unless ($readOnly)
+                @can('update', $task)
+                    <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="btn btn-sm btn-link text-body-secondary p-0 lh-1">
+                        <x-icon name="pencil" />
+                    </button>
+                @endcan
+            @endunless
+        </div>
+
+        <a href="{{ route('tasks.show', $task) }}" class="d-block fw-semibold text-body text-decoration-none mt-2 lh-sm">
             {{ $task->title }}
         </a>
 
-        @unless ($readOnly)
-            @can('update', $task)
-                <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="shrink-0 rounded-md p-1 opacity-70 hover:bg-black/10 hover:opacity-100">
-                    <x-icon name="pencil" class="h-3.5 w-3.5" />
-                </button>
-            @endcan
-        @endunless
-    </div>
+        @if ($task->rejection_reason || $notApprovedByHomologation || $notDeployed || $task->isLate() || ($task->due_at && ! $task->completed_at))
+            <div class="d-flex flex-wrap gap-1 mt-2">
+                @if ($task->rejection_reason)
+                    <x-badge color="danger">Reprovada</x-badge>
+                @endif
 
-    <div class="mt-2 flex items-center justify-between text-xs">
-        <span class="rounded-full px-2 py-0.5 text-[11px] font-medium" style="background-color: {{ $fg }}1a;">
-            {{ $task->category->name }}
-        </span>
-        <span class="flex items-center gap-1.5 opacity-75">
-            {{ $task->priority->name }}
-            <x-xp-badge :amount="$task->xpValue()" />
-        </span>
-    </div>
+                @if ($notApprovedByHomologation)
+                    <x-badge color="warning">Não homologado</x-badge>
+                @endif
 
-    <div class="mt-2 flex flex-wrap gap-1.5">
-        @if ($task->rejection_reason)
-            <x-badge color="terracotta">Reprovada</x-badge>
+                @if ($notDeployed)
+                    <x-badge color="warning">Não implantado</x-badge>
+                @endif
+
+                @if ($task->isLate())
+                    <x-badge color="danger"><x-icon name="alert" /> Atrasada</x-badge>
+                @elseif ($task->due_at && ! $task->completed_at)
+                    <x-badge color="secondary"><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ $task->due_at->format('d/m H:i') }}</x-badge>
+                @endif
+            </div>
         @endif
 
-        @if ($task->status === \App\Enums\TaskStatus::APPROVED && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::HOMOLOGATION_COMPLETED))
-            <x-badge color="amber-clay">Não homologado</x-badge>
-        @endif
+        <div class="d-flex align-items-center justify-content-between gap-2 mt-3 pt-2 border-top">
+            @if ($task->assignedTo)
+                <span class="d-flex align-items-center gap-2 min-w-0">
+                    <x-avatar :user="$task->assignedTo" size="sm" />
+                    <span class="small text-body-secondary text-truncate">{{ $task->assignedTo->name }}</span>
+                </span>
+            @else
+                <span class="small text-body-tertiary">Não atribuído</span>
+            @endif
 
-        @if ($task->status === \App\Enums\TaskStatus::DONE && ! $task->taskEvents->contains('type', \App\Enums\TaskEventType::DEPLOYED))
-            <x-badge color="amber-clay">Não implantado</x-badge>
-        @endif
-
-        @if ($task->isLate())
-            <x-badge color="terracotta">Atrasada</x-badge>
-        @elseif ($task->due_at && ! $task->completed_at)
-            <span class="text-xs opacity-75">
-                Prazo: {{ $task->due_at->format('d/m/Y H:i') }}
+            <span class="d-flex align-items-center gap-2 flex-shrink-0">
+                <span class="small text-body-secondary" title="Prioridade">{{ $task->priority->name }}</span>
+                <x-xp-badge :amount="$task->xpValue()" />
             </span>
-        @endif
-    </div>
-
-    <div class="mt-3 flex items-center justify-between text-xs">
-        @if ($task->assignedTo)
-            <span class="opacity-75">{{ $task->assignedTo->name }}</span>
-        @else
-            <span class="opacity-50">Não atribuído</span>
-        @endif
+        </div>
 
         @unless ($readOnly)
             @can('claim', $task)
-                <button type="button" wire:click="claim({{ $task->id }})" class="rounded-md px-2 py-0.5 font-medium hover:opacity-80" style="background-color: {{ $fg }}1a;">
-                    Assumir
+                <button type="button" wire:click="claim({{ $task->id }})" class="btn btn-sm btn-outline-primary w-100 mt-2">
+                    <i class="bi bi-hand-index-thumb" aria-hidden="true"></i> Assumir tarefa
                 </button>
             @endcan
         @endunless

@@ -43,7 +43,7 @@ class Kanban extends Component
         $this->board->load([
             'columns.tasks' => fn ($query) => $query->whereNull('archived_at')
                 ->visibleTo(auth()->user())
-                ->with(['category', 'assignedTo', 'taskEvents']),
+                ->with(['category', 'priority', 'assignedTo.person', 'taskEvents']),
         ]);
     }
 

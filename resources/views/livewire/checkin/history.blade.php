@@ -1,57 +1,61 @@
 <div>
-    <x-page-header title="Check-in" />
+    <x-page-header title="Check-in" subtitle="Faça check-in todos os dias para manter sua sequência." />
 
-    <livewire:checkin.button />
-
-    <x-card rounded="rounded-2xl" padding="p-6" class="mx-auto mt-6 w-full max-w-lg">
-        <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-ink">{{ $monthLabel }}</h2>
-
-            <div class="flex items-center gap-1">
-                <button type="button" wire:click="previousMonth" title="Mês anterior" aria-label="Mês anterior" class="rounded-lg p-2 text-ink-muted hover:bg-line/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M15 6l-6 6 6 6" /></svg>
-                </button>
-                <button type="button" wire:click="goToCurrentMonth" class="rounded-lg px-3 py-1.5 text-sm font-medium text-ink hover:bg-line/20">
-                    Hoje
-                </button>
-                <button type="button" wire:click="nextMonth" title="Próximo mês" aria-label="Próximo mês" class="rounded-lg p-2 text-ink-muted hover:bg-line/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M9 6l6 6-6 6" /></svg>
-                </button>
-            </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+            <livewire:checkin.button />
         </div>
+    </div>
 
-        <div class="grid grid-cols-7 gap-2 text-center text-xs font-medium text-ink-muted">
-            <div>Seg</div>
-            <div>Ter</div>
-            <div>Qua</div>
-            <div>Qui</div>
-            <div>Sex</div>
-            <div>Sáb</div>
-            <div>Dom</div>
-        </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8 col-xl-6">
+            <x-card padding="p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h2 class="h5 mb-0 text-capitalize">{{ $monthLabel }}</h2>
 
-        <div class="mt-2 grid grid-cols-7 gap-2">
-            @foreach ($days as $day)
-                <div
-                    wire:key="day-{{ $day['date']->toDateString() }}"
-                    class="flex h-12 flex-col items-center justify-center rounded-lg border text-center sm:h-14
-                        {{ $day['inMonth'] ? 'border-line bg-card' : 'border-transparent bg-line/10' }}
-                        {{ $day['isToday'] ? 'ring-2 ring-primary' : '' }}"
-                >
-                    @if ($day['checkedIn'])
-                        <span class="text-forest"><x-icon name="check" class="h-5 w-5" /></span>
-                    @else
-                        <span class="text-sm {{ $day['inMonth'] ? 'text-ink' : 'text-ink-muted/50' }}">
-                            {{ $day['date']->day }}
-                        </span>
-                    @endif
+                    <div class="btn-group" role="group" aria-label="Navegar entre meses">
+                        <button type="button" wire:click="previousMonth" title="Mês anterior" aria-label="Mês anterior" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" wire:click="goToCurrentMonth" class="btn btn-outline-secondary btn-sm">Hoje</button>
+                        <button type="button" wire:click="nextMonth" title="Próximo mês" aria-label="Próximo mês" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
                 </div>
-            @endforeach
-        </div>
 
-        <div class="mt-4 flex items-center justify-center gap-4 text-sm text-ink-muted">
-            <span class="flex items-center gap-1.5"><span class="text-forest"><x-icon name="check" class="h-4 w-4" /></span> Feito</span>
-            <span class="flex items-center gap-1.5"><span class="h-4 w-4 rounded-full border border-line"></span> Sem check-in</span>
+                <div class="d-grid text-center small fw-semibold text-body-secondary text-uppercase mb-2" style="grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+                    <div>Dom</div>
+                </div>
+
+                <div class="d-grid" style="grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">
+                    @foreach ($days as $day)
+                        <div
+                            wire:key="day-{{ $day['date']->toDateString() }}"
+                            class="checkin-day d-flex align-items-center justify-content-center rounded-3 border
+                                {{ $day['checkedIn'] ? 'bg-success-subtle border-success-subtle text-success-emphasis' : ($day['inMonth'] ? 'bg-body' : 'bg-body-tertiary border-0') }}
+                                {{ $day['isToday'] ? 'checkin-day--today' : '' }}"
+                        >
+                            @if ($day['checkedIn'])
+                                <x-icon name="check" class="fs-5 fw-bold" />
+                            @else
+                                <span class="{{ $day['inMonth'] ? '' : 'text-body-tertiary' }}">{{ $day['date']->day }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="d-flex align-items-center justify-content-center gap-4 small text-body-secondary mt-3">
+                    <span class="d-flex align-items-center gap-2"><span class="badge bg-success-subtle text-success-emphasis"><x-icon name="check" /></span> Feito</span>
+                    <span class="d-flex align-items-center gap-2"><span class="badge border text-body-secondary">&nbsp;</span> Sem check-in</span>
+                </div>
+            </x-card>
         </div>
-    </x-card>
+    </div>
 </div>

@@ -1,57 +1,81 @@
-<x-modal title="Nova pessoa" max-width="max-w-2xl">
-    <form wire:submit="save" class="space-y-4">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="sm:col-span-2">
+<x-modal title="Nova pessoa" size="lg">
+    <form wire:submit="save" class="vstack gap-3">
+        <div class="row g-3">
+            <div class="col-12">
                 <x-input name="nome" label="Nome" wire:model="nome" autofocus />
             </div>
 
-            <x-input name="cpf" label="CPF" wire:model="cpf" placeholder="00000000000" />
+            <div class="col-sm-6">
+                <x-input name="cpf" label="CPF" wire:model="cpf" placeholder="00000000000" />
+            </div>
 
-            <x-input name="rg" label="RG" wire:model="rg" />
+            <div class="col-sm-6">
+                <x-input name="rg" label="RG" wire:model="rg" />
+            </div>
 
-            <x-input name="nascimento" label="Nascimento" type="date" wire:model="nascimento" />
+            <div class="col-sm-6">
+                <x-input name="nascimento" label="Nascimento" type="date" wire:model="nascimento" />
+            </div>
 
-            <x-select name="sexo" label="Sexo" wire:model="sexo" placeholder="Selecione">
-                @foreach ($generos as $genero)
-                    <option value="{{ $genero->value }}">{{ $genero->label() }}</option>
-                @endforeach
-            </x-select>
+            <div class="col-sm-6">
+                <x-select name="sexo" label="Sexo" wire:model="sexo" placeholder="Selecione">
+                    @foreach ($generos as $genero)
+                        <option value="{{ $genero->value }}">{{ $genero->label() }}</option>
+                    @endforeach
+                </x-select>
+            </div>
 
-            <x-input name="email" label="E-mail" type="email" wire:model="email" />
+            <div class="col-sm-6">
+                <x-input name="email" label="E-mail" type="email" wire:model="email" />
+            </div>
 
-            <x-input name="telefone1" label="Telefone 1" wire:model="telefone1" />
+            <div class="col-sm-6">
+                <x-input name="telefone1" label="Telefone 1" wire:model="telefone1" />
+            </div>
 
-            <x-input name="telefone2" label="Telefone 2" wire:model="telefone2" />
+            <div class="col-sm-6">
+                <x-input name="telefone2" label="Telefone 2" wire:model="telefone2" />
+            </div>
 
-            <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-ink">Foto</label>
+            <div class="col-12">
+                <label for="person-foto" class="form-label fw-medium small mb-1">Foto</label>
 
-                @if ($foto)
-                    <img src="{{ $foto->temporaryUrl() }}" alt="" class="mt-2 h-16 w-16 rounded-full object-cover">
-                @endif
+                <div class="d-flex align-items-center gap-3">
+                    @if ($foto)
+                        <img src="{{ $foto->temporaryUrl() }}" alt="" class="avatar avatar-lg">
+                    @endif
 
-                <input type="file" wire:model="foto" accept="image/*" class="mt-2 block w-full text-sm text-ink file:mr-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20">
-                @error('foto') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+                    <input type="file" id="person-foto" wire:model="foto" accept="image/*" class="form-control @error('foto') is-invalid @enderror">
+                </div>
+                @error('foto') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
         </div>
 
-        <h3 class="mt-2 text-sm font-semibold text-ink border-t border-line pt-4">Endereço</h3>
+        <h3 class="h6 border-top pt-3 mb-0">Endereço</h3>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-input name="cep" label="CEP" wire:model="cep" placeholder="00000-000" />
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <x-input name="cep" label="CEP" wire:model="cep" placeholder="00000-000" />
+            </div>
 
-            <x-input name="numero" label="Número" wire:model="numero" placeholder="Sem número" />
+            <div class="col-sm-6">
+                <x-input name="numero" label="Número" wire:model="numero" placeholder="Sem número" />
+            </div>
 
-            <div class="sm:col-span-2">
+            <div class="col-12">
                 <x-input name="logradouro" label="Logradouro" wire:model="logradouro" />
             </div>
 
-            <x-input name="cidade" label="Cidade" wire:model="cidade" />
+            <div class="col-sm-6">
+                <x-input name="cidade" label="Cidade" wire:model="cidade" />
+            </div>
 
-            <x-input name="estado" label="Estado (UF)" wire:model="estado" maxlength="2" placeholder="SP" class="uppercase" />
+            <div class="col-sm-6">
+                <x-input name="estado" label="Estado (UF)" wire:model="estado" maxlength="2" placeholder="SP" class="text-uppercase" />
+            </div>
         </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Salvar pessoa</x-button>
         </div>

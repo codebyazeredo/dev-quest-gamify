@@ -1,11 +1,5 @@
-@props(['variant' => 'default'])
-
-@php
-    $textClass = $variant === 'inverted' ? 'text-white/70' : 'text-ink-muted';
-@endphp
-
-<footer {{ $attributes->merge(['class' => "shrink-0 px-4 py-3 text-xs {$textClass} sm:px-6"]) }}>
-    <div class="flex items-center justify-between">
+<footer {{ $attributes->merge(['class' => 'small text-body-secondary']) }}>
+    <div class="d-flex align-items-center justify-content-between">
         <span>v1.0</span>
         <span>&copy; {{ now()->year }} codebyazeredo</span>
     </div>

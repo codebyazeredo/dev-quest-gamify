@@ -24,7 +24,7 @@ class Archive extends Component
     {
         $archived = Task::where('board_id', $this->board->id)
             ->whereNotNull('archived_at')
-            ->with(['category', 'priority', 'assignedTo', 'taskEvents'])
+            ->with(['category', 'priority', 'assignedTo.person', 'taskEvents'])
             ->orderByDesc('archived_at')
             ->get();
 

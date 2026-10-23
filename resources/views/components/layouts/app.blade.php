@@ -4,7 +4,23 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        @php $appSettings = \App\Models\AppSetting::current(); @endphp
+        @php
+            $appSettings = \App\Models\AppSetting::current();
+            $currentUser = auth()->user();
+            $navigation = [
+                'Geral' => [
+                    ['route' => 'boards.index', 'active' => 'boards.*', 'label' => 'Quadros', 'icon' => 'bi-kanban'],
+                    ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Minha conta', 'icon' => 'bi-person-circle'],
+                ],
+                'Gamificação' => [
+                    ['route' => 'ranking', 'active' => 'ranking', 'label' => 'Ranking', 'icon' => 'bi-trophy'],
+                    ['route' => 'challenges', 'active' => 'challenges', 'label' => 'Desafios', 'icon' => 'bi-flag'],
+                    ['route' => 'checkin', 'active' => 'checkin', 'label' => 'Check-in', 'icon' => 'bi-fire'],
+                    ['route' => 'achievements', 'active' => 'achievements', 'label' => 'Conquistas', 'icon' => 'bi-award'],
+                    ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
+                ],
+            ];
+        @endphp
 
         <title>{{ $title ?? $appSettings->displayName() }}</title>
 
@@ -16,84 +32,103 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        <x-theme-style :color="$appSettings->primaryColor()" />
+
         @livewireStyles
     </head>
-    <body class="h-screen overflow-hidden bg-surface text-ink">
-        <div class="flex h-screen flex-col">
-            <nav class="flex items-center justify-between gap-3 bg-linear-to-r from-primary to-accent px-4 py-3 sm:px-6">
-                <a href="{{ route('boards.index') }}" class="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-white">
-                    @if ($appSettings->logoUrl())
-                        <img src="{{ $appSettings->logoUrl() }}" alt="" class="h-7 w-auto">
-                    @endif
-                    <span class="hidden sm:inline">{{ $appSettings->displayName() }}</span>
-                </a>
+    <body>
+        <div class="d-flex vh-100 overflow-hidden">
+            <aside class="app-sidebar flex-shrink-0" data-bs-theme="dark">
+              <div class="offcanvas-lg offcanvas-start h-100 d-flex flex-column" id="app-sidebar" tabindex="-1" aria-label="Menu principal">
+                <div class="offcanvas-header d-lg-none">
+                    <span class="fw-bold text-white">Menu</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#app-sidebar" aria-label="Fechar"></button>
+                </div>
 
-                <div class="flex items-center gap-1">
-                    <a href="{{ route('boards.index') }}" title="Quadros" aria-label="Quadros" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('boards.*') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-                        <x-icon name="columns" class="h-[18px] w-[18px]" />
+                <div class="offcanvas-body d-flex flex-column p-3 pt-lg-4 overflow-y-auto h-100">
+                    <a href="{{ route('boards.index') }}" class="d-flex align-items-center gap-2 text-white text-decoration-none fw-bold fs-5 px-2 mb-3">
+                        @if ($appSettings->logoUrl())
+                            <img src="{{ $appSettings->logoUrl() }}" alt="" style="height: 2rem; width: auto;">
+                        @else
+                            <i class="bi bi-controller" aria-hidden="true"></i>
+                        @endif
+                        <span class="text-truncate">{{ $appSettings->displayName() }}</span>
                     </a>
 
-                    <a href="{{ route('ranking') }}" title="Ranking" aria-label="Ranking" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('ranking') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-                        <x-icon name="trophy" class="h-[18px] w-[18px]" />
-                    </a>
+                    <nav class="flex-grow-1">
+                        @foreach ($navigation as $heading => $items)
+                            <div class="sidebar-heading">{{ $heading }}</div>
+                            <ul class="nav flex-column gap-1">
+                                @foreach ($items as $item)
+                                    <li>
+                                        <a href="{{ route($item['route']) }}" class="nav-link {{ request()->routeIs($item['active']) ? 'active' : '' }}" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
+                                            <i class="bi {{ $item['icon'] }}" aria-hidden="true"></i>
+                                            {{ $item['label'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endforeach
 
-                    <a href="{{ route('challenges') }}" title="Desafios" aria-label="Desafios" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('challenges') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-                        <x-icon name="flag" class="h-[18px] w-[18px]" />
-                    </a>
+                        @can('accessAdminPanel', \App\Models\User::class)
+                            <div class="sidebar-heading">Administração</div>
+                            <ul class="nav flex-column gap-1">
+                                <li>
+                                    <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if (request()->routeIs('admin.*')) aria-current="page" @endif>
+                                        <i class="bi bi-gear" aria-hidden="true"></i>
+                                        Configurações
+                                    </a>
+                                </li>
+                            </ul>
+                        @endcan
+                    </nav>
 
-                    <a href="{{ route('checkin') }}" title="Check-in" aria-label="Check-in" class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {{ request()->routeIs('checkin') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
-                        <x-icon name="fire" class="h-[18px] w-[18px]" />
-                    </a>
-
-                    <div class="relative ml-1" x-data="{ open: false }">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-white transition-colors hover:bg-white/10">
-                            @if (auth()->user()->person?->foto_path)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url(auth()->user()->person->foto_path) }}" alt="" class="h-8 w-8 rounded-full object-cover">
-                            @else
-                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
-                                    {{ auth()->user()->initials() }}
+                    <div class="dropup border-top border-secondary-subtle pt-3 mt-3">
+                        <button type="button" class="btn btn-link text-decoration-none text-white w-100 d-flex align-items-center gap-2 p-1 text-start" data-bs-toggle="dropdown" aria-expanded="false">
+                            <x-avatar :user="$currentUser" />
+                            <span class="min-w-0 flex-grow-1">
+                                <span class="d-block small fw-semibold text-truncate">{{ $currentUser->name }}</span>
+                                <span class="d-block text-truncate text-white-50" style="font-size: 0.75rem;">
+                                    @if ($currentUser->selectedTitle)
+                                        {{ $currentUser->selectedTitle->name }}
+                                    @else
+                                        {{ $currentUser->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}
+                                    @endif
                                 </span>
-                            @endif
-                            <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
-                            @if (auth()->user()->selectedTitle)
-                                <span class="hidden items-center gap-1 text-xs font-medium text-gold sm:flex">
-                                    <x-icon :name="auth()->user()->selectedTitle->icon" class="h-3.5 w-3.5" />
-                                    {{ auth()->user()->selectedTitle->name }}
-                                </span>
-                            @else
-                                <span class="hidden text-xs text-white/60 sm:inline">{{ auth()->user()->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}</span>
-                            @endif
+                            </span>
+                            <i class="bi bi-chevron-expand text-white-50" aria-hidden="true"></i>
                         </button>
 
-                        <div x-show="open" x-cloak x-transition class="absolute right-0 mt-2 w-48 rounded-xl border border-line bg-card py-1 shadow-lg">
-                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('dashboard') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
-                                Minha conta
-                            </a>
-
-                            @can('accessAdminPanel', \App\Models\User::class)
-                                <a href="{{ route('admin.index') }}" class="block px-4 py-2 text-sm {{ request()->routeIs('admin.*') ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-line/30' }}">
-                                    Configurações
-                                </a>
-                            @endcan
-
-                            <hr class="my-1 border-line">
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-ink hover:bg-line/30">
-                                    Sair
-                                </button>
-                            </form>
-                        </div>
+                        <ul class="dropdown-menu w-100 shadow">
+                            <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-person-circle me-2" aria-hidden="true"></i>Minha conta</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </nav>
+              </div>
+            </aside>
 
-            <main class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-                {{ $slot }}
-            </main>
+            <div class="d-flex flex-column flex-grow-1 min-w-0">
+                <header class="navbar bg-body border-bottom d-lg-none px-3">
+                    <button type="button" class="btn btn-outline-secondary btn-icon" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
+                        <i class="bi bi-list fs-4" aria-hidden="true"></i>
+                    </button>
+                    <span class="navbar-brand mb-0 fw-bold text-truncate">{{ $appSettings->displayName() }}</span>
+                    <x-avatar :user="$currentUser" />
+                </header>
 
-            <x-footer class="border-t border-line bg-card" />
+                <main class="flex-grow-1 min-h-0 overflow-auto d-flex flex-column p-3 p-lg-4">
+                    {{ $slot }}
+                </main>
+
+                <x-footer class="border-top bg-body px-3 px-lg-4 py-2" />
+            </div>
         </div>
 
         @php
@@ -106,6 +141,16 @@
         <div
             x-data="{
                 toasts: @js($pendingToasts),
+                styles: {
+                    level_up: { icon: 'bi-stars', variant: 'warning' },
+                    achievement: { icon: 'bi-trophy-fill', variant: 'warning' },
+                    challenge: { icon: 'bi-flag-fill', variant: 'info' },
+                    streak: { icon: 'bi-fire', variant: 'danger' },
+                    error: { icon: 'bi-exclamation-triangle-fill', variant: 'danger' },
+                    checkin: { icon: 'bi-check-circle-fill', variant: 'success' },
+                    success: { icon: 'bi-check-circle-fill', variant: 'success' },
+                },
+                styleOf(toast) { return this.styles[toast.type] ?? { icon: 'bi-info-circle-fill', variant: 'primary' } },
                 addToast(toast) {
                     const t = { id: Date.now() + Math.random(), ...toast };
                     this.toasts.push(t);
@@ -118,57 +163,29 @@
             }"
             x-init="toasts.forEach(t => scheduleRemoval(t))"
             x-on:toast.window="addToast($event.detail.toast)"
-            class="fixed right-4 top-20 z-[60] flex w-80 flex-col gap-2"
+            class="toast-stack toast-container position-fixed top-0 end-0 p-3 d-flex flex-column gap-2"
+            aria-live="polite"
         >
             <template x-for="t in toasts" :key="t.id">
                 <div
                     x-show="true"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-x-4"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-x-0"
-                    x-transition:leave-end="opacity-0 translate-x-4"
-                    :class="{
-                        'border-gold ring-2 ring-gold scale-105': t.type === 'level_up',
-                        'border-gold/40': t.type === 'achievement',
-                        'border-accent/40': t.type === 'challenge',
-                        'border-amber-clay/40': t.type === 'streak',
-                        'border-terracotta/40': t.type === 'error',
-                        'border-forest/40': t.type === 'checkin' || t.type === 'success',
-                    }"
-                    class="flex items-start gap-3 rounded-xl border p-3 shadow-lg bg-card"
+                    x-transition.opacity.duration.250ms
+                    class="toast show w-100 border-0 shadow"
+                    :class="t.type === 'level_up' ? 'border border-2 border-warning' : ''"
+                    role="status"
                 >
-                    <span x-show="t.type === 'level_up'" class="text-gold">
-                        <x-icon name="star" class="h-7 w-7" />
-                    </span>
-                    <span x-show="t.type === 'achievement'" class="text-gold">
-                        <x-icon name="trophy" class="h-5 w-5" />
-                    </span>
-                    <span x-show="t.type === 'challenge'" class="text-accent">
-                        <x-icon name="flag" class="h-5 w-5" />
-                    </span>
-                    <span x-show="t.type === 'streak'" class="text-amber-clay">
-                        <x-icon name="fire" class="h-5 w-5" />
-                    </span>
-                    <span x-show="t.type === 'error'" class="text-terracotta">
-                        <x-icon name="alert" class="h-5 w-5" />
-                    </span>
-                    <span x-show="t.type === 'checkin' || t.type === 'success'" class="text-forest">
-                        <x-icon name="check" class="h-5 w-5" />
-                    </span>
+                    <div class="toast-body d-flex align-items-start gap-3">
+                        <span class="icon-chip icon-chip-sm" :class="`bg-${styleOf(t).variant}-subtle text-${styleOf(t).variant}-emphasis`">
+                            <i class="bi" :class="styleOf(t).icon" aria-hidden="true"></i>
+                        </span>
 
-                    <div class="min-w-0 flex-1">
-                        <p
-                            x-text="t.title"
-                            :class="t.type === 'level_up' ? 'text-base font-bold text-gold' : 'text-sm font-semibold text-ink'"
-                        ></p>
-                        <p x-text="t.message" class="text-xs text-ink-muted"></p>
+                        <div class="min-w-0 flex-grow-1">
+                            <p x-text="t.title" class="mb-0 fw-semibold" :class="t.type === 'level_up' ? 'fs-6 text-warning-emphasis' : 'small'"></p>
+                            <p x-text="t.message" class="mb-0 small text-body-secondary"></p>
+                        </div>
+
+                        <button type="button" class="btn-close small" @click="toasts = toasts.filter(x => x.id !== t.id)" aria-label="Fechar"></button>
                     </div>
-
-                    <button type="button" @click="toasts = toasts.filter(x => x.id !== t.id)" class="text-ink-muted hover:text-ink">
-                        &times;
-                    </button>
                 </div>
             </template>
         </div>

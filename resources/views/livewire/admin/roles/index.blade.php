@@ -1,63 +1,50 @@
 <div>
-    <x-page-header title="Roles & permissões" :back="route('admin.index')" backLabel="Configurações">
-        <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-            + Novo role
-        </button>
+    <x-page-header title="Roles & permissões" subtitle="Marque o que cada papel pode fazer." :back="route('admin.index')" backLabel="Configurações">
+        <x-button wire:click="toggleCreate"><x-icon name="plus" /> Novo role</x-button>
     </x-page-header>
 
-    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error('delete') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line bg-card">
-        <table class="w-full text-sm">
-            <thead class="bg-line/20 text-left text-ink-muted">
-                <tr>
-                    <th class="px-4 py-3">Role</th>
-                    @foreach ($permissions as $permission)
-                        <th class="px-3 py-3 text-center">{{ \App\Support\PermissionLabel::for($permission->name) }}</th>
-                    @endforeach
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-line/50">
-                @forelse ($roles as $role)
-                    <tr wire:key="role-{{ $role->id }}">
-                        <td class="px-4 py-3 font-medium text-ink">
-                            {{ \App\Enums\UserRole::labelFor($role->name) }}
-                            @if ($role->name === 'admin')
-                                <span class="ml-1 text-xs text-ink-muted">(acesso total)</span>
-                            @endif
-                        </td>
-                        @foreach ($permissions as $permission)
-                            <td class="px-3 py-3 text-center">
-                                <input type="checkbox"
-                                    @checked($role->hasPermissionTo($permission))
-                                    @disabled($role->name === 'admin')
-                                    wire:click="togglePermission({{ $role->id }}, {{ $permission->id }})"
-                                    class="rounded border-line">
-                            </td>
-                        @endforeach
-                        <td class="px-4 py-3 text-right">
-                            @unless ($role->name === 'admin')
-                                <button type="button" wire:click="delete({{ $role->id }})" wire:confirm="Excluir este role?" title="Excluir" aria-label="Excluir"
-                                    class="rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10">
-                                    <x-icon name="trash" class="h-4 w-4" />
-                                </button>
-                            @endunless
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="{{ $permissions->count() + 2 }}" class="px-4 py-6 text-center text-ink-muted">Nenhum role cadastrado.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :paginator="$roles">
+        <x-slot:head>
+            <th class="ps-4">Role</th>
+            @foreach ($permissions as $permission)
+                <th class="text-center">{{ \App\Support\PermissionLabel::for($permission->name) }}</th>
+            @endforeach
+            <th class="text-end pe-4"></th>
+        </x-slot:head>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-per-page-selector />
-        {{ $roles->links() }}
-    </div>
+        @forelse ($roles as $role)
+            <tr wire:key="role-{{ $role->id }}">
+                <td class="ps-4 fw-medium">
+                    {{ \App\Enums\UserRole::labelFor($role->name) }}
+                    @if ($role->name === 'admin')
+                        <x-badge color="warning" class="ms-1">acesso total</x-badge>
+                    @endif
+                </td>
+                @foreach ($permissions as $permission)
+                    <td class="text-center">
+                        <div class="form-check d-flex justify-content-center mb-0">
+                            <input type="checkbox" class="form-check-input"
+                                aria-label="{{ \App\Support\PermissionLabel::for($permission->name) }}"
+                                @checked($role->hasPermissionTo($permission))
+                                @disabled($role->name === 'admin')
+                                wire:click="togglePermission({{ $role->id }}, {{ $permission->id }})">
+                        </div>
+                    </td>
+                @endforeach
+                <td class="text-end pe-4">
+                    @unless ($role->name === 'admin')
+                        <x-row-actions :delete="'delete('.$role->id.')'" confirm="Excluir este role?" />
+                    @endunless
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="{{ $permissions->count() + 2 }}" class="text-center text-body-secondary py-5">Nenhum role cadastrado.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     @if ($showCreateModal)
         <livewire:admin.roles.create wire:key="role-create" />

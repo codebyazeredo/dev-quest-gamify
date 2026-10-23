@@ -1,32 +1,32 @@
-<x-modal title="Editar usuário" max-width="max-w-2xl">
-    <form wire:submit="save" class="space-y-4">
+<x-modal title="Editar usuário" size="lg">
+    <form wire:submit="save" class="vstack gap-3">
         <div>
-            <label class="block text-sm font-medium text-ink">Nome</label>
-            <p class="mt-1 text-sm text-ink">{{ $user->name }}</p>
+            <span class="form-label fw-medium small d-block mb-1">Nome</span>
+            <p class="mb-0">{{ $user->name }}</p>
         </div>
 
         <x-input name="email" label="E-mail" type="email" wire:model="email" />
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="form-grid form-grid-2">
             <x-input name="password" label="Nova senha (opcional)" type="password" wire:model="password" />
 
             <x-input name="password_confirmation" label="Confirmar senha" type="password" wire:model="password_confirmation" />
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-ink">Roles</label>
-            <div class="mt-1 flex flex-wrap gap-2">
+            <span class="form-label fw-medium small d-block mb-1">Roles</span>
+            <div class="d-flex flex-wrap gap-3">
                 @foreach ($availableRoles as $roleOption)
-                    <label class="flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-xs">
-                        <input type="checkbox" value="{{ $roleOption }}" wire:model="roles" class="rounded border-line">
-                        {{ \App\Enums\UserRole::labelFor($roleOption) }}
-                    </label>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="role-edit-{{ $roleOption }}" value="{{ $roleOption }}" wire:model="roles">
+                        <label class="form-check-label" for="role-edit-{{ $roleOption }}">{{ \App\Enums\UserRole::labelFor($roleOption) }}</label>
+                    </div>
                 @endforeach
             </div>
-            @error('roles') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+            @error('roles') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
         </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Salvar alterações</x-button>
         </div>

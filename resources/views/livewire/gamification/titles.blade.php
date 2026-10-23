@@ -1,29 +1,30 @@
 <div>
-    <x-page-header title="Títulos" :back="route('dashboard')" backLabel="Minha conta" />
+    <x-page-header title="Títulos" subtitle="Escolha o título exibido no seu perfil." :back="route('dashboard')" backLabel="Minha conta" />
 
     @if ($unlockedTitles->isEmpty())
-        <p class="text-sm text-ink-muted">Você ainda não desbloqueou nenhum título.</p>
+        <div class="text-center text-body-secondary py-5">
+            <i class="bi bi-patch-check fs-1 d-block mb-2" aria-hidden="true"></i>
+            Você ainda não desbloqueou nenhum título.
+        </div>
     @else
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="row g-3">
             @foreach ($unlockedTitles as $title)
-                <x-card :variant="$selectedTitleId === $title->id ? 'active' : 'default'" class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-gold">
-                            <x-icon :name="$title->icon" class="h-6 w-6" />
-                        </span>
-                        <span class="font-semibold text-ink">{{ $title->name }}</span>
-                    </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <x-card :variant="$selectedTitleId === $title->id ? 'active' : 'default'" class="h-100">
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <div class="d-flex align-items-center gap-3 min-w-0">
+                                <x-icon-chip :icon="$title->icon" color="warning" />
+                                <span class="fw-semibold text-truncate">{{ $title->name }}</span>
+                            </div>
 
-                    @if ($selectedTitleId === $title->id)
-                        <button type="button" wire:click="clearTitle" class="rounded-lg border border-line px-2 py-1 text-xs font-medium text-ink hover:bg-line/20">
-                            Remover
-                        </button>
-                    @else
-                        <button type="button" wire:click="selectTitle({{ $title->id }})" class="rounded-lg bg-primary px-2 py-1 text-xs font-semibold text-white hover:bg-primary-hover">
-                            Selecionar
-                        </button>
-                    @endif
-                </x-card>
+                            @if ($selectedTitleId === $title->id)
+                                <button type="button" wire:click="clearTitle" class="btn btn-sm btn-outline-secondary bg-body">Remover</button>
+                            @else
+                                <button type="button" wire:click="selectTitle({{ $title->id }})" class="btn btn-sm btn-primary">Selecionar</button>
+                            @endif
+                        </div>
+                    </x-card>
+                </div>
             @endforeach
         </div>
     @endif

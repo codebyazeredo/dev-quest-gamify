@@ -48,6 +48,27 @@ class SettingsManagementTest extends TestCase
         $this->assertSame(LogoSize::SMALL, AppSetting::current()->logo_size);
     }
 
+    public function test_admin_can_change_the_primary_color_and_invalid_values_are_rejected(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->assertSame(AppSetting::DEFAULT_PRIMARY_COLOR, AppSetting::current()->primaryColor());
+
+        Livewire::actingAs($admin)
+            ->test(Settings::class)
+            ->set('primary_color', 'azul')
+            ->call('save')
+            ->assertHasErrors(['primary_color' => 'regex']);
+
+        Livewire::actingAs($admin)
+            ->test(Settings::class)
+            ->set('primary_color', '#198754')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('#198754', AppSetting::current()->primaryColor());
+    }
+
     public function test_developer_gets_forbidden_on_the_route(): void
     {
         $developer = User::factory()->developer()->create();

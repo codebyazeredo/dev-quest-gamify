@@ -1,64 +1,45 @@
 <div>
-    <x-page-header title="Pessoas" :back="route('admin.index')" backLabel="Configurações">
+    <x-page-header title="Pessoas" subtitle="Dados cadastrais da equipe." :back="route('admin.index')" backLabel="Configurações">
         @can('create', \App\Models\Person::class)
-            <button type="button" wire:click="toggleCreate" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-                + Nova pessoa
-            </button>
+            <x-button wire:click="toggleCreate"><x-icon name="plus" /> Nova pessoa</x-button>
         @endcan
     </x-page-header>
 
-    @error('delete') <p class="mb-4 text-sm text-terracotta">{{ $message }}</p> @enderror
+    @error('delete') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
 
-    <div class="overflow-x-auto rounded-xl border border-line bg-card">
-        <table class="w-full text-sm">
-            <thead class="bg-line/20 text-left text-ink-muted">
-                <tr>
-                    <th class="px-4 py-3">Nome</th>
-                    <th class="px-4 py-3">CPF</th>
-                    <th class="px-4 py-3">E-mail</th>
-                    <th class="px-4 py-3">Telefone</th>
-                    <th class="px-4 py-3">Usuário</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-line/50">
-                @forelse ($people as $person)
-                    <tr wire:key="person-{{ $person->id }}">
-                        <td class="px-4 py-3 text-ink">{{ $person->nome }}</td>
-                        <td class="px-4 py-3 text-ink">{{ $person->cpf }}</td>
-                        <td class="px-4 py-3 text-ink">{{ $person->email }}</td>
-                        <td class="px-4 py-3 text-ink">{{ $person->telefone1 }}</td>
-                        <td class="px-4 py-3">
-                            @if ($person->user()->exists())
-                                <x-badge color="forest">Vinculado</x-badge>
-                            @else
-                                <x-badge>Sem usuário</x-badge>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <button type="button" wire:click="edit({{ $person->id }})" title="Editar" aria-label="Editar"
-                                class="rounded-lg border border-line p-1.5 text-ink-muted hover:bg-line/20">
-                                <x-icon name="pencil" class="h-4 w-4" />
-                            </button>
-                            <button type="button" wire:click="delete({{ $person->id }})" wire:confirm="Excluir esta pessoa?" title="Excluir" aria-label="Excluir"
-                                class="ml-2 rounded-lg border border-terracotta/30 p-1.5 text-terracotta hover:bg-terracotta/10">
-                                <x-icon name="trash" class="h-4 w-4" />
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-ink-muted">Nenhuma pessoa cadastrada.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :paginator="$people">
+        <x-slot:head>
+            <th class="ps-4">Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Usuário</th>
+            <th class="text-end pe-4"></th>
+        </x-slot:head>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-per-page-selector />
-        {{ $people->links() }}
-    </div>
+        @forelse ($people as $person)
+            <tr wire:key="person-{{ $person->id }}">
+                <td class="ps-4 fw-medium">{{ $person->nome }}</td>
+                <td>{{ $person->cpf }}</td>
+                <td>{{ $person->email }}</td>
+                <td>{{ $person->telefone1 }}</td>
+                <td>
+                    @if ($person->user()->exists())
+                        <x-badge color="success">Vinculado</x-badge>
+                    @else
+                        <x-badge>Sem usuário</x-badge>
+                    @endif
+                </td>
+                <td class="text-end pe-4">
+                    <x-row-actions :edit="'edit('.$person->id.')'" :delete="'delete('.$person->id.')'" confirm="Excluir esta pessoa?" />
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center text-body-secondary py-5">Nenhuma pessoa cadastrada.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     @if ($showCreateModal)
         <livewire:admin.people.create wire:key="person-create" />

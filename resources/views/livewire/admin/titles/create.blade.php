@@ -1,13 +1,11 @@
 <x-modal title="Novo título">
-    <form wire:submit="save" class="space-y-4">
+    <form wire:submit="save" class="vstack gap-3">
         <x-input name="name" label="Nome" wire:model="name" autofocus />
 
         <div>
-            <label class="block text-sm font-medium text-ink">Ícone</label>
-            <div class="mt-1">
-                <x-icon-picker model="icon" :icons="$icons" />
-            </div>
-            @error('icon') <p class="mt-1 text-sm text-terracotta">{{ $message }}</p> @enderror
+            <label class="form-label fw-medium small mb-1">Ícone</label>
+            <x-icon-picker model="icon" :icons="$icons" />
+            @error('icon') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
         </div>
 
         <x-select name="achievement_id" label="Conquista" wire:model="achievement_id" placeholder="Nenhuma">
@@ -16,7 +14,7 @@
             @endforeach
         </x-select>
 
-        <div class="flex justify-end gap-2">
+        <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>
             <x-button type="submit">Criar título</x-button>
         </div>
