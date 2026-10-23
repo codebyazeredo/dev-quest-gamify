@@ -43,15 +43,7 @@
                     <i class="bi bi-controller fs-4" aria-hidden="true"></i>
                 </a>
 
-                <a href="{{ route('boards.index') }}" class="rail-item {{ request()->routeIs('boards.*') ? 'active' : '' }}" title="Quadros" aria-label="Quadros"><i class="bi bi-kanban" aria-hidden="true"></i></a>
-                <a href="{{ route('ranking') }}" class="rail-item {{ request()->routeIs('ranking') ? 'active' : '' }}" title="Ranking" aria-label="Ranking"><i class="bi bi-trophy" aria-hidden="true"></i></a>
-                <a href="{{ route('checkin') }}" class="rail-item {{ request()->routeIs('checkin') ? 'active' : '' }}" title="Check-in" aria-label="Check-in"><i class="bi bi-fire" aria-hidden="true"></i></a>
-
-                <div class="mt-auto d-flex flex-column align-items-center gap-2">
-                    @can('accessAdminPanel', \App\Models\User::class)
-                        <a href="{{ route('admin.index') }}" class="rail-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" title="Configurações" aria-label="Configurações"><i class="bi bi-gear" aria-hidden="true"></i></a>
-                    @endcan
-
+                <div class="mt-auto">
                     <div class="dropend">
                         <button type="button" class="btn p-0 border-0 rounded-circle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu do usuário">
                             <x-avatar :user="$currentUser" class="border border-2 border-white border-opacity-50" />
@@ -63,7 +55,6 @@
                                 <div class="small text-body-secondary">{{ $currentUser->email }}</div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-person-circle me-2" aria-hidden="true"></i>Minha conta</a></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
