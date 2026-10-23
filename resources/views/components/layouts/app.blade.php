@@ -39,8 +39,12 @@
     <body>
         <div class="d-flex vh-100 overflow-hidden">
             <nav class="app-rail d-none d-lg-flex flex-column align-items-center flex-shrink-0 py-3 gap-2" aria-label="Atalhos">
-                <a href="{{ route('boards.index') }}" class="rail-item mb-2" title="{{ $appSettings->displayName() }}" aria-label="Início">
-                    <i class="bi bi-controller fs-4" aria-hidden="true"></i>
+                <a href="{{ route('boards.index') }}" class="brand-tile text-decoration-none mb-2" title="{{ $appSettings->displayName() }}" aria-label="Início">
+                    @if ($appSettings->logoUrl())
+                        <img src="{{ $appSettings->logoUrl() }}" alt="">
+                    @else
+                        <i class="bi bi-controller fs-4 text-primary" aria-hidden="true"></i>
+                    @endif
                 </a>
 
                 <div class="mt-auto">
@@ -74,18 +78,9 @@
                 </div>
 
                 <div class="offcanvas-body d-flex flex-column p-3 overflow-y-auto h-100">
-                    <a href="{{ route('boards.index') }}" class="d-flex align-items-center gap-2 text-body text-decoration-none px-1 mb-2">
-                        <span class="brand-tile">
-                            @if ($appSettings->logoUrl())
-                                <img src="{{ $appSettings->logoUrl() }}" alt="">
-                            @else
-                                <i class="bi bi-controller fs-5 text-primary" aria-hidden="true"></i>
-                            @endif
-                        </span>
-                        <span class="min-w-0">
-                            <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
-                            <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
-                        </span>
+                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none px-2 mb-2">
+                        <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
+                        <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
                     </a>
 
                     <nav class="flex-grow-1">
@@ -103,23 +98,23 @@
                             </ul>
                         @endforeach
 
-                        @can('accessAdminPanel', \App\Models\User::class)
-                            <div class="sidebar-heading">Administração</div>
-                            <ul class="nav flex-column gap-1">
-                                <li>
-                                    <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if (request()->routeIs('admin.*')) aria-current="page" @endif>
-                                        <i class="bi bi-gear" aria-hidden="true"></i>
-                                        Configurações
-                                    </a>
-                                </li>
-                            </ul>
-                        @endcan
                     </nav>
 
-                    <form method="POST" action="{{ route('logout') }}" class="d-lg-none border-top pt-3 mt-3">
-                        @csrf
-                        <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
-                    </form>
+                    <div class="border-top pt-3 mt-3">
+                        @can('accessAdminPanel', \App\Models\User::class)
+                            <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if (request()->routeIs('admin.*')) aria-current="page" @endif>
+                                <i class="bi bi-gear" aria-hidden="true"></i>
+                                Configurações
+                            </a>
+                        @endcan
+
+                        <form method="POST" action="{{ route('logout') }}" class="d-lg-none">
+                            @csrf
+                            <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
+                        </form>
+
+                        <x-footer class="text-center mt-3" />
+                    </div>
                 </div>
               </div>
             </aside>

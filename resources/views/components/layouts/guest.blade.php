@@ -48,7 +48,7 @@
             {{ $slot }}
         </div>
 
-        <x-footer class="w-100 mt-4" style="max-width: 25rem;" />
+        <x-footer class="text-center mt-4" />
 
         @livewireScripts
     </body>
