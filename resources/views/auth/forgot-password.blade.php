@@ -1,6 +1,6 @@
 <x-layouts.guest :title="__('Esqueci minha senha')">
-    <h1 class="h4 mb-1">Esqueceu sua senha?</h1>
-    <p class="text-body-secondary mb-4">
+    <h1 class="h5 text-center mb-1">Esqueceu sua senha?</h1>
+    <p class="text-body-secondary text-center mb-4">
         Informe seu e-mail e enviaremos um link para redefinir sua senha.
     </p>
 

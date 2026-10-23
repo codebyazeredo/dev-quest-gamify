@@ -1,5 +1,18 @@
-<div class="d-flex flex-column flex-grow-1 min-h-0">
-    <div x-data="{ draggingTaskId: null, overColumnId: null }" class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2">
+<div class="d-flex flex-column flex-grow-1 min-h-0" x-data="{ draggingTaskId: null, overColumnId: null, search: '', mine: false }">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <div class="input-group" style="max-width: 16rem;">
+            <input type="search" x-model.debounce.150ms="search" class="form-control" placeholder="Buscar tarefas" aria-label="Buscar tarefas">
+            <span class="input-group-text bg-body-tertiary"><i class="bi bi-search" aria-hidden="true"></i></span>
+        </div>
+
+        <button type="button" class="btn" :class="mine ? 'btn-primary' : 'btn-outline-secondary'" x-on:click="mine = ! mine" :aria-pressed="mine">
+            <i class="bi bi-person-check" aria-hidden="true"></i> Minhas tarefas
+        </button>
+
+        <button type="button" class="btn btn-link text-decoration-none" x-show="search || mine" x-cloak x-on:click="search = ''; mine = false">Limpar filtros</button>
+    </div>
+
+    <div class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2">
         @foreach ($board->columns as $column)
             <section
                 class="kanban-column d-flex flex-column p-2"

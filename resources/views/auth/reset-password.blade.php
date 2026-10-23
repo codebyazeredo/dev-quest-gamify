@@ -1,5 +1,5 @@
 <x-layouts.guest :title="__('Redefinir senha')">
-    <h1 class="h4 mb-4">Redefinir senha</h1>
+    <h1 class="h5 text-center mb-4">Redefinir senha</h1>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">

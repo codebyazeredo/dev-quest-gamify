@@ -38,21 +38,63 @@
     </head>
     <body>
         <div class="d-flex vh-100 overflow-hidden">
-            <aside class="app-sidebar flex-shrink-0" data-bs-theme="dark">
+            <nav class="app-rail d-none d-lg-flex flex-column align-items-center flex-shrink-0 py-3 gap-2" aria-label="Atalhos">
+                <a href="{{ route('boards.index') }}" class="rail-item mb-2" title="{{ $appSettings->displayName() }}" aria-label="Início">
+                    <i class="bi bi-controller fs-4" aria-hidden="true"></i>
+                </a>
+
+                <a href="{{ route('boards.index') }}" class="rail-item {{ request()->routeIs('boards.*') ? 'active' : '' }}" title="Quadros" aria-label="Quadros"><i class="bi bi-kanban" aria-hidden="true"></i></a>
+                <a href="{{ route('ranking') }}" class="rail-item {{ request()->routeIs('ranking') ? 'active' : '' }}" title="Ranking" aria-label="Ranking"><i class="bi bi-trophy" aria-hidden="true"></i></a>
+                <a href="{{ route('checkin') }}" class="rail-item {{ request()->routeIs('checkin') ? 'active' : '' }}" title="Check-in" aria-label="Check-in"><i class="bi bi-fire" aria-hidden="true"></i></a>
+
+                <div class="mt-auto d-flex flex-column align-items-center gap-2">
+                    @can('accessAdminPanel', \App\Models\User::class)
+                        <a href="{{ route('admin.index') }}" class="rail-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" title="Configurações" aria-label="Configurações"><i class="bi bi-gear" aria-hidden="true"></i></a>
+                    @endcan
+
+                    <div class="dropend">
+                        <button type="button" class="btn p-0 border-0 rounded-circle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu do usuário">
+                            <x-avatar :user="$currentUser" class="border border-2 border-white border-opacity-50" />
+                        </button>
+
+                        <ul class="dropdown-menu shadow">
+                            <li class="px-3 py-2">
+                                <div class="fw-semibold">{{ $currentUser->name }}</div>
+                                <div class="small text-body-secondary">{{ $currentUser->email }}</div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-person-circle me-2" aria-hidden="true"></i>Minha conta</a></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <aside class="app-sidebar flex-shrink-0">
               <div class="offcanvas-lg offcanvas-start h-100 d-flex flex-column" id="app-sidebar" tabindex="-1" aria-label="Menu principal">
-                <div class="offcanvas-header d-lg-none">
-                    <span class="fw-bold text-white">Menu</span>
+                <div class="offcanvas-header d-lg-none border-bottom">
+                    <span class="fw-semibold">Menu</span>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#app-sidebar" aria-label="Fechar"></button>
                 </div>
 
-                <div class="offcanvas-body d-flex flex-column p-3 pt-lg-4 overflow-y-auto h-100">
-                    <a href="{{ route('boards.index') }}" class="d-flex align-items-center gap-2 text-white text-decoration-none fw-bold fs-5 px-2 mb-3">
-                        @if ($appSettings->logoUrl())
-                            <img src="{{ $appSettings->logoUrl() }}" alt="" style="height: 2rem; width: auto;">
-                        @else
-                            <i class="bi bi-controller" aria-hidden="true"></i>
-                        @endif
-                        <span class="text-truncate">{{ $appSettings->displayName() }}</span>
+                <div class="offcanvas-body d-flex flex-column p-3 overflow-y-auto h-100">
+                    <a href="{{ route('boards.index') }}" class="d-flex align-items-center gap-2 text-body text-decoration-none px-1 mb-2">
+                        <span class="brand-tile">
+                            @if ($appSettings->logoUrl())
+                                <img src="{{ $appSettings->logoUrl() }}" alt="">
+                            @else
+                                <i class="bi bi-controller fs-5 text-primary" aria-hidden="true"></i>
+                            @endif
+                        </span>
+                        <span class="min-w-0">
+                            <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
+                            <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
+                        </span>
                     </a>
 
                     <nav class="flex-grow-1">
@@ -83,51 +125,26 @@
                         @endcan
                     </nav>
 
-                    <div class="dropup border-top border-secondary-subtle pt-3 mt-3">
-                        <button type="button" class="btn btn-link text-decoration-none text-white w-100 d-flex align-items-center gap-2 p-1 text-start" data-bs-toggle="dropdown" aria-expanded="false">
-                            <x-avatar :user="$currentUser" />
-                            <span class="min-w-0 flex-grow-1">
-                                <span class="d-block small fw-semibold text-truncate">{{ $currentUser->name }}</span>
-                                <span class="d-block text-truncate text-white-50" style="font-size: 0.75rem;">
-                                    @if ($currentUser->selectedTitle)
-                                        {{ $currentUser->selectedTitle->name }}
-                                    @else
-                                        {{ $currentUser->getRoleNames()->map(fn ($role) => \App\Enums\UserRole::labelFor($role))->join(', ') }}
-                                    @endif
-                                </span>
-                            </span>
-                            <i class="bi bi-chevron-expand text-white-50" aria-hidden="true"></i>
-                        </button>
-
-                        <ul class="dropdown-menu w-100 shadow">
-                            <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-person-circle me-2" aria-hidden="true"></i>Minha conta</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                    <form method="POST" action="{{ route('logout') }}" class="d-lg-none border-top pt-3 mt-3">
+                        @csrf
+                        <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
+                    </form>
                 </div>
               </div>
             </aside>
 
             <div class="d-flex flex-column flex-grow-1 min-w-0">
-                <header class="navbar bg-body border-bottom d-lg-none px-3">
-                    <button type="button" class="btn btn-outline-secondary btn-icon" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
-                        <i class="bi bi-list fs-4" aria-hidden="true"></i>
+                <header class="navbar bg-primary d-lg-none px-3" style="color: var(--app-primary-contrast);">
+                    <button type="button" class="rail-item border-0 bg-transparent text-reset" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
+                        <i class="bi bi-list fs-3" aria-hidden="true"></i>
                     </button>
-                    <span class="navbar-brand mb-0 fw-bold text-truncate">{{ $appSettings->displayName() }}</span>
+                    <span class="fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
                     <x-avatar :user="$currentUser" />
                 </header>
 
-                <main class="flex-grow-1 min-h-0 overflow-auto d-flex flex-column p-3 p-lg-4">
+                <main class="flex-grow-1 min-h-0 overflow-auto d-flex flex-column px-3 px-lg-4 py-3 py-lg-4">
                     {{ $slot }}
                 </main>
-
-                <x-footer class="border-top bg-body px-3 px-lg-4 py-2" />
             </div>
         </div>
 

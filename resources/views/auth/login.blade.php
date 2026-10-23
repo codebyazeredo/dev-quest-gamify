@@ -1,6 +1,6 @@
 <x-layouts.guest :title="__('Entrar')">
-    <h1 class="h4 mb-1">Faça seu login</h1>
-    <p class="text-body-secondary mb-4">Entre para continuar suas missões.</p>
+    <h1 class="h5 text-center mb-1">Entrar na plataforma</h1>
+    <p class="text-body-secondary text-center mb-4">Use seu e-mail e senha para continuar.</p>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
