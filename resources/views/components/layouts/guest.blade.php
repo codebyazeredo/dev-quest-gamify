@@ -23,8 +23,15 @@
     <body>
         <div class="container-fluid">
             <div class="row min-vh-100">
-                <div class="col-lg-5 col-xl-4 bg-body d-flex flex-column justify-content-center px-4 px-sm-5 py-5 order-2 order-lg-1">
-                    <div class="w-100 mx-auto" style="max-width: 24rem;">
+                <div class="col-lg-5 col-xl-4 bg-body d-flex flex-column justify-content-between px-4 px-sm-5 py-4 order-2 order-lg-1">
+                    <div class="d-flex align-items-center gap-2 fw-semibold">
+                        @if ($appSettings->logoUrl())
+                            <img src="{{ $appSettings->logoUrl() }}" alt="" style="height: 1.75rem; width: auto;">
+                        @endif
+                        <span class="text-truncate">{{ $appSettings->displayName() }}</span>
+                    </div>
+
+                    <div class="w-100 mx-auto py-5" style="max-width: 22rem;">
                         @if (session('status'))
                             <div class="alert alert-success d-flex align-items-start gap-2" role="alert">
                                 <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
@@ -35,10 +42,10 @@
                         {{ $slot }}
                     </div>
 
-                    <x-footer class="w-100 mx-auto mt-5" style="max-width: 24rem;" />
+                    <x-footer class="w-100" />
                 </div>
 
-                <div class="col-lg-7 col-xl-8 bg-primary bg-gradient text-bg-primary d-flex flex-column align-items-center justify-content-center gap-4 px-4 py-5 text-center order-1 order-lg-2">
+                <div class="auth-showcase col-lg-7 col-xl-8 d-none d-lg-flex flex-column align-items-center justify-content-center gap-4 p-5 text-center text-white order-1 order-lg-2" data-bs-theme="dark">
                     @if ($appSettings->logoUrl())
                         @php
                             $logoMaxWidth = match ($appSettings->logo_size) {
@@ -47,19 +54,19 @@
                                 \App\Enums\LogoSize::LARGE => '28rem',
                             };
                         @endphp
-                        <img src="{{ $appSettings->logoUrl() }}" alt="{{ $appSettings->displayName() }}" class="img-fluid" style="max-width: min(100%, {{ $logoMaxWidth }}); max-height: 40vh;">
+                        <img src="{{ $appSettings->logoUrl() }}" alt="{{ $appSettings->displayName() }}" class="img-fluid position-relative" style="max-width: min(100%, {{ $logoMaxWidth }}); max-height: 38vh;">
                     @else
-                        <h2 class="display-5 fw-bold mb-0">{{ $appSettings->displayName() }}</h2>
+                        <h2 class="display-5 fw-bold mb-0 position-relative">{{ $appSettings->displayName() }}</h2>
                     @endif
 
-                    <p class="d-none d-lg-block fs-4 fw-medium mb-0 opacity-90" style="max-width: 32rem;">
+                    <p class="fs-4 fw-medium mb-0 position-relative" style="max-width: 30rem;">
                         Transforme tarefas em conquistas: gamificação de verdade para o seu time de desenvolvimento.
                     </p>
 
-                    <ul class="list-unstyled d-none d-lg-flex gap-4 mb-0 small fw-medium">
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-kanban fs-5" aria-hidden="true"></i> Kanban</li>
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-lightning-charge-fill fs-5" aria-hidden="true"></i> XP e níveis</li>
-                        <li class="d-flex align-items-center gap-2"><i class="bi bi-trophy-fill fs-5" aria-hidden="true"></i> Ranking</li>
+                    <ul class="list-unstyled d-flex gap-3 mb-0 small position-relative">
+                        <li class="d-flex align-items-center gap-2 border border-light-subtle border-opacity-25 rounded-pill px-3 py-2"><i class="bi bi-kanban" aria-hidden="true"></i> Kanban</li>
+                        <li class="d-flex align-items-center gap-2 border border-light-subtle border-opacity-25 rounded-pill px-3 py-2"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> XP e níveis</li>
+                        <li class="d-flex align-items-center gap-2 border border-light-subtle border-opacity-25 rounded-pill px-3 py-2"><i class="bi bi-trophy-fill" aria-hidden="true"></i> Ranking</li>
                     </ul>
                 </div>
             </div>

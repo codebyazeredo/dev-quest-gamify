@@ -1,12 +1,13 @@
 <div>
-    <div class="card text-bg-primary bg-gradient border-0 mb-4">
+    <div class="card mb-4 overflow-hidden">
+        <div class="bg-primary" style="height: 0.375rem;"></div>
         <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center gap-4">
-            <x-avatar :user="auth()->user()" size="xl" class="border border-3 border-white border-opacity-50" />
+            <x-avatar :user="auth()->user()" size="xl" />
 
             <div class="flex-grow-1 min-w-0">
-                <p class="small text-uppercase fw-semibold opacity-75 mb-1">Minha conta</p>
-                <h1 class="h2 mb-1 text-truncate">{{ auth()->user()->name }}</h1>
-                <p class="mb-0 d-flex align-items-center gap-2 opacity-90">
+                <p class="small text-uppercase fw-semibold text-body-secondary mb-1">Minha conta</p>
+                <h1 class="h3 mb-1 text-truncate">{{ auth()->user()->name }}</h1>
+                <p class="mb-0 d-flex align-items-center gap-2 text-body-secondary">
                     @if ($selectedTitle)
                         <x-icon :name="$selectedTitle->icon" />
                         {{ $selectedTitle->name }}
@@ -17,13 +18,13 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('achievements') }}" class="btn btn-light">
+                <a href="{{ route('achievements') }}" class="btn btn-outline-secondary bg-body">
                     <i class="bi bi-award" aria-hidden="true"></i> Conquistas
                 </a>
-                <a href="{{ route('titles') }}" class="btn btn-light">
+                <a href="{{ route('titles') }}" class="btn btn-outline-secondary bg-body">
                     <i class="bi bi-patch-check" aria-hidden="true"></i> Títulos
                 </a>
-                <button type="button" wire:click="toggleEditProfile" class="btn btn-outline-light">
+                <button type="button" wire:click="toggleEditProfile" class="btn btn-primary">
                     <x-icon name="pencil" /> Editar dados
                 </button>
             </div>

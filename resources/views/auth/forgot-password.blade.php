@@ -1,5 +1,5 @@
 <x-layouts.guest :title="__('Esqueci minha senha')">
-    <h1 class="h2 mb-1">Esqueceu sua senha?</h1>
+    <h1 class="h4 mb-1">Esqueceu sua senha?</h1>
     <p class="text-body-secondary mb-4">
         Informe seu e-mail e enviaremos um link para redefinir sua senha.
     </p>
@@ -19,10 +19,10 @@
 
         <div>
             <label for="email" class="form-label fw-medium small mb-1">E-mail</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control form-control-lg" required autofocus>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control" required autofocus>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg w-100">Enviar link de redefinição</button>
+        <button type="submit" class="btn btn-primary w-100">Enviar link de redefinição</button>
     </form>
 
     <p class="small mt-4 mb-0">

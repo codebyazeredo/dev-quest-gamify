@@ -1,5 +1,5 @@
 <x-layouts.guest :title="__('Entrar')">
-    <h1 class="h2 mb-1">Faça seu login</h1>
+    <h1 class="h4 mb-1">Faça seu login</h1>
     <p class="text-body-secondary mb-4">Entre para continuar suas missões.</p>
 
     @if ($errors->any())
@@ -19,7 +19,7 @@
             <label for="email" class="form-label fw-medium small mb-1">E-mail</label>
             <div class="input-group">
                 <span class="input-group-text"><x-icon name="mail" /></span>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control form-control-lg" required autofocus autocomplete="username" placeholder="seu@email.com">
+                <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control" required autofocus autocomplete="username" placeholder="seu@email.com">
             </div>
         </div>
 
@@ -27,7 +27,7 @@
             <label for="password" class="form-label fw-medium small mb-1">Senha</label>
             <div class="input-group">
                 <span class="input-group-text"><x-icon name="lock" /></span>
-                <input :type="show ? 'text' : 'password'" id="password" name="password" class="form-control form-control-lg" required autocomplete="current-password" placeholder="sua senha">
+                <input :type="show ? 'text' : 'password'" id="password" name="password" class="form-control" required autocomplete="current-password" placeholder="sua senha">
                 <button type="button" @click="show = !show" title="Mostrar/ocultar senha" aria-label="Mostrar/ocultar senha" class="btn btn-outline-secondary">
                     <span x-show="!show"><x-icon name="eye" /></span>
                     <span x-show="show" x-cloak><x-icon name="eye-off" /></span>
@@ -44,6 +44,6 @@
             <a href="{{ route('password.request') }}">Esqueceu sua senha?</a>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg w-100">Entrar</button>
+        <button type="submit" class="btn btn-primary w-100">Entrar</button>
     </form>
 </x-layouts.guest>

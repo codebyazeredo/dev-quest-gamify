@@ -16,14 +16,14 @@
                             wire:change="renameColumn({{ $column->id }}, $event.target.value)"
                             aria-label="Nome da coluna"
                             @can('update', $board) @else disabled @endcan
-                            class="form-control form-control-sm kanban-column-name px-2"
+                            class="form-control form-control-sm kanban-column-name kanban-column-title px-2"
                         >
-                        @if ($column->status)
+                        @if ($column->status && $column->status->label() !== $column->name)
                             <x-badge color="primary" class="mt-1 ms-1">{{ $column->status->label() }}</x-badge>
                         @endif
                     </div>
 
-                    <span class="badge rounded-pill text-bg-light border flex-shrink-0">{{ $column->tasks->count() }}</span>
+                    <span class="small fw-semibold text-body-secondary flex-shrink-0 px-1">{{ $column->tasks->count() }}</span>
 
                     @can('update', $board)
                         <div class="position-relative flex-shrink-0" x-data="{ open: false }" @click.outside="open = false">
