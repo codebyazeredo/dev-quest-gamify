@@ -54,6 +54,34 @@
                 </div>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-header fw-semibold d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-card-checklist me-1" aria-hidden="true"></i> Minhas tarefas em aberto</span>
+                    <a href="{{ route('boards.index') }}" class="small fw-normal">Ver quadros</a>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    @forelse ($openTasks as $openTask)
+                        <li class="list-group-item d-flex align-items-center justify-content-between gap-3" wire:key="open-task-{{ $openTask->id }}">
+                            <div class="min-w-0">
+                                <a href="{{ route('tasks.show', $openTask) }}" class="fw-medium text-body text-decoration-none d-block text-truncate">{{ $openTask->title }}</a>
+                                <span class="small text-body-secondary">{{ $openTask->board->name }} · {{ $openTask->category->name }}</span>
+                            </div>
+
+                            @if ($openTask->isLate())
+                                <x-badge color="danger"><x-icon name="alert" /> Atrasada · {{ $openTask->due_at->format('d/m') }}</x-badge>
+                            @elseif ($openTask->due_at)
+                                <x-badge :color="$openTask->due_at->isToday() ? 'warning' : 'secondary'"><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ $openTask->due_at->isToday() ? 'Hoje' : $openTask->due_at->format('d/m H:i') }}</x-badge>
+                            @else
+                                <span class="small text-body-tertiary">Sem prazo</span>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="list-group-item text-center text-body-secondary py-4">Você não tem tarefas em aberto. Que tal assumir uma no quadro?</li>
+                    @endforelse
+                </ul>
+            </div>
+
             <livewire:gamification.xp-history :limit="5" />
         </div>
 

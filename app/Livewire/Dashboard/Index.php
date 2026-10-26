@@ -6,6 +6,7 @@ use App\Models\Achievement;
 use App\Models\Task;
 use App\Models\Title;
 use App\Models\XpTransaction;
+use App\Repositories\TaskRepository;
 use App\Services\CheckinService;
 use App\Services\LevelService;
 use Illuminate\Contracts\View\View;
@@ -65,6 +66,7 @@ class Index extends Component
             'achievementsCount' => $user->isAdmin() ? Achievement::where('active', true)->count() : $user->unlockedAchievements()->count(),
             'titlesCount' => $user->isAdmin() ? Title::count() : $user->unlockedTitles()->count(),
             'currentStreak' => app(CheckinService::class)->currentStreakFor($user),
+            'openTasks' => app(TaskRepository::class)->openAssignedTo($user, 6),
             'selectedTitle' => $user->selectedTitle,
         ]);
     }
