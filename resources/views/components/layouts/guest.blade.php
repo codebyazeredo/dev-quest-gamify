@@ -12,6 +12,8 @@
         <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+        <x-theme-init />
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])

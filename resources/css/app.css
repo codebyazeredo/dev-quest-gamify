@@ -1,10 +1,6 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.min.css';
 
-/*
- * Tokens do Bootstrap (variáveis CSS nativas do 5.3).
- * A cor primária é sobrescrita em runtime por <x-theme-style> a partir das configurações da empresa.
- */
 :root {
     --bs-body-font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --bs-body-font-size: 0.875rem;
@@ -22,6 +18,8 @@
     --bs-box-shadow-sm: 0 1px 1px rgba(9, 30, 66, 0.12);
     --bs-box-shadow: 0 4px 10px rgba(9, 30, 66, 0.14);
     --app-sidebar-width: 16rem;
+    --app-sidebar-bg: #f7f8f9;
+    --app-card-hover: #f7f8f9;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -55,9 +53,6 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
 }
 
-/* ---------- Cor primária configurável ----------
- * O Bootstrap compila várias cores literais; aqui elas passam a derivar de --bs-primary.
- */
 .btn-primary {
     --bs-btn-color: var(--app-primary-contrast, #fff);
     --bs-btn-bg: var(--bs-primary);
@@ -123,7 +118,6 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--app-primary-contrast, #fff);
 }
 
-/* ---------- Componentes do app ---------- */
 .min-h-0 { min-height: 0; }
 .min-w-0 { min-width: 0; }
 
@@ -216,7 +210,6 @@ h1, h2, h3, h4, h5, h6 {
     --bs-progress-bar-bg: var(--bs-primary);
 }
 
-/* ---------- Estrutura (rail + menu lateral + conteúdo) ---------- */
 .app-rail {
     width: 4rem;
     background: var(--bs-primary);
@@ -245,14 +238,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-sidebar .offcanvas-lg {
-    --bs-offcanvas-bg: #f7f8f9;
+    --bs-offcanvas-bg: var(--app-sidebar-bg);
     --bs-offcanvas-width: 17rem;
 }
 
 @media (min-width: 992px) {
     .app-sidebar {
         width: var(--app-sidebar-width);
-        background: #f7f8f9;
+        background: var(--app-sidebar-bg);
         border-right: 1px solid var(--bs-border-color);
     }
 }
@@ -300,7 +293,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     border-radius: 0.5rem;
-    background: var(--bs-body-bg);
+    background: #fff;
     border: 1px solid var(--bs-border-color);
     overflow: hidden;
 }
@@ -322,7 +315,6 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.4rem;
 }
 
-/* ---------- Login ---------- */
 .auth-page {
     min-height: 100vh;
     background:
@@ -336,7 +328,7 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 25rem;
     border: 1px solid var(--bs-border-color);
     border-radius: 0.5rem;
-    background: #fff;
+    background: var(--bs-body-bg);
     box-shadow: 0 8px 24px rgba(9, 30, 66, 0.12), 0 0 1px rgba(9, 30, 66, 0.2);
 }
 
@@ -345,7 +337,6 @@ h1, h2, h3, h4, h5, h6 {
     width: min(22rem, 100vw - 2rem);
 }
 
-/* ---------- Kanban ---------- */
 .kanban-board {
     scroll-snap-type: x proximity;
 }
@@ -356,6 +347,7 @@ h1, h2, h3, h4, h5, h6 {
     max-height: 100%;
     background: var(--bs-secondary-bg);
     border: 1px solid transparent;
+    border-top: 3px solid var(--bs-primary);
     border-radius: 0.5rem;
     scroll-snap-align: start;
     transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -390,7 +382,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .kanban-card:hover {
-    background: #f7f8f9;
+    background: var(--app-card-hover);
 }
 
 .kanban-card-key {
@@ -405,7 +397,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--bs-secondary-color);
+    color: var(--bs-primary-text-emphasis);
 }
 
 .kanban-card[draggable='true'] {
@@ -413,11 +405,88 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .kanban-card--dragging {
-    opacity: 0.45;
-    transform: rotate(1.5deg);
+    display: none;
 }
 
-/* ---------- Check-in (calendário) ---------- */
+.kanban-card--mine {
+    box-shadow: inset 3px 0 0 var(--bs-primary), 0 1px 1px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+}
+
+.kanban-cards {
+    min-height: 4rem;
+}
+
+.kanban-cards:has(.kanban-placeholder) .kanban-empty {
+    display: none;
+}
+
+.kanban-placeholder {
+    flex-shrink: 0;
+    height: var(--placeholder-height, 4rem);
+    border: 2px dashed var(--bs-primary);
+    border-radius: 0.25rem;
+    background: var(--bs-primary-bg-subtle);
+    animation: placeholder-grow 0.15s ease-out;
+}
+
+@keyframes placeholder-grow {
+    from { height: 0; opacity: 0; }
+}
+
+.kanban-count {
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4rem;
+}
+
+.app-thead {
+    --bs-table-bg: var(--bs-tertiary-bg);
+}
+
+html[data-bs-theme='dark'] {
+    --bs-body-bg: #1d2125;
+    --bs-body-color: #b6c2cf;
+    --bs-body-color-rgb: 182, 194, 207;
+    --bs-secondary-color: #9fadbc;
+    --bs-tertiary-color: #8c9bab;
+    --bs-secondary-bg: #161a1d;
+    --bs-tertiary-bg: #22272b;
+    --bs-border-color: #38414a;
+    --bs-box-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.4);
+    --bs-box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    --app-sidebar-bg: #161a1d;
+    --app-card-hover: #2c333a;
+}
+
+html[data-bs-theme='dark'] .card {
+    --bs-card-bg: #22272b;
+}
+
+html[data-bs-theme='dark'] .kanban-card {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+html[data-bs-theme='dark'] .app-sidebar .nav-link {
+    color: #9fadbc;
+}
+
+html[data-bs-theme='dark'] .app-sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+html[data-bs-theme='dark'] .auth-card {
+    background: #22272b;
+}
+
+html[data-bs-theme='dark'] .jira-tag {
+    filter: saturate(0.9) brightness(0.95);
+}
+
 .checkin-day {
     aspect-ratio: 1;
     min-height: 2.75rem;

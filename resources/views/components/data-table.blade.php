@@ -3,7 +3,7 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead class="app-thead">
                 <tr class="small text-body-secondary text-uppercase">
                     {{ $head }}
                 </tr>
@@ -15,7 +15,7 @@
     </div>
 
     @if ($paginator)
-        <div class="card-footer bg-body d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+        <div class="card-footer bg-body-tertiary d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
             <x-per-page-selector />
             {{ $paginator->links() }}
         </div>

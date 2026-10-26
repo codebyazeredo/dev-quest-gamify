@@ -20,6 +20,10 @@
                     ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
                 ],
             ];
+
+            if ($currentUser->isAdmin()) {
+                $navigation['Geral'][] = ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Painel administrativo', 'icon' => 'bi-speedometer2'];
+            }
         @endphp
 
         <title>{{ $title ?? $appSettings->displayName() }}</title>
@@ -27,6 +31,8 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+        <x-theme-init />
 
         @fonts
 
@@ -102,7 +108,7 @@
 
                     <div class="border-top pt-3 mt-3">
                         @can('accessAdminPanel', \App\Models\User::class)
-                            <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" @if (request()->routeIs('admin.*')) aria-current="page" @endif>
+                            <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
                                 <i class="bi bi-gear" aria-hidden="true"></i>
                                 Configurações
                             </a>
@@ -112,6 +118,8 @@
                             @csrf
                             <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
                         </form>
+
+                        <x-theme-switch class="mt-3" />
 
                         <x-footer class="text-center mt-3" />
                     </div>

@@ -20,4 +20,14 @@
         --bs-link-hover-color: color-mix(in srgb, {{ $hex }} 80%, black);
         --bs-link-hover-color-rgb: {{ $red }}, {{ $green }}, {{ $blue }};
     }
+
+    @if ($selector === 'html:root')
+        html[data-bs-theme='dark']:root {
+            --bs-primary-text-emphasis: color-mix(in srgb, {{ $hex }} 55%, white);
+            --bs-primary-bg-subtle: color-mix(in srgb, {{ $hex }} 22%, #1d2125);
+            --bs-primary-border-subtle: color-mix(in srgb, {{ $hex }} 45%, #1d2125);
+            --bs-link-color: color-mix(in srgb, {{ $hex }} 65%, white);
+            --bs-link-hover-color: color-mix(in srgb, {{ $hex }} 50%, white);
+        }
+    @endif
 </style>
