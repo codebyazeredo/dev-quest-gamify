@@ -4,6 +4,7 @@ use App\Livewire\Admin\Achievements\Index as AdminAchievements;
 use App\Livewire\Admin\Categories\Index as AdminCategories;
 use App\Livewire\Admin\Challenges\Index as AdminChallenges;
 use App\Livewire\Admin\EventRules\Index as AdminEventRules;
+use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Hub as AdminHub;
 use App\Livewire\Admin\People\Index as AdminPeople;
 use App\Livewire\Admin\Priorities\Index as AdminPriorities;
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkin', CheckinHistory::class)->name('checkin');
 });
 
+Route::get('/admin/dashboard', AdminDashboard::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.dashboard');
 Route::get('/admin', AdminHub::class)
     ->middleware(['auth', 'role:admin'])
     ->name('admin.index');

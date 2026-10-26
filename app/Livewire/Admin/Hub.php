@@ -21,6 +21,12 @@ class Hub extends Component
     {
         $sections = [
             [
+                'label' => 'Visão geral',
+                'items' => [
+                    ['route' => 'admin.dashboard', 'label' => 'Painel administrativo', 'description' => 'Indicadores de tarefas, XP e equipe.', 'icon' => 'columns'],
+                ],
+            ],
+            [
                 'label' => 'Gestão',
                 'items' => [
                     ['route' => 'admin.users', 'label' => 'Usuários', 'description' => 'Contas de acesso ao sistema.', 'icon' => 'users'],
