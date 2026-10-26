@@ -3,6 +3,8 @@
 namespace App\Livewire\Gamification;
 
 use App\Models\Title;
+use App\Repositories\TitleRepository;
+use App\Repositories\UserChallengeRepository;
 use App\Services\TitleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -33,8 +35,14 @@ class Titles extends Component
             ? Title::orderBy('name')->get()
             : $user->unlockedTitles()->with('title')->get()->pluck('title');
 
+        $lockedTitles = $user->isAdmin()
+            ? collect()
+            : app(TitleRepository::class)->activeLockedFor($unlockedTitles->pluck('id')->all());
+
         return view('livewire.gamification.titles', [
             'unlockedTitles' => $unlockedTitles,
+            'lockedTitles' => $lockedTitles,
+            'completedChallenges' => app(UserChallengeRepository::class)->countCompletedBy($user),
             'selectedTitleId' => $user->selected_title_id,
         ]);
     }

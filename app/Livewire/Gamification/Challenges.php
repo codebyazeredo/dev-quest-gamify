@@ -3,6 +3,7 @@
 namespace App\Livewire\Gamification;
 
 use App\Models\Challenge;
+use App\Repositories\ChallengeRepository;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -16,10 +17,7 @@ class Challenges extends Component
 
         $userChallenges = $user->userChallenges()->get()->keyBy('challenge_id');
 
-        $challenges = Challenge::where('active', true)
-            ->where('ends_at', '>=', now())
-            ->orderBy('ends_at')
-            ->get()
+        $challenges = app(ChallengeRepository::class)->activeCurrentAndUpcoming()
             ->map(function (Challenge $challenge) use ($userChallenges) {
                 $userChallenge = $userChallenges->get($challenge->id);
 
