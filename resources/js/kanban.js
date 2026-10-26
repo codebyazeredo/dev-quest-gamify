@@ -1,8 +1,14 @@
+import { api, ApiError } from './api';
+import { pageActions, stashToasts } from './page-actions';
+
 const EDGE_SIZE = 72;
 const EDGE_SPEED = 18;
 
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('kanbanBoard', () => ({
+        ...pageActions(),
+
+        newColumnName: '',
         draggingTaskId: null,
         overColumnId: null,
         dropIndex: 0,
@@ -153,7 +159,21 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.endDrag();
-            this.$wire.moveTask(taskId, columnId, position);
+            this.moveTask(taskId, columnId, position);
+        },
+
+        /** O card já foi movido na tela; se a API recusar, recarrega para voltar ao estado real. */
+        async moveTask(taskId, columnId, position) {
+            try {
+                await api.post(`/api/tasks/${taskId}/move`, { column_id: columnId, position });
+            } catch (error) {
+                if (!(error instanceof ApiError)) {
+                    throw error;
+                }
+
+                stashToasts([{ type: 'error', title: error.message, message: '' }]);
+                window.location.reload();
+            }
         },
 
         endDrag() {
