@@ -8,6 +8,11 @@ use App\Models\UserTitle;
 
 class TitlePolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return $user->isAdmin();
+    }
+
     public function create(User $user): bool
     {
         return $user->isAdmin();

@@ -4,12 +4,15 @@ namespace App\Listeners;
 
 use App\Enums\XpSourceType;
 use App\Events\TaskEventCreated;
-use App\Models\TaskEventRule;
+use App\Repositories\TaskEventRuleRepository;
 use App\Services\XpService;
 
 class GrantXpListener
 {
-    public function __construct(private XpService $xpService) {}
+    public function __construct(
+        private XpService $xpService,
+        private TaskEventRuleRepository $eventRules,
+    ) {}
 
     public function handle(TaskEventCreated $event): void
     {
@@ -20,7 +23,7 @@ class GrantXpListener
             return;
         }
 
-        $rule = TaskEventRule::where('type', $taskEvent->type)->first();
+        $rule = $this->eventRules->findByType($taskEvent->type);
 
         if (! $rule || ! $rule->active || $rule->xp_reward <= 0) {
             return;

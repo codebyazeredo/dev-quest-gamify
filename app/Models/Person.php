@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['nome', 'cpf', 'rg', 'nascimento', 'sexo', 'email', 'telefone1', 'telefone2', 'foto_path'])]
 class Person extends Model
@@ -19,6 +21,11 @@ class Person extends Model
             'nascimento' => 'date',
             'sexo' => Gender::class,
         ];
+    }
+
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->foto_path ? Storage::url($this->foto_path) : null);
     }
 
     public function address(): HasOne

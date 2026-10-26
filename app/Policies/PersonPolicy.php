@@ -7,6 +7,11 @@ use App\Models\User;
 
 class PersonPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return $user->can('manage-people');
+    }
+
     public function create(User $user): bool
     {
         return $user->can('manage-people');
