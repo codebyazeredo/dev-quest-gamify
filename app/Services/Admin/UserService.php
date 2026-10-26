@@ -6,14 +6,30 @@ use App\Exceptions\DeletionBlockedException;
 use App\Exceptions\DuplicateEntryException;
 use App\Models\User;
 use App\Repositories\PersonRepository;
+use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class UserService
 {
     public function __construct(
         private UserRepository $users,
         private PersonRepository $people,
+        private RoleRepository $roles,
     ) {}
+
+    public function paginate(int $perPage): LengthAwarePaginator
+    {
+        return $this->users->paginate($perPage);
+    }
+
+    /** @return array{people: Collection, roles: SupportCollection} */
+    public function formOptions(): array
+    {
+        return ['people' => $this->people->withoutUser(), 'roles' => $this->roles->names()];
+    }
 
     public function create(int $personId, string $email, string $password, array $roles): User
     {

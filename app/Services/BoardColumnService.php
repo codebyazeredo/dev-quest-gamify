@@ -15,47 +15,53 @@ class BoardColumnService
 {
     public function __construct(private BoardColumnRepository $columns) {}
 
+    public function findInBoard(Board $board, int $columnId): BoardColumn
+    {
+        return $this->columns->findInBoardOrFail($board, $columnId);
+    }
+
+    /** Uma coluna por marco de pontuação, na ordem do fluxo de desenvolvimento. */
+    public function seedDefaults(Board $board): void
+    {
+        foreach (TaskStatus::cases() as $position => $status) {
+            $this->columns->createFor($board, [
+                'name' => $status->label(),
+                'slug' => Str::slug($status->label()),
+                'position' => $position,
+                'is_final' => $status === TaskStatus::DONE,
+                'status' => $status,
+            ]);
+        }
+    }
+
     public function create(Board $board, string $name): BoardColumn
     {
-        $column = $board->columns()->create([
+        $column = $this->columns->createFor($board, [
             'name' => $name,
             'slug' => Str::slug($name).'-'.Str::random(8),
-            'position' => $board->columns()->count(),
+            'position' => $this->columns->countFor($board),
             'is_final' => false,
             'status' => null,
         ]);
 
-        $column->update(['slug' => Str::slug($name).'-'.$column->id]);
-
-        return $column;
+        return $this->columns->update($column, ['slug' => Str::slug($name).'-'.$column->id]);
     }
 
     public function rename(BoardColumn $column, string $name): BoardColumn
     {
-        $column->update(['name' => $name]);
-
-        return $column;
+        return $this->columns->update($column, ['name' => $name]);
     }
 
     public function setMilestone(BoardColumn $column, ?TaskStatus $status): BoardColumn
     {
-        if ($status !== null) {
-            $conflict = BoardColumn::where('board_id', $column->board_id)
-                ->where('status', $status)
-                ->where('id', '!=', $column->id)
-                ->exists();
-
-            if ($conflict) {
-                throw new DuplicateEntryException('Este quadro já tem uma coluna marcada com este marco.');
-            }
+        if ($status !== null && $this->columns->milestoneTakenByAnother($column, $status)) {
+            throw new DuplicateEntryException('Este quadro já tem uma coluna marcada com este marco.');
         }
 
-        $column->update([
+        return $this->columns->update($column, [
             'status' => $status,
             'is_final' => $status === TaskStatus::DONE,
         ]);
-
-        return $column;
     }
 
     public function moveUp(BoardColumn $column): void
@@ -74,18 +80,18 @@ class BoardColumnService
             throw new DeletionBlockedException('Esta coluna ainda possui tarefas.');
         }
 
-        $boardId = $column->board_id;
+        $board = $column->board;
 
-        $column->delete();
+        $this->columns->delete($column);
 
-        BoardColumn::where('board_id', $boardId)->orderBy('position')->get()->values()
-            ->each(fn (BoardColumn $remaining, int $index) => $remaining->update(['position' => $index]));
+        $this->columns->orderedFor($board)->values()
+            ->each(fn (BoardColumn $remaining, int $index) => $this->columns->update($remaining, ['position' => $index]));
     }
 
     private function swapPosition(BoardColumn $column, int $direction): void
     {
         DB::transaction(function () use ($column, $direction) {
-            $columns = BoardColumn::where('board_id', $column->board_id)->orderBy('position')->get();
+            $columns = $this->columns->orderedFor($column->board);
             $index = $columns->search(fn (BoardColumn $candidate) => $candidate->id === $column->id);
             $targetIndex = $index + $direction;
 
@@ -98,8 +104,8 @@ class BoardColumnService
 
             [$currentPosition, $targetPosition] = [$current->position, $target->position];
 
-            $current->update(['position' => $targetPosition]);
-            $target->update(['position' => $currentPosition]);
+            $this->columns->update($current, ['position' => $targetPosition]);
+            $this->columns->update($target, ['position' => $currentPosition]);
         });
     }
 }

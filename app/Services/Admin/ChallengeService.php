@@ -7,6 +7,7 @@ use App\Enums\TitleUnlockType;
 use App\Exceptions\DeletionBlockedException;
 use App\Models\Challenge;
 use App\Repositories\ChallengeRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,11 @@ class ChallengeService
         private ChallengeRepository $challenges,
         private TitleService $titles,
     ) {}
+
+    public function paginate(int $perPage, string $search, string $status): LengthAwarePaginator
+    {
+        return $this->challenges->paginateFiltered($perPage, $search, $status);
+    }
 
     /** @param  array{name: string, icon: ?string}|null  $rewardTitle  Título criado junto e concedido ao concluir o desafio. */
     public function create(array $data, ?array $rewardTitle = null): Challenge
@@ -111,7 +117,7 @@ class ChallengeService
         return [
             'name' => $data['name'],
             'slug' => Str::slug($data['name']),
-            'description' => $data['description'],
+            'description' => $data['description'] ?? null,
             'icon' => $data['icon'] ?? 'flag',
             'type' => ChallengeType::from($data['type']),
             'target' => $data['target'],

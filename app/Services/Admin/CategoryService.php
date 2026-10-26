@@ -5,11 +5,17 @@ namespace App\Services\Admin;
 use App\Exceptions\DeletionBlockedException;
 use App\Models\TaskCategory;
 use App\Repositories\TaskCategoryRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
 class CategoryService
 {
     public function __construct(private TaskCategoryRepository $categories) {}
+
+    public function paginate(int $perPage): LengthAwarePaginator
+    {
+        return $this->categories->paginate($perPage);
+    }
 
     public function create(array $data): TaskCategory
     {

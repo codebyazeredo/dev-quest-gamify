@@ -6,11 +6,15 @@ use App\Enums\XpSourceType;
 use App\Events\LevelUp;
 use App\Models\User;
 use App\Models\XpTransaction;
+use App\Repositories\XpTransactionRepository;
 use Illuminate\Support\Facades\DB;
 
 class XpService
 {
-    public function __construct(private LevelService $levelService) {}
+    public function __construct(
+        private LevelService $levelService,
+        private XpTransactionRepository $xpTransactions,
+    ) {}
 
     public function grant(
         User $user,
@@ -27,7 +31,7 @@ class XpService
             $totalBefore = $this->levelService->totalXpFor($user);
             $levelBefore = $this->levelService->levelForTotalXp($totalBefore);
 
-            $transaction = XpTransaction::create([
+            $transaction = $this->xpTransactions->create([
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'source_type' => $sourceType,

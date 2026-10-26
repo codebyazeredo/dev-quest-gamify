@@ -7,6 +7,9 @@ use App\Enums\XpSourceType;
 use App\Events\StreakBonusEarned;
 use App\Models\DailyCheckin;
 use App\Models\User;
+use App\Repositories\DailyCheckinRepository;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CheckinService
@@ -21,6 +24,7 @@ class CheckinService
         private XpService $xpService,
         private ChallengeService $challengeService,
         private AchievementService $achievementService,
+        private DailyCheckinRepository $checkins,
     ) {}
 
     public function checkIn(User $user): DailyCheckin
@@ -28,17 +32,17 @@ class CheckinService
         return DB::transaction(function () use ($user) {
             $today = now()->toDateString();
 
-            $existing = DailyCheckin::where('user_id', $user->id)->where('date', $today)->first();
+            $existing = $this->checkins->findForDate($user, $today);
 
             if ($existing !== null) {
                 return $existing;
             }
 
             $yesterday = now()->subDay()->toDateString();
-            $previous = DailyCheckin::where('user_id', $user->id)->where('date', $yesterday)->first();
+            $previous = $this->checkins->findForDate($user, $yesterday);
             $streakCount = $previous !== null ? $previous->streak_count + 1 : 1;
 
-            $checkin = DailyCheckin::create([
+            $checkin = $this->checkins->create([
                 'user_id' => $user->id,
                 'date' => $today,
                 'streak_count' => $streakCount,
@@ -65,9 +69,14 @@ class CheckinService
         });
     }
 
+    public function hasCheckedInToday(User $user): bool
+    {
+        return $this->checkins->findForDate($user, now()->toDateString()) !== null;
+    }
+
     public function currentStreakFor(User $user): int
     {
-        $latest = DailyCheckin::where('user_id', $user->id)->orderByDesc('date')->first();
+        $latest = $this->checkins->latestFor($user);
 
         if ($latest === null) {
             return 0;
@@ -81,5 +90,33 @@ class CheckinService
         }
 
         return $latest->streak_count;
+    }
+
+    /**
+     * Dias exibidos no calendário do mês (semanas completas, de segunda a domingo).
+     *
+     * @return Collection<int, array{date: Carbon, inMonth: bool, isToday: bool, isFuture: bool, checkedIn: bool}>
+     */
+    public function calendarFor(User $user, Carbon $month): Collection
+    {
+        $monthStart = $month->copy()->startOfMonth();
+        $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $gridEnd = $monthStart->copy()->endOfMonth()->endOfWeek(Carbon::MONDAY);
+
+        $checkedInDates = $this->checkins->datesBetween($user, $gridStart->toDateString(), $gridEnd->toDateString());
+
+        $days = collect();
+
+        for ($cursor = $gridStart->copy(); $cursor->lte($gridEnd); $cursor->addDay()) {
+            $days->push([
+                'date' => $cursor->copy(),
+                'inMonth' => $cursor->month === $monthStart->month,
+                'isToday' => $cursor->isToday(),
+                'isFuture' => $cursor->isFuture(),
+                'checkedIn' => in_array($cursor->toDateString(), $checkedInDates, true),
+            ]);
+        }
+
+        return $days;
     }
 }

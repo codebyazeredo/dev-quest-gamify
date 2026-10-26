@@ -5,6 +5,8 @@ namespace App\Services\Admin;
 use App\Exceptions\DeletionBlockedException;
 use App\Repositories\PermissionRepository;
 use App\Repositories\RoleRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\Permission\Models\Role;
 
 class RoleService
@@ -16,15 +18,26 @@ class RoleService
         private PermissionRepository $permissions,
     ) {}
 
-    public function create(string $name): Role
+    public function paginate(int $perPage): LengthAwarePaginator
     {
-        return $this->roles->create(['name' => $name, 'guard_name' => 'web']);
+        return $this->roles->paginate($perPage);
     }
 
-    public function togglePermission(Role $role, int $permissionId): void
+    public function permissions(): Collection
+    {
+        return $this->permissions->all();
+    }
+
+    public function create(string $name): Role
+    {
+        return $this->roles->create(['name' => $name, 'guard_name' => 'web'])->load('permissions');
+    }
+
+    /** O role admin tem acesso total e não pode ter permissões alteradas. */
+    public function togglePermission(Role $role, int $permissionId): Role
     {
         if ($role->name === self::PROTECTED_ROLE) {
-            return;
+            throw new DeletionBlockedException('As permissões do role "admin" não podem ser alteradas.');
         }
 
         $permission = $this->permissions->findOrFail($permissionId);
@@ -34,6 +47,8 @@ class RoleService
         } else {
             $this->roles->givePermission($role, $permission);
         }
+
+        return $role->load('permissions');
     }
 
     public function delete(Role $role): void

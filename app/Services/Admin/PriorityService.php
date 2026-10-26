@@ -5,11 +5,17 @@ namespace App\Services\Admin;
 use App\Exceptions\DeletionBlockedException;
 use App\Models\TaskPriority;
 use App\Repositories\TaskPriorityRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
 class PriorityService
 {
     public function __construct(private TaskPriorityRepository $priorities) {}
+
+    public function paginate(int $perPage): LengthAwarePaginator
+    {
+        return $this->priorities->paginate($perPage);
+    }
 
     public function create(array $data): TaskPriority
     {

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\NotificationRepository;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
 
 class NotificationService
@@ -20,17 +21,13 @@ class NotificationService
         return $this->notifications->unreadCountFor($user);
     }
 
-    public function markAsRead(User $user, string $notificationId): ?int
+    public function markAsRead(User $user, string $notificationId): DatabaseNotification
     {
-        $notification = $this->notifications->findFor($user, $notificationId);
-
-        if ($notification === null) {
-            return null;
-        }
+        $notification = $this->notifications->findForOrFail($user, $notificationId);
 
         $notification->markAsRead();
 
-        return $notification->data['task_id'] ?? null;
+        return $notification;
     }
 
     public function markAllAsRead(User $user): void

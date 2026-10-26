@@ -13,13 +13,17 @@ use App\Exceptions\MissingMilestoneColumnException;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
-use App\Models\TaskCategory;
 use App\Models\TaskEvent;
 use App\Models\TaskEventRule;
-use App\Models\TaskMovement;
-use App\Models\TaskPriority;
 use App\Models\User;
 use App\Repositories\BoardColumnRepository;
+use App\Repositories\TaskCategoryRepository;
+use App\Repositories\TaskEventRepository;
+use App\Repositories\TaskEventRuleRepository;
+use App\Repositories\TaskMovementRepository;
+use App\Repositories\TaskPriorityRepository;
+use App\Repositories\TaskRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 
 class TaskService
@@ -27,18 +31,25 @@ class TaskService
     public function __construct(
         private XpService $xpService,
         private BoardColumnRepository $columns,
+        private TaskRepository $tasks,
+        private TaskCategoryRepository $categories,
+        private TaskPriorityRepository $priorities,
+        private TaskEventRepository $taskEvents,
+        private TaskMovementRepository $movements,
+        private TaskEventRuleRepository $eventRules,
+        private UserRepository $users,
     ) {}
 
     public function create(array $data, User $creator): Task
     {
         return DB::transaction(function () use ($data, $creator) {
-            $category = TaskCategory::findOrFail((int) $data['category_id']);
-            $column = BoardColumn::findOrFail((int) $data['column_id']);
-            $priority = TaskPriority::findOrFail((int) $data['priority_id']);
+            $category = $this->categories->findOrFail((int) $data['category_id']);
+            $column = $this->columns->findOrFail((int) $data['column_id']);
+            $priority = $this->priorities->findOrFail((int) $data['priority_id']);
 
-            $position = Task::where('column_id', $column->id)->count();
+            $position = $this->tasks->countInColumn($column->id);
 
-            return Task::create([
+            return $this->tasks->create([
                 'board_id' => $column->board_id,
                 'column_id' => $column->id,
                 'category_id' => $category->id,
@@ -56,6 +67,28 @@ class TaskService
         });
     }
 
+    /** Explica ao usuário por que a movimentação foi negada pela policy. */
+    public function explainMoveDenial(Task $task, BoardColumn $destination, User $actor): string
+    {
+        if ($destination->status === TaskStatus::APPROVED) {
+            return 'A coluna "Aprovado" só é alcançada aprovando a tarefa em teste.';
+        }
+
+        if ($destination->status === TaskStatus::DONE) {
+            return 'A coluna "Concluído" só é alcançada marcando homologação e implantação na tarefa aprovada.';
+        }
+
+        if ($task->status === TaskStatus::TESTING) {
+            return 'Tarefas em teste só saem por aprovação ou reprovação do testador.';
+        }
+
+        if ($task->assigned_to !== null && $task->assigned_to !== $actor->id) {
+            return 'Esta tarefa pertence a '.($task->assignedTo?->name ?? 'outra pessoa').'. Só o responsável pode movê-la.';
+        }
+
+        return 'Você não tem permissão para mover esta tarefa para esta coluna.';
+    }
+
     public function move(Task $task, BoardColumn $destination, int $position, User $actor, ?string $note = null): Task
     {
         return DB::transaction(function () use ($task, $destination, $position, $actor, $note) {
@@ -71,10 +104,10 @@ class TaskService
             if (! $changingColumn) {
                 $this->reorderWithinColumn($task, $position);
             } else {
-                $this->closeGap($task->column_id, $task->position);
+                $this->tasks->closeGap($task->column_id, $task->position);
 
-                $position = min($position, $destination->tasks()->count());
-                $this->openSlot($destination->id, $position);
+                $position = min($position, $this->tasks->countInColumn($destination->id));
+                $this->tasks->openSlot($destination->id, $position);
 
                 $task->column_id = $destination->id;
                 $task->position = $position;
@@ -87,11 +120,11 @@ class TaskService
 
             $this->applyLifecycleSideEffects($task, $destination);
 
-            $task->save();
+            $this->tasks->save($task);
             $task->refresh();
 
             if ($changingColumn) {
-                TaskMovement::create([
+                $this->movements->create([
                     'task_id' => $task->id,
                     'from_column_id' => $previousColumnId,
                     'to_column_id' => $destination->id,
@@ -130,7 +163,7 @@ class TaskService
             $task->rejected_at = null;
             $task->approved_by = $actor->id;
 
-            $moved = $this->move($task, $destination, $destination->tasks()->count(), $actor);
+            $moved = $this->move($task, $destination, $this->tasks->countInColumn($destination->id), $actor);
 
             $this->recordEventOnce($moved, TaskEventType::APPROVED, $actor);
 
@@ -151,7 +184,7 @@ class TaskService
             $task->rejected_at = now();
             $task->approved_by = null;
 
-            return $this->move($task, $destination, $destination->tasks()->count(), $actor, $reason);
+            return $this->move($task, $destination, $this->tasks->countInColumn($destination->id), $actor, $reason);
         });
     }
 
@@ -160,9 +193,14 @@ class TaskService
         return $this->columns->findTaggedWith($board, $status);
     }
 
+    public function assignToUser(Task $task, int $userId, User $actor): Task
+    {
+        return $this->assign($task, $this->users->findOrFail($userId), $actor);
+    }
+
     public function assign(Task $task, ?User $user, ?User $actor = null): Task
     {
-        $task->update(['assigned_to' => $user?->id]);
+        $this->tasks->update($task, ['assigned_to' => $user?->id]);
 
         if ($user !== null && $actor !== null && $user->id !== $actor->id) {
             event(new TaskAssigned($task, $user, $actor));
@@ -183,21 +221,19 @@ class TaskService
 
             if (($categoryChanged || $priorityChanged) && $task->completed_at === null) {
                 if ($categoryChanged) {
-                    $category = TaskCategory::findOrFail((int) $data['category_id']);
+                    $category = $this->categories->findOrFail((int) $data['category_id']);
                     $task->category_id = $category->id;
                     $task->base_points = $category->base_points;
                 }
 
                 if ($priorityChanged) {
-                    $priority = TaskPriority::findOrFail((int) $data['priority_id']);
+                    $priority = $this->priorities->findOrFail((int) $data['priority_id']);
                     $task->priority_id = $priority->id;
                     $task->priority_multiplier = (string) $priority->multiplier;
                 }
             }
 
-            $task->save();
-
-            return $task;
+            return $this->tasks->save($task);
         });
     }
 
@@ -209,7 +245,7 @@ class TaskService
             $done = $this->columnTaggedWith($task->board, TaskStatus::DONE);
 
             if ($done !== null && $task->column_id !== $done->id) {
-                $this->move($task, $done, $done->tasks()->count(), $actor);
+                $this->move($task, $done, $this->tasks->countInColumn($done->id), $actor);
             }
 
             return $task->refresh();
@@ -218,16 +254,12 @@ class TaskService
 
     public function archive(Task $task): Task
     {
-        $task->update(['archived_at' => now()]);
-
-        return $task;
+        return $this->tasks->update($task, ['archived_at' => now()]);
     }
 
     public function unarchive(Task $task): Task
     {
-        $task->update(['archived_at' => null]);
-
-        return $task;
+        return $this->tasks->update($task, ['archived_at' => null]);
     }
 
     public function markDeployed(Task $task, User $actor): Task
@@ -241,11 +273,11 @@ class TaskService
 
     public function recordEventOnce(Task $task, TaskEventType $type, User $actor): ?TaskEvent
     {
-        if (TaskEvent::where('task_id', $task->id)->where('type', $type)->exists()) {
+        if ($this->taskEvents->existsOfType($task, $type)) {
             return null;
         }
 
-        $taskEvent = TaskEvent::create([
+        $taskEvent = $this->taskEvents->create([
             'task_id' => $task->id,
             'type' => $type,
             'user_id' => $actor->id,
@@ -297,16 +329,14 @@ class TaskService
             return;
         }
 
-        $rule = TaskEventRule::where('type', TaskEventType::APPROVED)->first();
+        $rule = $this->eventRules->findByType(TaskEventType::APPROVED);
         $bonus = $this->percentageBonus($rule, $taskXp);
 
         if ($bonus <= 0) {
             return;
         }
 
-        $approvalEvent = TaskEvent::where('task_id', $task->id)
-            ->where('type', TaskEventType::APPROVED)
-            ->first();
+        $approvalEvent = $this->taskEvents->firstOfType($task, TaskEventType::APPROVED);
 
         $this->xpService->grant(
             $task->approvedBy,
@@ -319,7 +349,7 @@ class TaskService
 
     private function grantDeferredCreatorXp(Task $task, int $taskXp): void
     {
-        $rule = TaskEventRule::where('type', TaskEventType::CREATION_COMPLETED)->first();
+        $rule = $this->eventRules->findByType(TaskEventType::CREATION_COMPLETED);
         $bonus = $this->percentageBonus($rule, $taskXp);
 
         if ($bonus <= 0) {
@@ -356,24 +386,10 @@ class TaskService
         };
     }
 
-    protected function closeGap(int $columnId, int $vacatedPosition): void
-    {
-        Task::where('column_id', $columnId)
-            ->where('position', '>', $vacatedPosition)
-            ->decrement('position');
-    }
-
-    protected function openSlot(int $columnId, int $position): void
-    {
-        Task::where('column_id', $columnId)
-            ->where('position', '>=', $position)
-            ->increment('position');
-    }
-
     protected function reorderWithinColumn(Task $task, int $position): void
     {
         $columnId = $task->column_id;
-        $count = Task::where('column_id', $columnId)->count();
+        $count = $this->tasks->countInColumn($columnId);
         $position = max(0, min($position, $count - 1));
 
         if ($position === $task->position) {
@@ -381,13 +397,9 @@ class TaskService
         }
 
         if ($position > $task->position) {
-            Task::where('column_id', $columnId)
-                ->whereBetween('position', [$task->position + 1, $position])
-                ->decrement('position');
+            $this->tasks->shiftUp($columnId, $task->position + 1, $position);
         } else {
-            Task::where('column_id', $columnId)
-                ->whereBetween('position', [$position, $task->position - 1])
-                ->increment('position');
+            $this->tasks->shiftDown($columnId, $position, $task->position - 1);
         }
 
         $task->position = $position;

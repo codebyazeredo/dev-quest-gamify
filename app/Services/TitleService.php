@@ -11,6 +11,7 @@ use App\Repositories\TitleRepository;
 use App\Repositories\UserChallengeRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\UserTitleRepository;
+use Illuminate\Support\Collection;
 
 class TitleService
 {
@@ -21,14 +22,41 @@ class TitleService
         private UserRepository $users,
     ) {}
 
+    /**
+     * Títulos do usuário: desbloqueados (administradores têm todos) e ainda bloqueados, com o progresso em desafios.
+     *
+     * @return array{unlocked: Collection, locked: Collection, completedChallenges: int}
+     */
+    public function catalogFor(User $user): array
+    {
+        $unlocked = $user->isAdmin() ? $this->titles->all() : $this->userTitles->titlesUnlockedBy($user);
+        $locked = $user->isAdmin() ? collect() : $this->titles->activeLockedFor($unlocked->pluck('id')->all());
+
+        return [
+            'unlocked' => $unlocked,
+            'locked' => $locked,
+            'completedChallenges' => $this->userChallenges->countCompletedBy($user),
+        ];
+    }
+
+    public function countUnlockedFor(User $user): int
+    {
+        return $user->isAdmin() ? $this->titles->count() : $this->userTitles->countFor($user);
+    }
+
+    public function find(int $titleId): Title
+    {
+        return $this->titles->findOrFail($titleId);
+    }
+
     public function select(User $user, Title $title): void
     {
-        $user->update(['selected_title_id' => $title->id]);
+        $this->users->update($user, ['selected_title_id' => $title->id]);
     }
 
     public function clear(User $user): void
     {
-        $user->update(['selected_title_id' => null]);
+        $this->users->update($user, ['selected_title_id' => null]);
     }
 
     public function grantForCompletedChallenge(User $user, Challenge $challenge): void

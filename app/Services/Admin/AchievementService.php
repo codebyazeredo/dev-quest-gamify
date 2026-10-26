@@ -7,6 +7,7 @@ use App\Enums\TitleUnlockType;
 use App\Exceptions\DeletionBlockedException;
 use App\Models\Achievement;
 use App\Repositories\AchievementRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,11 @@ class AchievementService
         private AchievementRepository $achievements,
         private TitleService $titles,
     ) {}
+
+    public function paginate(int $perPage, string $search, string $status): LengthAwarePaginator
+    {
+        return $this->achievements->paginateFiltered($perPage, $search, $status);
+    }
 
     /** @param  array{name: string, icon: ?string}|null  $rewardTitle  Título criado junto e concedido ao desbloquear a conquista. */
     public function create(array $data, ?array $rewardTitle = null): Achievement
@@ -107,8 +113,8 @@ class AchievementService
         return [
             'name' => $data['name'],
             'slug' => Str::slug($data['name']),
-            'description' => $data['description'],
-            'icon' => $data['icon'],
+            'description' => $data['description'] ?? null,
+            'icon' => $data['icon'] ?? null,
             'condition_type' => AchievementConditionType::from($data['condition_type']),
             'condition_value' => $data['condition_value'],
             'xp_reward' => $data['xp_reward'],
