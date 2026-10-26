@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskReviewPolicyTest extends TestCase
@@ -23,6 +21,7 @@ class TaskReviewPolicyTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $review = $board->columns->firstWhere('status', TaskStatus::REVIEW);
         $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $review->id,
@@ -30,10 +29,9 @@ class TaskReviewPolicyTest extends TestCase
             'assigned_to' => $developer->id,
         ]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $testing->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+            ->assertForbidden();
 
         $this->assertSame($review->id, $task->refresh()->column_id);
     }
@@ -46,6 +44,7 @@ class TaskReviewPolicyTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $review = $board->columns->firstWhere('status', TaskStatus::REVIEW);
         $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $review->id,
@@ -53,9 +52,9 @@ class TaskReviewPolicyTest extends TestCase
             'assigned_to' => $assignee->id,
         ]);
 
-        Livewire::actingAs($reviewer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $testing->id, 0);
+        $this->actingAs($reviewer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertSame($testing->id, $task->refresh()->column_id);
     }
@@ -67,6 +66,7 @@ class TaskReviewPolicyTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
         $review = $board->columns->firstWhere('status', TaskStatus::REVIEW);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $doing->id,
@@ -74,9 +74,9 @@ class TaskReviewPolicyTest extends TestCase
             'assigned_to' => $developer->id,
         ]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $review->id, 0);
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $review->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertSame($review->id, $task->refresh()->column_id);
     }
@@ -97,9 +97,9 @@ class TaskReviewPolicyTest extends TestCase
                 'assigned_to' => $assignee->id,
             ]);
 
-            Livewire::actingAs($actor)
-                ->test(Kanban::class, ['board' => $board])
-                ->call('moveTask', $task->id, $testing->id, 0);
+            $this->actingAs($actor)
+                ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+                ->assertOk();
 
             $this->assertSame($testing->id, $task->refresh()->column_id);
         }
@@ -113,6 +113,7 @@ class TaskReviewPolicyTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $todo = $board->columns->firstWhere('status', TaskStatus::TODO);
         $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $todo->id,
@@ -120,10 +121,9 @@ class TaskReviewPolicyTest extends TestCase
             'assigned_to' => $assignee->id,
         ]);
 
-        Livewire::actingAs($otherDeveloper)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $doing->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($otherDeveloper)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertForbidden();
 
         $this->assertSame($todo->id, $task->refresh()->column_id);
     }

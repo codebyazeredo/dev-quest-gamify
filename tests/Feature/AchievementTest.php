@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\TaskEventType;
 use App\Enums\TaskStatus;
-use App\Livewire\Gamification\Achievements;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -17,7 +16,6 @@ use Database\Seeders\LevelSeeder;
 use Database\Seeders\TaskEventRuleSeeder;
 use Database\Seeders\TitleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class AchievementTest extends TestCase
@@ -112,7 +110,7 @@ class AchievementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $rows = Livewire::actingAs($admin)->test(Achievements::class)->viewData('achievements');
+        $rows = $this->actingAs($admin)->get(route('achievements'))->assertOk()->viewData('achievements');
 
         $this->assertNotEmpty($rows);
         $this->assertTrue($rows->every(fn (array $row) => $row['unlocked'] === true));
@@ -122,7 +120,7 @@ class AchievementTest extends TestCase
     {
         $developer = User::factory()->developer()->create();
 
-        $rows = Livewire::actingAs($developer)->test(Achievements::class)->viewData('achievements');
+        $rows = $this->actingAs($developer)->get(route('achievements'))->assertOk()->viewData('achievements');
 
         $this->assertNotEmpty($rows);
         $this->assertTrue($rows->every(fn (array $row) => $row['unlocked'] === false));

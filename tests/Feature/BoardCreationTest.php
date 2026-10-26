@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Board\Create;
 use App\Models\Board;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class BoardCreationTest extends TestCase
@@ -17,12 +15,10 @@ class BoardCreationTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'Squad Alpha')
-            ->call('save');
+        $this->actingAs($admin)->postJson(route('api.boards.store'), ['name' => 'Squad Alpha', 'is_active' => true])->assertCreated();
 
         $board = Board::where('name', 'Squad Alpha')->firstOrFail();
+
         $this->assertSame(7, $board->columns()->count());
     }
 
@@ -30,13 +26,12 @@ class BoardCreationTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'Squad Bravo')
-            ->set('seedDefaultColumns', false)
-            ->call('save');
+        $this->actingAs($admin)
+            ->postJson(route('api.boards.store'), ['name' => 'Squad Bravo', 'is_active' => true, 'seed_default_columns' => false])
+            ->assertCreated();
 
         $board = Board::where('name', 'Squad Bravo')->firstOrFail();
+
         $this->assertSame(0, $board->columns()->count());
     }
 }

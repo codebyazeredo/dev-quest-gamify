@@ -2,12 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Board\Create;
-use App\Livewire\Board\Index;
 use App\Models\Board;
 use App\Models\User;
+use App\Services\BoardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class BoardTest extends TestCase
@@ -18,26 +16,48 @@ class BoardTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'New Board')
-            ->set('description', 'A board')
-            ->call('save');
+        $this->actingAs($admin)
+            ->postJson(route('api.boards.store'), ['name' => 'New Board', 'description' => 'A board', 'is_active' => true])
+            ->assertCreated()
+            ->assertJsonPath('data.name', 'New Board');
 
-        $board = Board::where('name', 'New Board')->first();
+        $board = Board::where('name', 'New Board')->firstOrFail();
 
-        $this->assertNotNull($board);
         $this->assertSame(7, $board->columns()->count());
+    }
+
+    public function test_admin_can_update_a_board(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $board = Board::factory()->create(['name' => 'Old']);
+
+        $this->actingAs($admin)
+            ->putJson(route('api.boards.update', $board), ['name' => 'Renamed', 'description' => null, 'is_active' => true])
+            ->assertOk();
+
+        $this->assertSame('Renamed', $board->refresh()->name);
     }
 
     public function test_developer_cannot_create_board(): void
     {
         $developer = User::factory()->developer()->create();
 
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->call('toggleCreate')
+        $this->actingAs($developer)
+            ->postJson(route('api.boards.store'), ['name' => 'New Board', 'is_active' => true])
             ->assertForbidden();
+
+        $this->assertNull(Board::where('name', 'New Board')->first());
+    }
+
+    public function test_board_name_must_be_unique(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Board::factory()->create(['name' => 'Squad']);
+
+        $this->actingAs($admin)
+            ->postJson(route('api.boards.store'), ['name' => 'Squad', 'is_active' => true])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('name');
     }
 
     public function test_non_admin_cannot_view_inactive_board_via_direct_url(): void
@@ -45,19 +65,17 @@ class BoardTest extends TestCase
         $developer = User::factory()->developer()->create();
         $board = Board::factory()->inactive()->create();
 
-        $response = $this->actingAs($developer)->get(route('boards.show', $board));
-
-        $response->assertForbidden();
+        $this->actingAs($developer)->get(route('boards.show', $board))->assertForbidden();
     }
 
     public function test_index_hides_inactive_boards_from_non_admins(): void
     {
         $developer = User::factory()->developer()->create();
-        $activeBoard = Board::factory()->create(['name' => 'Active Board']);
+        Board::factory()->create(['name' => 'Active Board']);
         Board::factory()->inactive()->create(['name' => 'Inactive Board']);
 
-        Livewire::actingAs($developer)
-            ->test(Index::class)
+        $this->actingAs($developer)->get(route('boards.index'))
+            ->assertOk()
             ->assertSee('Active Board')
             ->assertDontSee('Inactive Board');
     }
@@ -66,19 +84,19 @@ class BoardTest extends TestCase
     {
         $board = Board::factory()->create();
 
-        $this->assertSame(route('boards.show', $board), Board::landingUrl());
+        $this->assertSame(route('boards.show', $board), app(BoardService::class)->landingUrl());
     }
 
     public function test_landing_url_goes_to_the_index_when_there_is_no_active_board(): void
     {
-        $this->assertSame(route('boards.index'), Board::landingUrl());
+        $this->assertSame(route('boards.index'), app(BoardService::class)->landingUrl());
     }
 
     public function test_landing_url_goes_to_the_index_when_there_are_multiple_active_boards(): void
     {
         Board::factory()->count(2)->create();
 
-        $this->assertSame(route('boards.index'), Board::landingUrl());
+        $this->assertSame(route('boards.index'), app(BoardService::class)->landingUrl());
     }
 
     public function test_root_redirects_guests_to_login_and_authenticated_users_to_the_landing_board(): void

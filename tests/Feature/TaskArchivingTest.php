@@ -3,15 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Board\Archive;
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskArchivingTest extends TestCase
@@ -25,15 +21,11 @@ class TaskArchivingTest extends TestCase
         $column = BoardColumn::factory()->for($board)->status(TaskStatus::DONE)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => TaskStatus::DONE]);
 
-        Livewire::actingAs($admin)
-            ->test(Show::class, ['task' => $task])
-            ->call('archive');
+        $this->actingAs($admin)->postJson(route('api.tasks.archive', $task))->assertOk();
 
         $this->assertNotNull($task->refresh()->archived_at);
 
-        Livewire::actingAs($admin)
-            ->test(Show::class, ['task' => $task])
-            ->call('unarchive');
+        $this->actingAs($admin)->postJson(route('api.tasks.unarchive', $task))->assertOk();
 
         $this->assertNull($task->refresh()->archived_at);
     }
@@ -45,9 +37,7 @@ class TaskArchivingTest extends TestCase
         $column = BoardColumn::factory()->for($board)->untagged()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => null]);
 
-        Livewire::actingAs($po)
-            ->test(Show::class, ['task' => $task])
-            ->call('archive');
+        $this->actingAs($po)->postJson(route('api.tasks.archive', $task))->assertOk();
 
         $this->assertNotNull($task->refresh()->archived_at);
     }
@@ -59,10 +49,7 @@ class TaskArchivingTest extends TestCase
         $column = BoardColumn::factory()->for($board)->untagged()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => null, 'assigned_to' => $developer->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('archive')
-            ->assertForbidden();
+        $this->actingAs($developer)->postJson(route('api.tasks.archive', $task))->assertForbidden();
 
         $this->assertNull($task->refresh()->archived_at);
     }
@@ -72,6 +59,7 @@ class TaskArchivingTest extends TestCase
         $admin = User::factory()->admin()->create();
         $board = Board::factory()->create();
         $column = BoardColumn::factory()->for($board)->untagged()->create();
+
         $archived = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $column->id,
@@ -84,12 +72,13 @@ class TaskArchivingTest extends TestCase
             'status' => null,
         ]);
 
-        $tasks = Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
+        $this->actingAs($admin)->get(route('boards.show', $board))
+            ->assertOk()
+            ->assertViewHas('board', function (Board $kanban) use ($archived, $active) {
+                $tasks = $kanban->columns->first()->tasks;
 
-        $this->assertFalse($tasks->contains('id', $archived->id));
-        $this->assertTrue($tasks->contains('id', $active->id));
+                return ! $tasks->contains('id', $archived->id) && $tasks->contains('id', $active->id);
+            });
     }
 
     public function test_archive_page_splits_completed_and_not_completed_tasks(): void
@@ -118,8 +107,8 @@ class TaskArchivingTest extends TestCase
             'status' => null,
         ]);
 
-        Livewire::actingAs($admin)
-            ->test(Archive::class, ['board' => $board])
+        $this->actingAs($admin)->get(route('boards.archive', $board))
+            ->assertOk()
             ->assertViewHas('completed', fn ($tasks) => $tasks->contains('id', $completed->id) && $tasks->count() === 1)
             ->assertViewHas('notCompleted', fn ($tasks) => $tasks->contains('id', $notCompleted->id) && $tasks->count() === 1)
             ->assertDontSee($notArchived->title);

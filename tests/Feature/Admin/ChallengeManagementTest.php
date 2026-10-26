@@ -3,46 +3,68 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\ChallengeType;
-use App\Livewire\Admin\Challenges\Create;
-use App\Livewire\Admin\Challenges\Edit;
-use App\Livewire\Admin\Challenges\Index;
 use App\Models\Challenge;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class ChallengeManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function payload(array $overrides = []): array
+    {
+        return [
+            'name' => 'Sprint Push',
+            'icon' => 'flag',
+            'type' => ChallengeType::TASKS_COMPLETED->value,
+            'target' => 3,
+            'xp_reward' => 40,
+            'starts_at' => now()->startOfWeek()->format('Y-m-d\TH:i'),
+            'ends_at' => now()->endOfWeek()->format('Y-m-d\TH:i'),
+            ...$overrides,
+        ];
+    }
+
     public function test_admin_can_create_update_and_delete_a_challenge(): void
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'Sprint Push')
-            ->set('type', ChallengeType::TASKS_COMPLETED->value)
-            ->set('target', 3)
-            ->set('xp_reward', 40)
-            ->call('save');
+        $this->actingAs($admin)->postJson(route('api.challenges.store'), $this->payload())->assertCreated();
 
-        $challenge = Challenge::where('name', 'Sprint Push')->first();
-        $this->assertNotNull($challenge);
+        $challenge = Challenge::where('name', 'Sprint Push')->firstOrFail();
 
-        Livewire::actingAs($admin)
-            ->test(Edit::class, ['challengeId' => $challenge->id])
-            ->set('name', 'Sprint Push II')
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.challenges.update', $challenge), $this->payload(['name' => 'Sprint Push II', 'active' => true]))
+            ->assertOk();
 
         $this->assertSame('Sprint Push II', $challenge->refresh()->name);
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $challenge->id);
+        $this->actingAs($admin)->deleteJson(route('api.challenges.destroy', $challenge))->assertOk();
 
         $this->assertNull(Challenge::find($challenge->id));
+    }
+
+    public function test_the_end_must_be_after_the_start(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('api.challenges.store'), $this->payload(['ends_at' => now()->startOfWeek()->subDay()->format('Y-m-d\TH:i')]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('ends_at');
+    }
+
+    public function test_admin_can_toggle_and_duplicate_a_challenge(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $challenge = Challenge::factory()->create(['active' => true]);
+
+        $this->actingAs($admin)->postJson(route('api.challenges.toggle-active', $challenge))->assertOk();
+        $this->assertFalse($challenge->refresh()->active);
+
+        $this->actingAs($admin)->postJson(route('api.challenges.duplicate', $challenge))->assertCreated();
+        $this->assertSame(2, Challenge::count());
     }
 
     public function test_index_paginates_the_list(): void
@@ -50,27 +72,17 @@ class ChallengeManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         Challenge::factory()->count(20)->create();
 
-        $challenges = Livewire::actingAs($admin)->test(Index::class)->viewData('challenges');
-
-        $this->assertSame(10, $challenges->count());
-        $this->assertTrue($challenges->hasMorePages());
+        $this->actingAs($admin)->getJson(route('api.challenges.index'))
+            ->assertOk()
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.last_page', 2);
     }
 
-    public function test_developer_gets_forbidden_on_the_route(): void
+    public function test_developer_gets_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/challenges');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/challenges')->assertForbidden();
+        $this->actingAs($developer)->getJson(route('api.challenges.index'))->assertForbidden();
     }
 }

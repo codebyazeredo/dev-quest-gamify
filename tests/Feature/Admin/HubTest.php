@@ -2,11 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\Hub;
 use App\Models\Level;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class HubTest extends TestCase
@@ -17,8 +15,7 @@ class HubTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Hub::class)
+        $this->actingAs($admin)->get('/admin')
             ->assertOk()
             ->assertSee('Gestão')
             ->assertSee('Gamificação')
@@ -32,18 +29,7 @@ class HubTest extends TestCase
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Hub::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin')->assertForbidden();
     }
 
     public function test_the_navbar_dropdown_only_shows_settings_to_an_admin(): void

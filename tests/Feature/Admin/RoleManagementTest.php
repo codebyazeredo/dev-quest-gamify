@@ -2,11 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\Roles\Create;
-use App\Livewire\Admin\Roles\Index;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -19,10 +16,7 @@ class RoleManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'financeiro')
-            ->call('save');
+        $this->actingAs($admin)->postJson(route('api.roles.store'), ['name' => 'financeiro'])->assertCreated();
 
         $this->assertNotNull(Role::where('name', 'financeiro')->first());
     }
@@ -31,29 +25,25 @@ class RoleManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $role = Role::create(['name' => 'financeiro', 'guard_name' => 'web']);
-        $permission = Permission::where('name', 'create-task')->first();
+        $permission = Permission::where('name', 'create-task')->firstOrFail();
 
-        $component = Livewire::actingAs($admin)->test(Index::class);
-
-        $component->call('togglePermission', $role->id, $permission->id);
+        $this->actingAs($admin)->putJson(route('api.roles.permissions.toggle', [$role, $permission->id]))->assertOk();
         $this->assertTrue($role->fresh()->hasPermissionTo($permission));
 
-        $component->call('togglePermission', $role->id, $permission->id);
+        $this->actingAs($admin)->putJson(route('api.roles.permissions.toggle', [$role, $permission->id]))->assertOk();
         $this->assertFalse($role->fresh()->hasPermissionTo($permission));
     }
 
     public function test_admin_role_cannot_be_deleted_or_have_permissions_toggled(): void
     {
         $admin = User::factory()->admin()->create();
-        $adminRole = Role::where('name', 'admin')->first();
-        $permission = Permission::where('name', 'manage-users')->first();
+        $adminRole = Role::where('name', 'admin')->firstOrFail();
+        $permission = Permission::where('name', 'manage-users')->firstOrFail();
 
-        $component = Livewire::actingAs($admin)->test(Index::class);
-
-        $component->call('togglePermission', $adminRole->id, $permission->id);
+        $this->actingAs($admin)->putJson(route('api.roles.permissions.toggle', [$adminRole, $permission->id]))->assertStatus(409);
         $this->assertTrue($adminRole->fresh()->hasPermissionTo($permission));
 
-        $component->call('delete', $adminRole->id);
+        $this->actingAs($admin)->deleteJson(route('api.roles.destroy', $adminRole))->assertStatus(409);
         $this->assertNotNull(Role::find($adminRole->id));
     }
 
@@ -61,44 +51,34 @@ class RoleManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $developer = User::factory()->developer()->create();
-        $devRole = Role::where('name', 'dev')->first();
+        $devRole = Role::where('name', 'dev')->firstOrFail();
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $devRole->id);
+        $this->actingAs($admin)->deleteJson(route('api.roles.destroy', $devRole))->assertStatus(409);
 
         $this->assertNotNull(Role::find($devRole->id));
         $this->assertTrue($developer->fresh()->hasRole('dev'));
     }
 
-    public function test_index_paginates_the_list(): void
+    public function test_index_paginates_the_list_and_lists_permissions(): void
     {
         $admin = User::factory()->admin()->create();
+
         foreach (range(1, 20) as $i) {
             Role::create(['name' => "custom-role-{$i}", 'guard_name' => 'web']);
         }
 
-        $roles = Livewire::actingAs($admin)->test(Index::class)->viewData('roles');
-
-        $this->assertSame(10, $roles->count());
-        $this->assertTrue($roles->hasMorePages());
+        $this->actingAs($admin)->getJson(route('api.roles.index'))
+            ->assertOk()
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.last_page', 3)
+            ->assertJsonStructure(['permissions' => [['id', 'name', 'label']]]);
     }
 
-    public function test_developer_gets_forbidden_on_the_route(): void
+    public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/roles');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/roles')->assertForbidden();
+        $this->actingAs($developer)->getJson(route('api.roles.index'))->assertForbidden();
     }
 }

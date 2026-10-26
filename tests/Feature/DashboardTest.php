@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\XpSourceType;
-use App\Livewire\Dashboard\Index;
 use App\Models\Level;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\XpTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -27,11 +25,11 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         XpTransaction::factory()->create(['user_id' => $user->id, 'amount' => 150, 'source_type' => XpSourceType::BONUS]);
 
-        $component = Livewire::actingAs($user)->test(Index::class);
-
-        $component->assertViewHas('totalXp', 150);
-        $component->assertViewHas('currentLevel', fn ($level) => $level->level === 2);
-        $component->assertViewHas('rankingPosition', 2);
+        $this->actingAs($user)->get('/dashboard')
+            ->assertOk()
+            ->assertViewHas('totalXp', 150)
+            ->assertViewHas('levelProgress', fn (array $progress) => $progress['currentLevel']->level === 2)
+            ->assertViewHas('rankingPosition', 2);
     }
 
     public function test_navbar_shows_the_users_active_title(): void

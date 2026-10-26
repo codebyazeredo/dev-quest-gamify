@@ -5,8 +5,6 @@ namespace Tests\Feature;
 use App\Enums\TaskEventType;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -16,7 +14,6 @@ use App\Models\XpTransaction;
 use Database\Seeders\LevelSeeder;
 use Database\Seeders\TaskEventRuleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskApprovalTest extends TestCase
@@ -52,11 +49,10 @@ class TaskApprovalTest extends TestCase
         $task = $this->taskInTesting($board, $assignee);
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->call('approve');
+        $this->actingAs($tester)->postJson(route('api.tasks.approve', $task))->assertOk();
 
         $task->refresh();
+
         $this->assertSame($approved->id, $task->column_id);
         $this->assertSame(TaskStatus::APPROVED, $task->status);
         $this->assertSame($tester->id, $task->approved_by);
@@ -70,10 +66,7 @@ class TaskApprovalTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $task = $this->taskInTesting($board, $user);
 
-        Livewire::actingAs($user)
-            ->test(Show::class, ['task' => $task])
-            ->call('approve')
-            ->assertForbidden();
+        $this->actingAs($user)->postJson(route('api.tasks.approve', $task))->assertForbidden();
 
         $this->assertSame(TaskStatus::TESTING, $task->refresh()->status);
     }
@@ -85,11 +78,10 @@ class TaskApprovalTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $task = $this->taskInTesting($board, User::factory()->developer()->create());
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->set('rejectionReasonInput', '')
-            ->call('reject')
-            ->assertHasErrors(['rejectionReasonInput']);
+        $this->actingAs($tester)
+            ->postJson(route('api.tasks.reject', $task), ['reason' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reason');
 
         $this->assertSame(TaskStatus::TESTING, $task->refresh()->status);
     }
@@ -104,21 +96,22 @@ class TaskApprovalTest extends TestCase
         $todo = $board->columns->firstWhere('status', TaskStatus::TODO);
         $doing = $board->columns->firstWhere('status', TaskStatus::DOING);
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->set('rejectionReasonInput', 'Botão de salvar não funciona')
-            ->call('reject');
+        $this->actingAs($tester)
+            ->postJson(route('api.tasks.reject', $task), ['reason' => 'Botão de salvar não funciona'])
+            ->assertOk();
 
         $task->refresh();
+
         $this->assertSame($todo->id, $task->column_id);
         $this->assertSame('Botão de salvar não funciona', $task->rejection_reason);
         $this->assertNotNull($task->rejected_at);
 
-        Livewire::actingAs($assignee)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $doing->id, 0);
+        $this->actingAs($assignee)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertOk();
 
         $task->refresh();
+
         $this->assertNull($task->rejection_reason);
         $this->assertNull($task->rejected_at);
     }
@@ -131,10 +124,9 @@ class TaskApprovalTest extends TestCase
         $task = $this->taskInTesting($board);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $done->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $done->id, 'position' => 0])
+            ->assertForbidden();
 
         $this->assertSame(TaskStatus::TESTING, $task->refresh()->status);
     }
@@ -147,16 +139,12 @@ class TaskApprovalTest extends TestCase
         BoardColumn::seedDefaultsFor($board);
         $task = $this->taskInTesting($board, $assignee);
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->call('approve');
+        $this->actingAs($tester)->postJson(route('api.tasks.approve', $task))->assertOk();
 
         $this->assertSame(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
 
-        Livewire::actingAs($assignee)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->call('markDeployed');
+        $this->actingAs($assignee)->postJson(route('api.tasks.homologation', $task))->assertOk();
+        $this->actingAs($assignee)->postJson(route('api.tasks.deploy', $task))->assertOk();
 
         $this->assertGreaterThan(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());
     }
@@ -172,10 +160,8 @@ class TaskApprovalTest extends TestCase
         $task = $this->taskInTesting($board, $assignee);
         $task->update(['base_points' => 20, 'priority_multiplier' => '2.00']);
 
-        Livewire::actingAs($tester)->test(Show::class, ['task' => $task])->call('approve');
-        Livewire::actingAs($assignee)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted');
+        $this->actingAs($tester)->postJson(route('api.tasks.approve', $task))->assertOk();
+        $this->actingAs($assignee)->postJson(route('api.tasks.homologation', $task))->assertOk();
 
         $this->assertSame(20, (int) XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
     }
@@ -191,29 +177,28 @@ class TaskApprovalTest extends TestCase
         $task = $this->taskInTesting($board, $assignee);
         $task->update(['created_by' => $creator->id, 'base_points' => 20, 'priority_multiplier' => '2.00']);
 
-        Livewire::actingAs(User::factory()->tester()->create())->test(Show::class, ['task' => $task])->call('approve');
-        Livewire::actingAs($assignee)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted');
+        $this->actingAs(User::factory()->tester()->create())->postJson(route('api.tasks.approve', $task))->assertOk();
+        $this->actingAs($assignee)->postJson(route('api.tasks.homologation', $task))->assertOk();
 
         $this->assertSame(10, (int) XpTransaction::where('user_id', $creator->id)->where('source_type', XpSourceType::TASK_EVENT)->sum('amount'));
     }
 
-    public function test_approving_on_a_board_with_no_approved_column_shows_an_error_instead_of_crashing(): void
+    public function test_approving_on_a_board_with_no_approved_column_returns_an_error_instead_of_crashing(): void
     {
         $tester = User::factory()->tester()->create();
         $board = Board::factory()->create();
         $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $testing->id,
             'status' => TaskStatus::TESTING,
         ]);
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->call('approve')
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($tester)
+            ->postJson(route('api.tasks.approve', $task))
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Este quadro não tem uma coluna marcada como "Aprovado".');
 
         $this->assertSame(TaskStatus::TESTING, $task->refresh()->status);
     }
@@ -228,10 +213,8 @@ class TaskApprovalTest extends TestCase
         $task = $this->taskInTesting($board, $assignee);
         $task->update(['created_by' => $creator->id, 'due_at' => now()->subDay()]);
 
-        Livewire::actingAs($tester)->test(Show::class, ['task' => $task])->call('approve');
-        Livewire::actingAs($assignee)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted');
+        $this->actingAs($tester)->postJson(route('api.tasks.approve', $task))->assertOk();
+        $this->actingAs($assignee)->postJson(route('api.tasks.homologation', $task))->assertOk();
 
         $this->assertTrue($task->refresh()->isLate());
         $this->assertSame(0, XpTransaction::where('user_id', $tester->id)->where('source_type', XpSourceType::TASK_EVENT)->count());

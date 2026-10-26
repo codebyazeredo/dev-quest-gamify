@@ -2,14 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Task\Create;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskCreationTest extends TestCase
@@ -24,12 +22,14 @@ class TaskCreationTest extends TestCase
         $category = TaskCategory::factory()->create();
         $priority = TaskPriority::factory()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class, ['board' => $board, 'columnId' => $freeColumn->id])
-            ->set('title', 'Organizar backlog')
-            ->set('category_id', $category->id)
-            ->set('priority_id', $priority->id)
-            ->call('save');
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.store'), [
+                'column_id' => $freeColumn->id,
+                'title' => 'Organizar backlog',
+                'category_id' => $category->id,
+                'priority_id' => $priority->id,
+            ])
+            ->assertCreated();
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Organizar backlog',
@@ -38,15 +38,20 @@ class TaskCreationTest extends TestCase
         ]);
     }
 
-    public function test_mount_aborts_when_the_column_does_not_belong_to_the_board(): void
+    public function test_a_column_that_does_not_exist_is_rejected(): void
     {
         $admin = User::factory()->admin()->create();
-        $board = Board::factory()->create();
-        $otherBoard = Board::factory()->create();
-        $columnFromOtherBoard = BoardColumn::factory()->for($otherBoard)->untagged()->create();
+        $category = TaskCategory::factory()->create();
+        $priority = TaskPriority::factory()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class, ['board' => $board, 'columnId' => $columnFromOtherBoard->id])
-            ->assertStatus(404);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.store'), [
+                'column_id' => 9999,
+                'title' => 'Sem coluna',
+                'category_id' => $category->id,
+                'priority_id' => $priority->id,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('column_id');
     }
 }

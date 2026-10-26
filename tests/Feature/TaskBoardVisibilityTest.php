@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskBoardVisibilityTest extends TestCase
@@ -39,10 +37,10 @@ class TaskBoardVisibilityTest extends TestCase
         ];
 
         foreach ($viewers as $viewer) {
-            $component = Livewire::actingAs($viewer)->test(Kanban::class, ['board' => $board]);
+            $response = $this->actingAs($viewer)->get(route('boards.show', $board))->assertOk();
 
             foreach ($tasks as $task) {
-                $component->assertSee($task->title);
+                $response->assertSee($task->title);
             }
         }
     }
@@ -51,14 +49,11 @@ class TaskBoardVisibilityTest extends TestCase
     {
         $developer = User::factory()->developer()->create();
         $board = Board::factory()->create();
-        $doing = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
+        BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $testing->id, 'status' => TaskStatus::TESTING, 'assigned_to' => $developer->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->assertSee($task->title);
-
-        $this->assertNotNull($doing);
+        $this->actingAs($developer)->get(route('boards.show', $board))->assertOk()->assertSee($task->title);
     }
 }

@@ -3,12 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\XpSourceType;
-use App\Livewire\Gamification\Ranking;
 use App\Models\User;
 use App\Models\XpTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class RankingTest extends TestCase
@@ -41,9 +39,7 @@ class RankingTest extends TestCase
         XpTransaction::factory()->create(['user_id' => $middle->id, 'amount' => 50, 'source_type' => XpSourceType::BONUS]);
         XpTransaction::factory()->create(['user_id' => $bottom->id, 'amount' => 10, 'source_type' => XpSourceType::BONUS]);
 
-        $names = Livewire::actingAs($viewer)
-            ->test(Ranking::class)
-            ->viewData('users')
+        $names = $this->actingAs($viewer)->get(route('ranking'))->viewData('users')
             ->pluck('name')
             ->values()
             ->all();
@@ -66,12 +62,12 @@ class RankingTest extends TestCase
         XpTransaction::factory()->create(['user_id' => $tester->id, 'amount' => 50, 'source_type' => XpSourceType::BONUS]);
         XpTransaction::factory()->create(['user_id' => $admin->id, 'amount' => 50, 'source_type' => XpSourceType::BONUS]);
 
-        $devNames = Livewire::actingAs($viewer)->test(Ranking::class)->viewData('users')->pluck('name')->values()->all();
+        $devNames = $this->actingAs($viewer)->get(route('ranking'))->viewData('users')->pluck('name')->values()->all();
         $this->assertContains('Dev Person', $devNames);
         $this->assertNotContains('Tester Person', $devNames);
         $this->assertNotContains('Admin Person', $devNames);
 
-        $testerNames = Livewire::actingAs($viewer)->test(Ranking::class)->call('setRole', 'tester')->viewData('users')->pluck('name')->values()->all();
+        $testerNames = $this->actingAs($viewer)->get(route('ranking', ['role' => 'tester']))->viewData('users')->pluck('name')->values()->all();
         $this->assertContains('Tester Person', $testerNames);
         $this->assertNotContains('Dev Person', $testerNames);
         $this->assertNotContains('Admin Person', $testerNames);
@@ -87,10 +83,7 @@ class RankingTest extends TestCase
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 40, 'source_type' => XpSourceType::BONUS, 'created_at' => now()]);
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 100, 'source_type' => XpSourceType::BONUS, 'created_at' => now()->subWeeks(2)]);
 
-        $weekly = Livewire::actingAs($viewer)
-            ->test(Ranking::class)
-            ->call('setPeriod', 'week')
-            ->viewData('users')
+        $weekly = $this->actingAs($viewer)->get(route('ranking', ['period' => 'week']))->viewData('users')
             ->firstWhere('name', 'Dev Person');
 
         $this->assertSame(40, (int) $weekly->total_xp);
@@ -106,10 +99,7 @@ class RankingTest extends TestCase
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 40, 'source_type' => XpSourceType::BONUS, 'created_at' => now()]);
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 100, 'source_type' => XpSourceType::BONUS, 'created_at' => now()->subMonths(2)]);
 
-        $monthly = Livewire::actingAs($viewer)
-            ->test(Ranking::class)
-            ->call('setPeriod', 'month')
-            ->viewData('users')
+        $monthly = $this->actingAs($viewer)->get(route('ranking', ['period' => 'month']))->viewData('users')
             ->firstWhere('name', 'Dev Person');
 
         $this->assertSame(40, (int) $monthly->total_xp);
@@ -125,9 +115,7 @@ class RankingTest extends TestCase
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 40, 'source_type' => XpSourceType::BONUS, 'created_at' => now()]);
         XpTransaction::factory()->create(['user_id' => $developer->id, 'amount' => 100, 'source_type' => XpSourceType::BONUS, 'created_at' => now()->subYear()]);
 
-        $total = Livewire::actingAs($viewer)
-            ->test(Ranking::class)
-            ->viewData('users')
+        $total = $this->actingAs($viewer)->get(route('ranking'))->viewData('users')
             ->firstWhere('name', 'Dev Person');
 
         $this->assertSame(140, (int) $total->total_xp);

@@ -4,9 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\ChallengeType;
 use App\Enums\TitleUnlockType;
-use App\Livewire\Admin\Challenges\Create as CreateChallenge;
-use App\Livewire\Admin\Challenges\Index as ChallengeIndex;
-use App\Livewire\Admin\Titles\Create as CreateTitle;
 use App\Models\Challenge;
 use App\Models\Title;
 use App\Models\User;
@@ -15,7 +12,6 @@ use App\Models\UserTitle;
 use App\Services\ChallengeService;
 use Database\Seeders\LevelSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TitleUnlockRulesTest extends TestCase
@@ -59,9 +55,11 @@ class TitleUnlockRulesTest extends TestCase
         ]);
 
         $this->completeChallenge($developer, $first);
+
         $this->assertFalse(UserTitle::where('title_id', $title->id)->exists());
 
         $this->completeChallenge($developer, $second);
+
         $this->assertTrue(UserTitle::where('user_id', $developer->id)->where('title_id', $title->id)->exists());
     }
 
@@ -69,6 +67,7 @@ class TitleUnlockRulesTest extends TestCase
     {
         $developer = User::factory()->developer()->create();
         $challenge = Challenge::factory()->create();
+
         UserChallenge::create([
             'user_id' => $developer->id,
             'challenge_id' => $challenge->id,
@@ -78,15 +77,16 @@ class TitleUnlockRulesTest extends TestCase
 
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(CreateTitle::class)
-            ->set('name', 'Veterano')
-            ->set('unlock_type', TitleUnlockType::CHALLENGES_COUNT->value)
-            ->set('challenges_required', 1)
-            ->call('save')
-            ->assertHasNoErrors();
+        $this->actingAs($admin)
+            ->postJson(route('api.titles.store'), [
+                'name' => 'Veterano',
+                'unlock_type' => TitleUnlockType::CHALLENGES_COUNT->value,
+                'challenges_required' => 1,
+            ])
+            ->assertCreated();
 
         $title = Title::where('name', 'Veterano')->firstOrFail();
+
         $this->assertTrue(UserTitle::where('user_id', $developer->id)->where('title_id', $title->id)->exists());
     }
 
@@ -94,33 +94,33 @@ class TitleUnlockRulesTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(CreateTitle::class)
-            ->set('name', 'Campeão')
-            ->set('unlock_type', TitleUnlockType::CHALLENGE->value)
-            ->call('save')
-            ->assertHasErrors(['challenge_id' => 'required']);
+        $this->actingAs($admin)
+            ->postJson(route('api.titles.store'), ['name' => 'Campeão', 'unlock_type' => TitleUnlockType::CHALLENGE->value])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('challenge_id');
 
-        Livewire::actingAs($admin)
-            ->test(CreateTitle::class)
-            ->set('name', 'Maratonista')
-            ->set('unlock_type', TitleUnlockType::CHALLENGES_COUNT->value)
-            ->call('save')
-            ->assertHasErrors(['challenges_required' => 'required']);
+        $this->actingAs($admin)
+            ->postJson(route('api.titles.store'), ['name' => 'Maratonista', 'unlock_type' => TitleUnlockType::CHALLENGES_COUNT->value])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('challenges_required');
     }
 
     public function test_admin_creates_a_challenge_together_with_its_reward_title(): void
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(CreateChallenge::class)
-            ->set('name', 'Sprint Perfeita')
-            ->set('target', 5)
-            ->set('award_title', true)
-            ->set('reward_title_name', 'Mestre da Sprint')
-            ->call('save')
-            ->assertHasNoErrors();
+        $this->actingAs($admin)
+            ->postJson(route('api.challenges.store'), [
+                'name' => 'Sprint Perfeita',
+                'type' => ChallengeType::TASKS_COMPLETED->value,
+                'target' => 5,
+                'xp_reward' => 10,
+                'starts_at' => now()->startOfWeek()->format('Y-m-d\TH:i'),
+                'ends_at' => now()->endOfWeek()->format('Y-m-d\TH:i'),
+                'award_title' => true,
+                'reward_title_name' => 'Mestre da Sprint',
+            ])
+            ->assertCreated();
 
         $challenge = Challenge::where('name', 'Sprint Perfeita')->firstOrFail();
         $title = Title::where('name', 'Mestre da Sprint')->firstOrFail();
@@ -133,12 +133,18 @@ class TitleUnlockRulesTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(CreateChallenge::class)
-            ->set('name', 'Sem Título')
-            ->set('award_title', true)
-            ->call('save')
-            ->assertHasErrors(['reward_title_name' => 'required']);
+        $this->actingAs($admin)
+            ->postJson(route('api.challenges.store'), [
+                'name' => 'Sem Título',
+                'type' => ChallengeType::TASKS_COMPLETED->value,
+                'target' => 5,
+                'xp_reward' => 10,
+                'starts_at' => now()->startOfWeek()->format('Y-m-d\TH:i'),
+                'ends_at' => now()->endOfWeek()->format('Y-m-d\TH:i'),
+                'award_title' => true,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reward_title_name');
     }
 
     public function test_duplicating_a_challenge_creates_an_inactive_copy_for_the_next_period(): void
@@ -150,9 +156,7 @@ class TitleUnlockRulesTest extends TestCase
             'ends_at' => now()->endOfWeek(),
         ]);
 
-        Livewire::actingAs($admin)
-            ->test(ChallengeIndex::class)
-            ->call('duplicate', $challenge->id);
+        $this->actingAs($admin)->postJson(route('api.challenges.duplicate', $challenge))->assertCreated();
 
         $copy = Challenge::where('name', 'Desafio Semanal (cópia)')->firstOrFail();
 

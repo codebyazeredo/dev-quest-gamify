@@ -2,14 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskAssignmentTest extends TestCase
@@ -22,9 +19,7 @@ class TaskAssignmentTest extends TestCase
         [$board, $column] = $this->boardWithColumn();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'assigned_to' => null]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('claim', $task->id);
+        $this->actingAs($developer)->postJson(route('api.tasks.claim', $task))->assertOk();
 
         $this->assertSame($developer->id, $task->refresh()->assigned_to);
     }
@@ -36,10 +31,9 @@ class TaskAssignmentTest extends TestCase
         [$board, $column] = $this->boardWithColumn();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'assigned_to' => $otherDeveloper->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('claim', $task->id)
-            ->assertForbidden();
+        $this->actingAs($developer)->postJson(route('api.tasks.claim', $task))->assertForbidden();
+
+        $this->assertSame($otherDeveloper->id, $task->refresh()->assigned_to);
     }
 
     public function test_admin_can_assign_task_to_any_user(): void
@@ -48,10 +42,7 @@ class TaskAssignmentTest extends TestCase
         $developer = User::factory()->developer()->create();
         $task = Task::factory()->create(['assigned_to' => null]);
 
-        Livewire::actingAs($admin)
-            ->test(Show::class, ['task' => $task])
-            ->set('assignToUserId', $developer->id)
-            ->call('assignTo');
+        $this->actingAs($admin)->postJson(route('api.tasks.assign', $task), ['user_id' => $developer->id])->assertOk();
 
         $this->assertSame($developer->id, $task->refresh()->assigned_to);
     }
@@ -62,11 +53,20 @@ class TaskAssignmentTest extends TestCase
         $developer = User::factory()->developer()->create();
         $task = Task::factory()->create(['assigned_to' => null]);
 
-        Livewire::actingAs($po)
-            ->test(Show::class, ['task' => $task])
-            ->set('assignToUserId', $developer->id)
-            ->call('assignTo')
-            ->assertForbidden();
+        $this->actingAs($po)->postJson(route('api.tasks.assign', $task), ['user_id' => $developer->id])->assertForbidden();
+
+        $this->assertNull($task->refresh()->assigned_to);
+    }
+
+    public function test_assigning_requires_an_existing_user(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $task = Task::factory()->create(['assigned_to' => null]);
+
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.assign', $task), ['user_id' => 9999])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('user_id');
     }
 
     protected function boardWithColumn(): array

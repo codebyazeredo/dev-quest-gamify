@@ -3,32 +3,38 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\LogoSize;
-use App\Livewire\Admin\Settings;
 use App\Models\AppSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class SettingsManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function payload(array $overrides = []): array
+    {
+        return [
+            'company_name' => 'Acme Corp',
+            'logo_size' => LogoSize::LARGE->value,
+            'primary_color' => AppSetting::DEFAULT_PRIMARY_COLOR,
+            ...$overrides,
+        ];
+    }
+
     public function test_admin_can_update_the_company_name_and_logo(): void
     {
         Storage::fake('public');
-
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Settings::class)
-            ->set('company_name', 'Acme Corp')
-            ->set('logo', UploadedFile::fake()->image('logo.png'))
-            ->call('save');
+        $this->actingAs($admin)
+            ->post(route('api.settings.update'), $this->payload(['_method' => 'PUT', 'logo' => UploadedFile::fake()->image('logo.png')]), ['Accept' => 'application/json'])
+            ->assertOk();
 
         $setting = AppSetting::current();
+
         $this->assertSame('Acme Corp', $setting->company_name);
         $this->assertNotNull($setting->logo_path);
         Storage::disk('public')->assertExists($setting->logo_path);
@@ -40,10 +46,9 @@ class SettingsManagementTest extends TestCase
 
         $this->assertSame(LogoSize::LARGE, AppSetting::current()->logo_size);
 
-        Livewire::actingAs($admin)
-            ->test(Settings::class)
-            ->set('logo_size', LogoSize::SMALL->value)
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.settings.update'), $this->payload(['logo_size' => LogoSize::SMALL->value]))
+            ->assertOk();
 
         $this->assertSame(LogoSize::SMALL, AppSetting::current()->logo_size);
     }
@@ -54,36 +59,23 @@ class SettingsManagementTest extends TestCase
 
         $this->assertSame(AppSetting::DEFAULT_PRIMARY_COLOR, AppSetting::current()->primaryColor());
 
-        Livewire::actingAs($admin)
-            ->test(Settings::class)
-            ->set('primary_color', 'azul')
-            ->call('save')
-            ->assertHasErrors(['primary_color' => 'regex']);
+        $this->actingAs($admin)
+            ->putJson(route('api.settings.update'), $this->payload(['primary_color' => 'azul']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('primary_color');
 
-        Livewire::actingAs($admin)
-            ->test(Settings::class)
-            ->set('primary_color', '#198754')
-            ->call('save')
-            ->assertHasNoErrors();
+        $this->actingAs($admin)
+            ->putJson(route('api.settings.update'), $this->payload(['primary_color' => '#198754']))
+            ->assertOk();
 
         $this->assertSame('#198754', AppSetting::current()->primaryColor());
     }
 
-    public function test_developer_gets_forbidden_on_the_route(): void
+    public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/settings');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Settings::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/settings')->assertForbidden();
+        $this->actingAs($developer)->putJson(route('api.settings.update'), $this->payload())->assertForbidden();
     }
 }

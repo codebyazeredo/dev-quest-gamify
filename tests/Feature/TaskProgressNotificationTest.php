@@ -3,14 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Notifications\Bell;
-use App\Livewire\Task\Kanban;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskProgressNotificationTest extends TestCase
@@ -36,9 +33,9 @@ class TaskProgressNotificationTest extends TestCase
         $developer = User::factory()->developer()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $doing->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertOk();
 
         $notification = $developer->notifications()->first();
 
@@ -54,9 +51,9 @@ class TaskProgressNotificationTest extends TestCase
         $developer = User::factory()->developer()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $doing->id, 0);
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertCount(0, $developer->notifications);
     }
@@ -68,9 +65,9 @@ class TaskProgressNotificationTest extends TestCase
         $tester = User::factory()->tester()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $doing->id, 'status' => TaskStatus::DOING, 'assigned_to' => User::factory()->developer()->create()->id]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $testing->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertSame('testing', $tester->notifications()->first()->data['kind']);
     }
@@ -83,20 +80,52 @@ class TaskProgressNotificationTest extends TestCase
         $other = User::factory()->developer()->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id, 'title' => 'Tarefa do andamento']);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $doing->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertOk();
 
-        Livewire::actingAs($other)->test(Bell::class)->assertDontSee('Tarefa do andamento');
+        $this->actingAs($other)->getJson(route('api.notifications.index'))
+            ->assertOk()
+            ->assertJsonCount(0, 'data')
+            ->assertJsonPath('unread_count', 0);
 
         $notificationId = $developer->notifications()->first()->id;
 
-        Livewire::actingAs($developer)
-            ->test(Bell::class)
-            ->assertSee('Tarefa do andamento')
-            ->call('openNotification', $notificationId)
-            ->assertRedirect(route('tasks.show', $task));
+        $this->actingAs($developer)->getJson(route('api.notifications.index'))
+            ->assertOk()
+            ->assertJsonPath('data.0.title', 'Tarefa do andamento')
+            ->assertJsonPath('data.0.task_id', $task->id)
+            ->assertJsonPath('unread_count', 1);
+
+        $this->actingAs($other)->postJson(route('api.notifications.read', $notificationId))->assertNotFound();
+
+        $this->actingAs($developer)->postJson(route('api.notifications.read', $notificationId))->assertOk();
 
         $this->assertSame(0, $developer->unreadNotifications()->count());
+    }
+
+    public function test_marking_all_notifications_as_read_clears_the_unread_count(): void
+    {
+        [$board, $todo, $doing] = $this->boardWithColumns();
+        $admin = User::factory()->admin()->create();
+        $developer = User::factory()->developer()->create();
+        $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id]);
+
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $doing->id, 'position' => 0])
+            ->assertOk();
+
+        $this->actingAs($developer)->postJson(route('api.notifications.read-all'))
+            ->assertOk()
+            ->assertJsonPath('unread_count', 0);
+
+        $this->assertSame(0, $developer->unreadNotifications()->count());
+    }
+
+    public function test_guests_cannot_read_notifications(): void
+    {
+        $this->getJson(route('api.notifications.index'))
+            ->assertUnauthorized()
+            ->assertJsonPath('message', 'Sessão expirada. Faça login novamente.');
     }
 }

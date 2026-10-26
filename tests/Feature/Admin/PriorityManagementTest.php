@@ -2,14 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\Priorities\Create;
-use App\Livewire\Admin\Priorities\Edit;
-use App\Livewire\Admin\Priorities\Index;
 use App\Models\Task;
 use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class PriorityManagementTest extends TestCase
@@ -20,26 +16,21 @@ class PriorityManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'Bloqueante')
-            ->set('multiplier', '8.00')
-            ->call('save');
+        $this->actingAs($admin)
+            ->postJson(route('api.priorities.store'), ['name' => 'Bloqueante', 'multiplier' => '8.00'])
+            ->assertCreated();
 
-        $priority = TaskPriority::where('name', 'Bloqueante')->first();
-        $this->assertNotNull($priority);
+        $priority = TaskPriority::where('name', 'Bloqueante')->firstOrFail();
+
         $this->assertSame('8.00', (string) $priority->multiplier);
 
-        Livewire::actingAs($admin)
-            ->test(Edit::class, ['priorityId' => $priority->id])
-            ->set('multiplier', '9.00')
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.priorities.update', $priority), ['name' => 'Bloqueante', 'multiplier' => '9.00'])
+            ->assertOk();
 
         $this->assertSame('9.00', (string) $priority->refresh()->multiplier);
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $priority->id);
+        $this->actingAs($admin)->deleteJson(route('api.priorities.destroy', $priority))->assertOk();
 
         $this->assertNull(TaskPriority::find($priority->id));
     }
@@ -50,10 +41,9 @@ class PriorityManagementTest extends TestCase
         $priority = TaskPriority::factory()->create();
         Task::factory()->create(['priority_id' => $priority->id]);
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $priority->id)
-            ->assertHasErrors(['delete']);
+        $this->actingAs($admin)->deleteJson(route('api.priorities.destroy', $priority))
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Esta gravidade ainda possui tarefas.');
 
         $this->assertNotNull(TaskPriority::find($priority->id));
     }
@@ -63,27 +53,17 @@ class PriorityManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         TaskPriority::factory()->count(20)->create();
 
-        $priorities = Livewire::actingAs($admin)->test(Index::class)->viewData('priorities');
-
-        $this->assertSame(10, $priorities->count());
-        $this->assertTrue($priorities->hasMorePages());
+        $this->actingAs($admin)->getJson(route('api.priorities.index'))
+            ->assertOk()
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.last_page', 2);
     }
 
-    public function test_developer_is_forbidden_on_the_route(): void
+    public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/priority-rules');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/priority-rules')->assertForbidden();
+        $this->actingAs($developer)->getJson(route('api.priorities.index'))->assertForbidden();
     }
 }

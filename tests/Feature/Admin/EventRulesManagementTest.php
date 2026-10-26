@@ -3,13 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\TaskEventType;
-use App\Livewire\Admin\EventRules\Create;
-use App\Livewire\Admin\EventRules\Edit;
-use App\Livewire\Admin\EventRules\Index;
 use App\Models\TaskEventRule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class EventRulesManagementTest extends TestCase
@@ -21,13 +17,12 @@ class EventRulesManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $rule = TaskEventRule::factory()->create(['type' => TaskEventType::DEPLOYED, 'xp_reward' => 20, 'active' => true]);
 
-        Livewire::actingAs($admin)
-            ->test(Edit::class, ['typeValue' => TaskEventType::DEPLOYED->value])
-            ->set('xp_reward', 30)
-            ->set('active', false)
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.event-rules.update', TaskEventType::DEPLOYED->value), ['xp_reward' => 30, 'active' => false])
+            ->assertOk();
 
         $rule->refresh();
+
         $this->assertSame(30, $rule->xp_reward);
         $this->assertFalse($rule->active);
     }
@@ -38,12 +33,9 @@ class EventRulesManagementTest extends TestCase
 
         $this->assertDatabaseMissing('task_event_rules', ['type' => TaskEventType::APPROVED]);
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('type', TaskEventType::APPROVED->value)
-            ->set('xp_reward', 15)
-            ->set('active', true)
-            ->call('save');
+        $this->actingAs($admin)
+            ->postJson(route('api.event-rules.store'), ['type' => TaskEventType::APPROVED->value, 'xp_reward' => 15, 'active' => true])
+            ->assertCreated();
 
         $this->assertDatabaseHas('task_event_rules', [
             'type' => TaskEventType::APPROVED->value,
@@ -57,31 +49,37 @@ class EventRulesManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         TaskEventRule::factory()->create(['type' => TaskEventType::DEPLOYED]);
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('type', TaskEventType::DEPLOYED->value)
-            ->set('xp_reward', 10)
-            ->call('save')
-            ->assertHasErrors(['type']);
+        $this->actingAs($admin)
+            ->postJson(route('api.event-rules.store'), ['type' => TaskEventType::DEPLOYED->value, 'xp_reward' => 10, 'active' => true])
+            ->assertStatus(409);
 
         $this->assertSame(1, TaskEventRule::where('type', TaskEventType::DEPLOYED)->count());
     }
 
-    public function test_developer_is_forbidden_on_the_route(): void
+    public function test_percentage_based_events_are_limited_to_one_hundred(): void
     {
-        $developer = User::factory()->developer()->create();
+        $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/event-rules');
-
-        $response->assertForbidden();
+        $this->actingAs($admin)
+            ->postJson(route('api.event-rules.store'), ['type' => TaskEventType::APPROVED->value, 'xp_reward' => 150, 'active' => true])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('xp_reward');
     }
 
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
+    public function test_index_lists_every_event_type(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->getJson(route('api.event-rules.index'))
+            ->assertOk()
+            ->assertJsonCount(count(TaskEventType::cases()), 'data');
+    }
+
+    public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/event-rules')->assertForbidden();
+        $this->actingAs($developer)->getJson(route('api.event-rules.index'))->assertForbidden();
     }
 }

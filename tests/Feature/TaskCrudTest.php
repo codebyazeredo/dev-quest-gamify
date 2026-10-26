@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Create;
-use App\Livewire\Task\Edit;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -12,7 +10,6 @@ use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskCrudTest extends TestCase
@@ -27,16 +24,17 @@ class TaskCrudTest extends TestCase
         $category = TaskCategory::factory()->create(['base_points' => 20]);
         $priority = TaskPriority::factory()->create(['multiplier' => '2.00']);
 
-        Livewire::actingAs($po)
-            ->test(Create::class, ['board' => $board, 'columnId' => $column->id])
-            ->set('title', 'Build report')
-            ->set('category_id', $category->id)
-            ->set('priority_id', $priority->id)
-            ->call('save');
+        $this->actingAs($po)
+            ->postJson(route('api.tasks.store'), [
+                'column_id' => $column->id,
+                'title' => 'Build report',
+                'category_id' => $category->id,
+                'priority_id' => $priority->id,
+            ])
+            ->assertCreated();
 
-        $task = Task::where('title', 'Build report')->first();
+        $task = Task::where('title', 'Build report')->firstOrFail();
 
-        $this->assertNotNull($task);
         $this->assertSame(20, $task->base_points);
         $this->assertSame('2.00', (string) $task->priority_multiplier);
     }
@@ -44,12 +42,20 @@ class TaskCrudTest extends TestCase
     public function test_developer_cannot_create_task(): void
     {
         $developer = User::factory()->developer()->create();
-        $board = Board::factory()->create();
-        $column = BoardColumn::factory()->for($board)->create();
+        $column = BoardColumn::factory()->for(Board::factory()->create())->create();
+        $category = TaskCategory::factory()->create();
+        $priority = TaskPriority::factory()->create();
 
-        Livewire::actingAs($developer)
-            ->test(Create::class, ['board' => $board, 'columnId' => $column->id])
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.store'), [
+                'column_id' => $column->id,
+                'title' => 'Não deveria existir',
+                'category_id' => $category->id,
+                'priority_id' => $priority->id,
+            ])
             ->assertForbidden();
+
+        $this->assertDatabaseMissing('tasks', ['title' => 'Não deveria existir']);
     }
 
     public function test_product_owner_can_edit_task_details(): void
@@ -57,10 +63,13 @@ class TaskCrudTest extends TestCase
         $po = User::factory()->productOwner()->create();
         $task = Task::factory()->create(['title' => 'Old title']);
 
-        Livewire::actingAs($po)
-            ->test(Edit::class, ['taskId' => $task->id])
-            ->set('title', 'New title')
-            ->call('save');
+        $this->actingAs($po)
+            ->putJson(route('api.tasks.update', $task), [
+                'title' => 'New title',
+                'category_id' => $task->category_id,
+                'priority_id' => $task->priority_id,
+            ])
+            ->assertOk();
 
         $this->assertSame('New title', $task->refresh()->title);
     }
@@ -72,6 +81,7 @@ class TaskCrudTest extends TestCase
         $otherCategory = TaskCategory::factory()->create(['base_points' => 99]);
         $priority = TaskPriority::factory()->create(['multiplier' => '1.00']);
         $otherPriority = TaskPriority::factory()->create(['multiplier' => '5.00']);
+
         $task = Task::factory()->create([
             'category_id' => $category->id,
             'priority_id' => $priority->id,
@@ -80,13 +90,16 @@ class TaskCrudTest extends TestCase
             'completed_at' => now(),
         ]);
 
-        Livewire::actingAs($po)
-            ->test(Edit::class, ['taskId' => $task->id])
-            ->set('category_id', $otherCategory->id)
-            ->set('priority_id', $otherPriority->id)
-            ->call('save');
+        $this->actingAs($po)
+            ->putJson(route('api.tasks.update', $task), [
+                'title' => $task->title,
+                'category_id' => $otherCategory->id,
+                'priority_id' => $otherPriority->id,
+            ])
+            ->assertOk();
 
         $task->refresh();
+
         $this->assertSame($category->id, $task->category_id);
         $this->assertSame(10, $task->base_points);
         $this->assertSame('1.00', (string) $task->priority_multiplier);

@@ -3,15 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskMovement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskMovementHistoryTest extends TestCase
@@ -26,11 +23,12 @@ class TaskMovementHistoryTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
         $movement = TaskMovement::where('task_id', $task->id)->latest('id')->first();
+
         $this->assertNotNull($movement);
         $this->assertSame($origin->id, $movement->from_column_id);
         $this->assertSame($destination->id, $movement->to_column_id);
@@ -45,9 +43,9 @@ class TaskMovementHistoryTest extends TestCase
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => TaskStatus::TODO, 'position' => 0]);
         Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => TaskStatus::TODO, 'position' => 1]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $column->id, 1);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $column->id, 'position' => 1])
+            ->assertOk();
 
         $this->assertSame(0, TaskMovement::where('task_id', $task->id)->count());
     }
@@ -59,6 +57,7 @@ class TaskMovementHistoryTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $testing->id,
@@ -66,17 +65,15 @@ class TaskMovementHistoryTest extends TestCase
             'assigned_to' => $assignee->id,
         ]);
 
-        Livewire::actingAs($tester)
-            ->test(Show::class, ['task' => $task])
-            ->set('rejectionReasonInput', 'Faltou tratar o caso de borda')
-            ->call('reject');
+        $this->actingAs($tester)
+            ->postJson(route('api.tasks.reject', $task), ['reason' => 'Faltou tratar o caso de borda'])
+            ->assertOk();
 
         $movement = TaskMovement::where('task_id', $task->id)->latest('id')->first();
+
         $this->assertSame('Faltou tratar o caso de borda', $movement->note);
 
-        Livewire::actingAs($assignee)
-            ->test(Show::class, ['task' => $task])
-            ->assertSee('Faltou tratar o caso de borda');
+        $this->actingAs($assignee)->get(route('tasks.show', $task))->assertOk()->assertSee('Faltou tratar o caso de borda');
     }
 
     public function test_movement_history_is_visible_to_any_authenticated_user(): void
@@ -88,12 +85,12 @@ class TaskMovementHistoryTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create(['name' => 'Em Andamento']);
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
-        Livewire::actingAs($viewer)
-            ->test(Show::class, ['task' => $task])
+        $this->actingAs($viewer)->get(route('tasks.show', $task))
+            ->assertOk()
             ->assertSee('A Fazer')
             ->assertSee('Em Andamento');
     }

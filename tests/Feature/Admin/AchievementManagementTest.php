@@ -3,46 +3,78 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\AchievementConditionType;
-use App\Livewire\Admin\Achievements\Create;
-use App\Livewire\Admin\Achievements\Edit;
-use App\Livewire\Admin\Achievements\Index;
 use App\Models\Achievement;
+use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class AchievementManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function payload(array $overrides = []): array
+    {
+        return [
+            'name' => 'Night Owl',
+            'icon' => 'trophy',
+            'condition_type' => AchievementConditionType::TASKS_COMPLETED_TOTAL->value,
+            'condition_value' => 3,
+            'xp_reward' => 30,
+            ...$overrides,
+        ];
+    }
+
     public function test_admin_can_create_update_and_delete_an_achievement(): void
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Create::class)
-            ->set('name', 'Night Owl')
-            ->set('condition_type', AchievementConditionType::TASKS_COMPLETED_TOTAL->value)
-            ->set('condition_value', 3)
-            ->set('xp_reward', 30)
-            ->call('save');
+        $this->actingAs($admin)->postJson(route('api.achievements.store'), $this->payload())->assertCreated();
 
-        $achievement = Achievement::where('name', 'Night Owl')->first();
-        $this->assertNotNull($achievement);
+        $achievement = Achievement::where('name', 'Night Owl')->firstOrFail();
 
-        Livewire::actingAs($admin)
-            ->test(Edit::class, ['achievementId' => $achievement->id])
-            ->set('name', 'Night Owl Supreme')
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.achievements.update', $achievement), $this->payload(['name' => 'Night Owl Supreme', 'active' => true]))
+            ->assertOk();
 
         $this->assertSame('Night Owl Supreme', $achievement->refresh()->name);
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $achievement->id);
+        $this->actingAs($admin)->deleteJson(route('api.achievements.destroy', $achievement))->assertOk();
 
         $this->assertNull(Achievement::find($achievement->id));
+    }
+
+    public function test_admin_can_create_an_achievement_that_awards_a_title(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('api.achievements.store'), $this->payload(['award_title' => true, 'reward_title_name' => 'Coruja']))
+            ->assertCreated();
+
+        $this->assertSame(Achievement::where('name', 'Night Owl')->value('id'), Title::where('name', 'Coruja')->value('achievement_id'));
+    }
+
+    public function test_reward_title_name_is_required_when_awarding_a_title(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('api.achievements.store'), $this->payload(['award_title' => true]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reward_title_name');
+    }
+
+    public function test_admin_can_toggle_and_duplicate_an_achievement(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $achievement = Achievement::factory()->create(['active' => true]);
+
+        $this->actingAs($admin)->postJson(route('api.achievements.toggle-active', $achievement))->assertOk();
+        $this->assertFalse($achievement->refresh()->active);
+
+        $this->actingAs($admin)->postJson(route('api.achievements.duplicate', $achievement))->assertCreated();
+        $this->assertSame(2, Achievement::count());
     }
 
     public function test_index_paginates_the_list(): void
@@ -50,27 +82,17 @@ class AchievementManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         Achievement::factory()->count(20)->create();
 
-        $achievements = Livewire::actingAs($admin)->test(Index::class)->viewData('achievements');
-
-        $this->assertSame(10, $achievements->count());
-        $this->assertTrue($achievements->hasMorePages());
+        $this->actingAs($admin)->getJson(route('api.achievements.index'))
+            ->assertOk()
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.last_page', 2);
     }
 
-    public function test_developer_gets_forbidden_on_the_route(): void
+    public function test_developer_gets_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/achievements');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_method_rejects_non_admin_even_when_route_middleware_is_bypassed(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Index::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/achievements')->assertForbidden();
+        $this->actingAs($developer)->getJson(route('api.achievements.index'))->assertForbidden();
     }
 }

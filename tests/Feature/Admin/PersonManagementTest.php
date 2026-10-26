@@ -2,44 +2,42 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Livewire\Admin\People\Create;
-use App\Livewire\Admin\People\Edit;
-use App\Livewire\Admin\People\Index;
 use App\Models\Address;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class PersonManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function fillPersonForm(mixed $component): mixed
+    private function payload(array $overrides = []): array
     {
-        return $component
-            ->set('nome', 'Maria Teste')
-            ->set('cpf', '52998224725')
-            ->set('nascimento', '1990-01-01')
-            ->set('sexo', 2)
-            ->set('email', 'maria@example.test')
-            ->set('telefone1', '11999998888')
-            ->set('cep', '01310-100')
-            ->set('logradouro', 'Av. Paulista')
-            ->set('numero', '1000')
-            ->set('cidade', 'São Paulo')
-            ->set('estado', 'SP');
+        return [
+            'nome' => 'Maria Teste',
+            'cpf' => '52998224725',
+            'nascimento' => '1990-01-01',
+            'sexo' => 2,
+            'email' => 'maria@example.test',
+            'telefone1' => '11999998888',
+            'cep' => '01310-100',
+            'logradouro' => 'Av. Paulista',
+            'numero' => '1000',
+            'cidade' => 'São Paulo',
+            'estado' => 'SP',
+            ...$overrides,
+        ];
     }
 
     public function test_admin_can_create_a_person_with_address(): void
     {
         $admin = User::factory()->admin()->create();
 
-        $this->fillPersonForm(Livewire::actingAs($admin)->test(Create::class))->call('save');
+        $this->actingAs($admin)->postJson(route('api.people.store'), $this->payload())->assertCreated();
 
-        $person = Person::where('email', 'maria@example.test')->first();
-        $this->assertNotNull($person);
+        $person = Person::where('email', 'maria@example.test')->firstOrFail();
+
         $this->assertSame('Maria Teste', $person->nome);
         $this->assertSame('52998224725', $person->cpf);
         $this->assertNotNull($person->address);
@@ -50,10 +48,10 @@ class PersonManagementTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $this->fillPersonForm(Livewire::actingAs($admin)->test(Create::class))
-            ->set('cpf', '11111111111')
-            ->call('save')
-            ->assertHasErrors(['cpf']);
+        $this->actingAs($admin)
+            ->postJson(route('api.people.store'), $this->payload(['cpf' => '11111111111']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('cpf');
 
         $this->assertNull(Person::where('email', 'maria@example.test')->first());
     }
@@ -63,9 +61,10 @@ class PersonManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         Person::factory()->create(['cpf' => '52998224725']);
 
-        $this->fillPersonForm(Livewire::actingAs($admin)->test(Create::class))
-            ->call('save')
-            ->assertHasErrors(['cpf']);
+        $this->actingAs($admin)
+            ->postJson(route('api.people.store'), $this->payload())
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('cpf');
     }
 
     public function test_admin_can_update_a_person(): void
@@ -74,10 +73,9 @@ class PersonManagementTest extends TestCase
         $person = Person::factory()->create(['nome' => 'Old Name']);
         Address::factory()->for($person)->create();
 
-        Livewire::actingAs($admin)
-            ->test(Edit::class, ['personId' => $person->id])
-            ->set('nome', 'New Name')
-            ->call('save');
+        $this->actingAs($admin)
+            ->putJson(route('api.people.update', $person), $this->payload(['nome' => 'New Name', 'cpf' => $person->cpf, 'email' => $person->email]))
+            ->assertOk();
 
         $this->assertSame('New Name', $person->refresh()->nome);
     }
@@ -87,28 +85,16 @@ class PersonManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $linked = User::factory()->developer()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Index::class)
-            ->call('delete', $linked->person_id);
+        $this->actingAs($admin)->deleteJson(route('api.people.destroy', $linked->person_id))->assertStatus(409);
 
         $this->assertNotNull(Person::find($linked->person_id));
     }
 
-    public function test_developer_gets_forbidden_on_the_route(): void
+    public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $response = $this->actingAs($developer)->get('/admin/people');
-
-        $response->assertForbidden();
-    }
-
-    public function test_livewire_create_rejects_non_admin(): void
-    {
-        $developer = User::factory()->developer()->create();
-
-        Livewire::actingAs($developer)
-            ->test(Create::class)
-            ->assertForbidden();
+        $this->actingAs($developer)->get('/admin/people')->assertForbidden();
+        $this->actingAs($developer)->postJson(route('api.people.store'), $this->payload())->assertForbidden();
     }
 }

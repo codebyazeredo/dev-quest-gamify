@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class BoardColumnManagementTest extends TestCase
@@ -21,19 +19,18 @@ class BoardColumnManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $board = Board::factory()->create();
 
-        $component = Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->set('newColumnName', 'Blocked')
-            ->call('addColumn');
+        $this->actingAs($admin)->postJson(route('api.columns.store', $board), ['name' => 'Blocked'])->assertCreated();
 
-        $column = $board->columns()->where('name', 'Blocked')->first();
-        $this->assertNotNull($column);
+        $column = $board->columns()->where('name', 'Blocked')->firstOrFail();
+
         $this->assertNull($column->status);
 
-        $component->call('renameColumn', $column->id, 'On Hold');
+        $this->actingAs($admin)->putJson(route('api.columns.rename', $column), ['name' => 'On Hold'])->assertOk();
+
         $this->assertSame('On Hold', $column->refresh()->name);
 
-        $component->call('deleteColumn', $column->id);
+        $this->actingAs($admin)->deleteJson(route('api.columns.destroy', $column))->assertOk();
+
         $this->assertNull(BoardColumn::find($column->id));
     }
 
@@ -42,12 +39,9 @@ class BoardColumnManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
         $board = Board::factory()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->set('newColumnName', 'A Fazer (livre)')
-            ->call('addColumn');
+        $this->actingAs($admin)->postJson(route('api.columns.store', $board), ['name' => 'A Fazer (livre)'])->assertCreated();
 
-        $column = $board->columns()->where('name', 'A Fazer (livre)')->first();
+        $column = $board->columns()->where('name', 'A Fazer (livre)')->firstOrFail();
 
         $this->assertNull($column->status);
         $this->assertFalse($column->is_final);
@@ -59,11 +53,12 @@ class BoardColumnManagementTest extends TestCase
         $board = Board::factory()->create();
         $column = BoardColumn::factory()->for($board)->untagged()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('setMilestone', $column->id, TaskStatus::DONE->value);
+        $this->actingAs($admin)
+            ->putJson(route('api.columns.milestone', $column), ['status' => TaskStatus::DONE->value])
+            ->assertOk();
 
         $column->refresh();
+
         $this->assertSame(TaskStatus::DONE, $column->status);
         $this->assertTrue($column->is_final);
     }
@@ -75,10 +70,10 @@ class BoardColumnManagementTest extends TestCase
         BoardColumn::factory()->for($board)->status(TaskStatus::DONE)->create();
         $other = BoardColumn::factory()->for($board)->untagged()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('setMilestone', $other->id, TaskStatus::DONE->value)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($admin)
+            ->putJson(route('api.columns.milestone', $other), ['status' => TaskStatus::DONE->value])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Este quadro já tem uma coluna marcada com este marco.');
 
         $this->assertNull($other->refresh()->status);
     }
@@ -90,10 +85,10 @@ class BoardColumnManagementTest extends TestCase
         $column = BoardColumn::factory()->for($board)->untagged()->create();
         Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id, 'status' => null]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('deleteColumn', $column->id)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($admin)
+            ->deleteJson(route('api.columns.destroy', $column))
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Esta coluna ainda possui tarefas.');
 
         $this->assertNotNull(BoardColumn::find($column->id));
     }
@@ -105,11 +100,17 @@ class BoardColumnManagementTest extends TestCase
         $first = BoardColumn::factory()->for($board)->untagged()->create(['position' => 0]);
         $second = BoardColumn::factory()->for($board)->untagged()->create(['position' => 1]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveColumnUp', $second->id);
+        $this->actingAs($admin)->postJson(route('api.columns.move-up', $second))->assertOk();
 
         $this->assertSame(0, $second->refresh()->position);
         $this->assertSame(1, $first->refresh()->position);
+    }
+
+    public function test_a_developer_cannot_manage_columns(): void
+    {
+        $developer = User::factory()->developer()->create();
+        $board = Board::factory()->create();
+
+        $this->actingAs($developer)->postJson(route('api.columns.store', $board), ['name' => 'Blocked'])->assertForbidden();
     }
 }

@@ -4,9 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
-use App\Livewire\Checkin\Button;
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -21,7 +18,7 @@ use Database\Seeders\TaskEventRuleSeeder;
 use Database\Seeders\TitleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class ToastNotificationTest extends TestCase
@@ -43,13 +40,18 @@ class ToastNotificationTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_leveling_up_via_task_completion_dispatches_a_level_up_toast(): void
+    /** @return array<int, string> tipos dos toasts anexados à resposta JSON da API */
+    private function toastTypes(TestResponse $response): array
+    {
+        return collect($response->json('toasts', []))->pluck('type')->all();
+    }
+
+    public function test_leveling_up_via_task_completion_returns_a_level_up_toast(): void
     {
         $developer = User::factory()->developer()->create();
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
-
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
         $task = Task::factory()->create([
@@ -62,13 +64,12 @@ class ToastNotificationTest extends TestCase
             'priority_multiplier' => '1.50',
         ]);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'level_up');
+        $response = $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
+
+        $this->assertContains('level_up', $this->toastTypes($response));
     }
 
-    public function test_unlocking_an_achievement_via_task_completion_dispatches_an_achievement_toast(): void
+    public function test_unlocking_an_achievement_via_task_completion_returns_an_achievement_toast(): void
     {
         $this->seed(AchievementSeeder::class);
         $this->seed(TitleSeeder::class);
@@ -77,7 +78,6 @@ class ToastNotificationTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug', 'base_points' => 10]);
-
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
         $task = Task::factory()->create([
@@ -86,18 +86,16 @@ class ToastNotificationTest extends TestCase
             'status' => TaskStatus::APPROVED,
             'assigned_to' => $developer->id,
             'category_id' => $bugCategory->id,
-
             'base_points' => 10,
             'priority_multiplier' => '1.50',
         ]);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'achievement');
+        $response = $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
+
+        $this->assertContains('achievement', $this->toastTypes($response));
     }
 
-    public function test_completing_a_challenge_dispatches_a_challenge_toast(): void
+    public function test_completing_a_challenge_returns_a_challenge_toast(): void
     {
         $this->seed(ChallengeSeeder::class);
 
@@ -105,12 +103,12 @@ class ToastNotificationTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
-
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
+        // Evita que um level up domine o resultado: o foco aqui é o toast do desafio.
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
-        $component = null;
+        $toastTypes = [];
 
         for ($i = 0; $i < 10; $i++) {
             $task = Task::factory()->create([
@@ -122,31 +120,30 @@ class ToastNotificationTest extends TestCase
                 'priority_multiplier' => '1.50',
             ]);
 
-            $component = Livewire::actingAs($developer)->test(Show::class, ['task' => $task]);
-            $component->call('markHomologationCompleted');
+            $response = $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
+            $toastTypes = [...$toastTypes, ...$this->toastTypes($response)];
         }
 
-        $component->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'challenge');
+        $this->assertContains('challenge', $toastTypes);
     }
 
-    public function test_a_fifth_consecutive_checkin_dispatches_a_streak_toast(): void
+    public function test_a_fifth_consecutive_checkin_returns_a_streak_toast(): void
     {
         $developer = User::factory()->developer()->create();
 
         Carbon::setTestNow('2026-01-01');
 
         for ($i = 0; $i < 4; $i++) {
-            Livewire::actingAs($developer)->test(Button::class)->call('checkIn');
+            $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
             Carbon::setTestNow(now()->addDay());
         }
 
-        Livewire::actingAs($developer)
-            ->test(Button::class)
-            ->call('checkIn')
-            ->assertDispatched('toast', function ($name, $params) {
-                return $params['toast']['type'] === 'streak'
-                    && str_contains($params['toast']['message'], '5 dias consecutivos');
-            });
+        $response = $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
+
+        $streak = collect($response->json('toasts'))->firstWhere('type', 'streak');
+
+        $this->assertNotNull($streak);
+        $this->assertStringContainsString('5 dias consecutivos', $streak['message']);
     }
 
     public function test_flush_returns_empty_when_nothing_was_queued(): void
@@ -161,7 +158,6 @@ class ToastNotificationTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $category = TaskCategory::factory()->create(['base_points' => 100]);
-
         $review = $board->columns->firstWhere('status', TaskStatus::REVIEW);
         $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
 
@@ -177,9 +173,19 @@ class ToastNotificationTest extends TestCase
 
         app(XpService::class)->grant($developer, 90, XpSourceType::TASK, null, 'test setup buffer');
 
-        Livewire::actingAs($reviewer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $testing->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] !== 'level_up');
+        $response = $this->actingAs($reviewer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+            ->assertOk();
+
+        $this->assertNotContains('level_up', $this->toastTypes($response));
+    }
+
+    public function test_api_errors_return_the_specific_message_with_the_matching_status(): void
+    {
+        $developer = User::factory()->developer()->create();
+
+        $this->actingAs($developer)->getJson('/api/rota-que-nao-existe')
+            ->assertNotFound()
+            ->assertJsonPath('message', 'O recurso solicitado não existe.');
     }
 }

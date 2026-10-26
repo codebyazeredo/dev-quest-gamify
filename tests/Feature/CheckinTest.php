@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Checkin\Button;
 use App\Models\Level;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class CheckinTest extends TestCase
@@ -24,55 +22,55 @@ class CheckinTest extends TestCase
     {
         $developer = User::factory()->developer()->create();
 
-        Livewire::actingAs($developer)
-            ->test(Button::class)
-            ->assertViewHas('checkedInToday', false)
-            ->call('checkIn')
-            ->assertViewHas('checkedInToday', true);
+        $this->actingAs($developer)->get(route('checkin'))->assertViewHas('checkedInToday', false);
+
+        $this->actingAs($developer)->postJson(route('api.me.checkin'))
+            ->assertOk()
+            ->assertJsonPath('data.checked_in_today', true);
 
         $this->assertDatabaseHas('daily_checkins', ['user_id' => $developer->id]);
         $this->assertSame(1, $developer->xpTransactions()->sum('amount'));
+
+        $this->actingAs($developer)->get(route('checkin'))->assertViewHas('checkedInToday', true);
     }
 
     public function test_an_admin_can_also_check_in(): void
     {
         $admin = User::factory()->admin()->create();
 
-        Livewire::actingAs($admin)
-            ->test(Button::class)
-            ->call('checkIn')
-            ->assertViewHas('checkedInToday', true);
+        $this->actingAs($admin)->postJson(route('api.me.checkin'))
+            ->assertOk()
+            ->assertJsonPath('data.checked_in_today', true);
     }
 
     public function test_a_second_check_in_the_same_day_is_a_no_op(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $component = Livewire::actingAs($developer)->test(Button::class);
-        $component->call('checkIn');
-        $component->call('checkIn');
+        $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
+        $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
 
         $this->assertDatabaseCount('daily_checkins', 1);
         $this->assertSame(1, $developer->xpTransactions()->sum('amount'));
     }
 
-    public function test_checking_in_dispatches_a_persistent_checkin_toast(): void
+    public function test_checking_in_returns_a_persistent_checkin_toast(): void
     {
         $developer = User::factory()->developer()->create();
 
-        Livewire::actingAs($developer)
-            ->test(Button::class)
-            ->call('checkIn')
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'checkin');
+        $this->actingAs($developer)->postJson(route('api.me.checkin'))
+            ->assertOk()
+            ->assertJsonPath('toasts.0.type', 'checkin');
     }
 
-    public function test_a_repeat_check_in_the_same_day_does_not_dispatch_another_checkin_toast(): void
+    public function test_a_repeat_check_in_the_same_day_does_not_return_another_checkin_toast(): void
     {
         $developer = User::factory()->developer()->create();
 
-        $component = Livewire::actingAs($developer)->test(Button::class);
-        $component->call('checkIn');
+        $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
 
-        $component->call('checkIn')->assertNotDispatched('toast');
+        $response = $this->actingAs($developer)->postJson(route('api.me.checkin'))->assertOk();
+
+        $this->assertArrayNotHasKey('toasts', $response->json());
     }
 }

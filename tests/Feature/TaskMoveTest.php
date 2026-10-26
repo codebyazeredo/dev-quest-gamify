@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskMoveTest extends TestCase
@@ -24,9 +22,9 @@ class TaskMoveTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO, 'assigned_to' => null]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertSame($destination->id, $task->refresh()->column_id);
     }
@@ -39,9 +37,9 @@ class TaskMoveTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertSame($destination->id, $task->refresh()->column_id);
     }
@@ -54,11 +52,12 @@ class TaskMoveTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO, 'assigned_to' => null]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
         $task->refresh();
+
         $this->assertSame($destination->id, $task->column_id);
         $this->assertSame($developer->id, $task->assigned_to);
     }
@@ -72,14 +71,14 @@ class TaskMoveTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO, 'assigned_to' => $owner->id]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error'
-                && str_contains($params['toast']['message'], $owner->name))
-            ->assertSee($task->title);
+        $response = $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertForbidden();
+
+        $this->assertStringContainsString($owner->name, $response->json('message'));
 
         $task->refresh();
+
         $this->assertSame($origin->id, $task->column_id);
         $this->assertSame($owner->id, $task->assigned_to);
     }
@@ -92,9 +91,9 @@ class TaskMoveTest extends TestCase
         $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::REVIEW, 'assigned_to' => null]);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $testing->id, 0);
+        $this->actingAs($developer)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $testing->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertNull($task->refresh()->assigned_to);
     }
@@ -107,10 +106,21 @@ class TaskMoveTest extends TestCase
         $destination = BoardColumn::factory()->for($board)->status(TaskStatus::REVIEW)->create();
         $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $origin->id, 'status' => TaskStatus::TODO]);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $destination->id, 0);
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $destination->id, 'position' => 0])
+            ->assertOk();
 
         $this->assertEquals(TaskStatus::REVIEW, $task->refresh()->status);
+    }
+
+    public function test_a_column_from_another_board_is_not_found(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $task = Task::factory()->create();
+        $foreignColumn = BoardColumn::factory()->for(Board::factory()->create())->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $foreignColumn->id, 'position' => 0])
+            ->assertNotFound();
     }
 }

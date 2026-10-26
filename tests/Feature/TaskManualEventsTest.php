@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\TaskEventType;
 use App\Enums\TaskStatus;
-use App\Livewire\Task\Kanban;
-use App\Livewire\Task\Show;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
@@ -15,7 +13,6 @@ use App\Services\TaskService;
 use Database\Seeders\LevelSeeder;
 use Database\Seeders\TaskEventRuleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TaskManualEventsTest extends TestCase
@@ -51,10 +48,8 @@ class TaskManualEventsTest extends TestCase
         $developer = User::factory()->developer()->create();
         [, $task] = $this->approvedBoardWithTask($developer);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->call('markDeployed');
+        $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
+        $this->actingAs($developer)->postJson(route('api.tasks.deploy', $task))->assertOk();
 
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::HOMOLOGATION_COMPLETED->value]);
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::DEPLOYED->value]);
@@ -66,8 +61,8 @@ class TaskManualEventsTest extends TestCase
         $po = User::factory()->productOwner()->create();
         [, $task] = $this->approvedBoardWithTask();
 
-        Livewire::actingAs($admin)->test(Show::class, ['task' => $task])->call('markHomologationCompleted');
-        Livewire::actingAs($po)->test(Show::class, ['task' => $task])->call('markDeployed');
+        $this->actingAs($admin)->postJson(route('api.tasks.homologation', $task))->assertOk();
+        $this->actingAs($po)->postJson(route('api.tasks.deploy', $task))->assertOk();
 
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::HOMOLOGATION_COMPLETED->value]);
         $this->assertDatabaseHas('task_events', ['task_id' => $task->id, 'type' => TaskEventType::DEPLOYED->value]);
@@ -79,10 +74,7 @@ class TaskManualEventsTest extends TestCase
         $other = User::factory()->developer()->create();
         [, $task] = $this->approvedBoardWithTask($assignee);
 
-        Livewire::actingAs($other)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->assertForbidden();
+        $this->actingAs($other)->postJson(route('api.tasks.homologation', $task))->assertForbidden();
     }
 
     public function test_repeat_calls_are_idempotent(): void
@@ -90,10 +82,9 @@ class TaskManualEventsTest extends TestCase
         $developer = User::factory()->developer()->create();
         [, $task] = $this->approvedBoardWithTask($developer);
 
-        $component = Livewire::actingAs($developer)->test(Show::class, ['task' => $task]);
-        $component->call('markHomologationCompleted');
-        $component->call('markDeployed');
-        $component->call('markDeployed');
+        $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
+        $this->actingAs($developer)->postJson(route('api.tasks.deploy', $task))->assertOk();
+        $this->actingAs($developer)->postJson(route('api.tasks.deploy', $task))->assertOk();
 
         $this->assertSame(
             1,
@@ -107,6 +98,7 @@ class TaskManualEventsTest extends TestCase
         $board = Board::factory()->create();
         BoardColumn::seedDefaultsFor($board);
         $testing = $board->columns->firstWhere('status', TaskStatus::TESTING);
+
         $task = Task::factory()->create([
             'board_id' => $board->id,
             'column_id' => $testing->id,
@@ -114,10 +106,7 @@ class TaskManualEventsTest extends TestCase
             'assigned_to' => $developer->id,
         ]);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted')
-            ->assertForbidden();
+        $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertForbidden();
     }
 
     public function test_marking_homologation_moves_the_task_straight_to_done(): void
@@ -126,11 +115,10 @@ class TaskManualEventsTest extends TestCase
         [$board, $task] = $this->approvedBoardWithTask($developer);
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markHomologationCompleted');
+        $this->actingAs($developer)->postJson(route('api.tasks.homologation', $task))->assertOk();
 
         $task->refresh();
+
         $this->assertSame($done->id, $task->column_id);
         $this->assertSame(TaskStatus::DONE, $task->status);
         $this->assertNotNull($task->completed_at);
@@ -142,10 +130,7 @@ class TaskManualEventsTest extends TestCase
         $developer = User::factory()->developer()->create();
         [, $task] = $this->approvedBoardWithTask($developer);
 
-        Livewire::actingAs($developer)
-            ->test(Show::class, ['task' => $task])
-            ->call('markDeployed')
-            ->assertForbidden();
+        $this->actingAs($developer)->postJson(route('api.tasks.deploy', $task))->assertForbidden();
     }
 
     public function test_kanban_shows_pending_badges_until_marked(): void
@@ -153,22 +138,17 @@ class TaskManualEventsTest extends TestCase
         $developer = User::factory()->developer()->create();
         [$board, $task] = $this->approvedBoardWithTask($developer);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->assertSee('Não homologado');
+        $this->actingAs($developer)->get(route('boards.show', $board))->assertSee('Não homologado');
 
         app(TaskService::class)->markHomologationCompleted($task, $developer);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
+        $this->actingAs($developer)->get(route('boards.show', $board))
             ->assertSee('Não implantado')
             ->assertDontSee('Não homologado');
 
         app(TaskService::class)->markDeployed($task, $developer);
 
-        Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->assertDontSee('Não implantado');
+        $this->actingAs($developer)->get(route('boards.show', $board))->assertDontSee('Não implantado');
     }
 
     public function test_nobody_can_drag_a_task_directly_into_done(): void
@@ -177,10 +157,9 @@ class TaskManualEventsTest extends TestCase
         [$board, $task] = $this->approvedBoardWithTask();
         $done = $board->columns->firstWhere('status', TaskStatus::DONE);
 
-        Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->call('moveTask', $task->id, $done->id, 0)
-            ->assertDispatched('toast', fn ($name, $params) => $params['toast']['type'] === 'error');
+        $this->actingAs($admin)
+            ->postJson(route('api.tasks.move', $task), ['column_id' => $done->id, 'position' => 0])
+            ->assertForbidden();
 
         $this->assertSame(TaskStatus::APPROVED, $task->refresh()->status);
     }
