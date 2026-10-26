@@ -6,6 +6,7 @@ use App\Models\Challenge;
 use App\Models\User;
 use App\Models\UserChallenge;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserChallengeRepository extends Repository
 {
@@ -17,6 +18,32 @@ class UserChallengeRepository extends Repository
     protected function completed(): Builder
     {
         return $this->query()->whereNotNull('completed_at');
+    }
+
+    public function firstOrCreateFor(User $user, Challenge $challenge): UserChallenge
+    {
+        return $this->query()->firstOrCreate(
+            ['user_id' => $user->id, 'challenge_id' => $challenge->id],
+            ['progress' => 0],
+        );
+    }
+
+    public function incrementProgress(UserChallenge $userChallenge, int $amount): UserChallenge
+    {
+        $userChallenge->increment('progress', $amount);
+
+        return $userChallenge;
+    }
+
+    public function markCompleted(UserChallenge $userChallenge): UserChallenge
+    {
+        return $this->update($userChallenge, ['completed_at' => now()]);
+    }
+
+    /** Progresso do usuário indexado pelo id do desafio. */
+    public function keyedByChallengeFor(User $user): Collection
+    {
+        return $this->query()->where('user_id', $user->id)->get()->keyBy('challenge_id');
     }
 
     public function countCompletedBy(User $user): int

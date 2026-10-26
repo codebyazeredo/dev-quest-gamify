@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class TaskRepository extends Repository
 {
@@ -18,6 +19,69 @@ class TaskRepository extends Repository
     protected function active(): Builder
     {
         return $this->query()->whereNull('archived_at');
+    }
+
+    public function countInColumn(int $columnId): int
+    {
+        return $this->query()->where('column_id', $columnId)->count();
+    }
+
+    /** Fecha o buraco deixado por uma tarefa que saiu da posição informada. */
+    public function closeGap(int $columnId, int $vacatedPosition): void
+    {
+        $this->query()->where('column_id', $columnId)->where('position', '>', $vacatedPosition)->decrement('position');
+    }
+
+    /** Abre espaço para uma tarefa que entra na posição informada. */
+    public function openSlot(int $columnId, int $position): void
+    {
+        $this->query()->where('column_id', $columnId)->where('position', '>=', $position)->increment('position');
+    }
+
+    public function shiftUp(int $columnId, int $fromPosition, int $toPosition): void
+    {
+        $this->query()->where('column_id', $columnId)->whereBetween('position', [$fromPosition, $toPosition])->decrement('position');
+    }
+
+    public function shiftDown(int $columnId, int $fromPosition, int $toPosition): void
+    {
+        $this->query()->where('column_id', $columnId)->whereBetween('position', [$fromPosition, $toPosition])->increment('position');
+    }
+
+    public function countCompletedAssignedTo(User $user): int
+    {
+        return $this->completedAssignedTo($user)->count();
+    }
+
+    public function countCompletedBugsAssignedTo(User $user): int
+    {
+        return $this->completedAssignedTo($user)
+            ->whereHas('category', fn (Builder $query) => $query->where('slug', 'bug'))
+            ->count();
+    }
+
+    public function maxCompletedInOneDayBy(User $user): int
+    {
+        return (int) $this->completedAssignedTo($user)
+            ->selectRaw('COUNT(*) as c')
+            ->groupBy(DB::raw('DATE(completed_at)'))
+            ->get()
+            ->max('c');
+    }
+
+    /** Carrega tudo o que a página da tarefa exibe. */
+    public function loadDetails(Task $task): Task
+    {
+        return $task->load([
+            'board', 'column', 'category', 'priority', 'assignedTo.person', 'assignedTo.selectedTitle', 'createdBy',
+            'taskEvents.user', 'taskEvents.xpTransaction',
+            'movements.user', 'movements.fromColumn', 'movements.toColumn',
+        ]);
+    }
+
+    protected function completedAssignedTo(User $user): Builder
+    {
+        return $this->query()->where('assigned_to', $user->id)->whereNotNull('completed_at');
     }
 
     public function openAssignedTo(User $user, int $limit): Collection

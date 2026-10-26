@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use Carbon\CarbonInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -15,13 +17,34 @@ class UserRepository extends Repository
 
     protected function query(): Builder
     {
-        return parent::query()->with('person')->orderBy('name');
+        return parent::query()->with(['person', 'roles'])->orderBy('name');
     }
 
     /** @param  array<int, int>  $ids */
     public function findMany(array $ids): Collection
     {
         return $this->query()->whereKey($ids)->get();
+    }
+
+    /** Usuários do papel ordenados pelo XP somado desde o início do período (ou desde sempre). */
+    public function paginateRankedByRole(string $role, ?CarbonInterface $since, int $perPage): LengthAwarePaginator
+    {
+        return $this->query()
+            ->reorder()
+            ->role($role)
+            ->withSum(['xpTransactions as total_xp' => function ($query) use ($since) {
+                if ($since !== null) {
+                    $query->where('created_at', '>=', $since);
+                }
+            }], 'amount')
+            ->orderByDesc('total_xp')
+            ->paginate($perPage);
+    }
+
+    /** Todos os usuários, já com pessoa e título, para escolher um responsável. */
+    public function allForAssignment(): Collection
+    {
+        return $this->query()->with('selectedTitle')->get();
     }
 
     public function withRole(string $role): Collection

@@ -28,6 +28,11 @@ abstract class Repository
         return $this->query()->get();
     }
 
+    public function count(): int
+    {
+        return $this->query()->count();
+    }
+
     public function create(array $attributes): Model
     {
         $modelClass = $this->model();
@@ -38,6 +43,13 @@ abstract class Repository
     public function update(Model $model, array $attributes): Model
     {
         $model->update($attributes);
+
+        return $model;
+    }
+
+    public function save(Model $model): Model
+    {
+        $model->save();
 
         return $model;
     }

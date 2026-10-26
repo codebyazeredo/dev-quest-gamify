@@ -15,7 +15,7 @@ class PersonRepository extends Repository
 
     protected function query(): Builder
     {
-        return parent::query()->orderBy('nome');
+        return parent::query()->with('address')->withExists('user')->orderBy('nome');
     }
 
     public function findWithAddressOrFail(int $id): Person

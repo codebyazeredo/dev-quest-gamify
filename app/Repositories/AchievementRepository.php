@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Achievement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class AchievementRepository extends Repository
 {
@@ -16,6 +17,22 @@ class AchievementRepository extends Repository
     protected function query(): Builder
     {
         return parent::query()->orderBy('name');
+    }
+
+    /** @param  array<int, int>  $excludedIds */
+    public function activeExcluding(array $excludedIds): Collection
+    {
+        return $this->query()->where('active', true)->whereNotIn('id', $excludedIds)->get();
+    }
+
+    public function allActive(): Collection
+    {
+        return $this->query()->where('active', true)->get();
+    }
+
+    public function countActive(): int
+    {
+        return $this->query()->where('active', true)->count();
     }
 
     public function hasUnlocks(Achievement $achievement): bool

@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Enums\ChallengeType;
 use App\Models\Challenge;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +19,17 @@ class ChallengeRepository extends Repository
     protected function query(): Builder
     {
         return parent::query()->orderByDesc('starts_at');
+    }
+
+    /** Desafios ativos de um tipo cujo período contém o instante informado. */
+    public function activeOfTypeAt(ChallengeType $type, CarbonInterface $moment): Collection
+    {
+        return $this->query()
+            ->where('active', true)
+            ->where('type', $type)
+            ->where('starts_at', '<=', $moment)
+            ->where('ends_at', '>=', $moment)
+            ->get();
     }
 
     public function hasProgress(Challenge $challenge): bool

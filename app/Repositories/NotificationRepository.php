@@ -23,9 +23,9 @@ class NotificationRepository extends Repository
         return $user->unreadNotifications()->count();
     }
 
-    public function findFor(User $user, string $id): ?DatabaseNotification
+    public function findForOrFail(User $user, string $id): DatabaseNotification
     {
-        return $user->notifications()->whereKey($id)->first();
+        return $user->notifications()->whereKey($id)->firstOrFail();
     }
 
     public function markAllReadFor(User $user): void
