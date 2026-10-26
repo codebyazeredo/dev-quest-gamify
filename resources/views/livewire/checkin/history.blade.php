@@ -13,12 +13,12 @@
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h2 class="h5 mb-0 text-capitalize">{{ $monthLabel }}</h2>
 
-                    <div class="btn-group" role="group" aria-label="Navegar entre meses">
-                        <button type="button" wire:click="previousMonth" title="Mês anterior" aria-label="Mês anterior" class="btn btn-outline-secondary btn-sm">
+                    <div class="d-flex align-items-center gap-1" role="group" aria-label="Navegar entre meses">
+                        <button type="button" wire:click="previousMonth" title="Mês anterior" aria-label="Mês anterior" class="btn btn-ghost btn-icon btn-icon-sm">
                             <i class="bi bi-chevron-left" aria-hidden="true"></i>
                         </button>
-                        <button type="button" wire:click="goToCurrentMonth" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-title="Ir para o mês atual" aria-label="Ir para o mês atual"><i class="bi bi-calendar-check" aria-hidden="true"></i></button>
-                        <button type="button" wire:click="nextMonth" title="Próximo mês" aria-label="Próximo mês" class="btn btn-outline-secondary btn-sm">
+                        <button type="button" wire:click="goToCurrentMonth" class="btn btn-ghost btn-icon btn-icon-sm" data-bs-toggle="tooltip" data-bs-title="Ir para o mês atual" aria-label="Ir para o mês atual"><i class="bi bi-calendar-check" aria-hidden="true"></i></button>
+                        <button type="button" wire:click="nextMonth" title="Próximo mês" aria-label="Próximo mês" class="btn btn-ghost btn-icon btn-icon-sm">
                             <i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </button>
                     </div>

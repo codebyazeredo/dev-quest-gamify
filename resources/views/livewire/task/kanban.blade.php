@@ -31,15 +31,15 @@
             @endforeach
         </select>
 
-        <button type="button" class="btn btn-icon" :class="mine ? 'btn-primary' : 'btn-outline-secondary bg-body'" x-on:click="mine = ! mine" :aria-pressed="mine" data-bs-toggle="tooltip" data-bs-title="Minhas tarefas" aria-label="Minhas tarefas">
+        <button type="button" class="btn btn-ghost btn-icon" :class="{ 'is-active': mine }" x-on:click="mine = ! mine" :aria-pressed="mine" data-bs-toggle="tooltip" data-bs-title="Minhas tarefas" aria-label="Minhas tarefas">
             <i class="bi bi-person-check" aria-hidden="true"></i>
         </button>
 
-        <button type="button" class="btn btn-icon" :class="late ? 'btn-danger' : 'btn-outline-secondary bg-body'" x-on:click="late = ! late" :aria-pressed="late" data-bs-toggle="tooltip" data-bs-title="Somente atrasadas" aria-label="Somente atrasadas">
+        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon" :class="{ 'is-active': late }" x-on:click="late = ! late" :aria-pressed="late" data-bs-toggle="tooltip" data-bs-title="Somente atrasadas" aria-label="Somente atrasadas">
             <i class="bi bi-alarm" aria-hidden="true"></i>
         </button>
 
-        <button type="button" class="btn btn-icon btn-outline-danger" x-show="hasFilters" x-cloak x-on:click="clearFilters()" data-bs-toggle="tooltip" data-bs-title="Limpar filtros" aria-label="Limpar filtros">
+        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon" x-show="hasFilters" x-cloak x-on:click="clearFilters()" data-bs-toggle="tooltip" data-bs-title="Limpar filtros" aria-label="Limpar filtros">
             <i class="bi bi-funnel" aria-hidden="true"></i>
         </button>
     </div>
@@ -73,7 +73,7 @@
 
                     @can('update', $board)
                         <div class="position-relative flex-shrink-0" x-data="{ open: false }" @click.outside="open = false">
-                            <button type="button" @click="open = !open" title="Configurações da coluna" aria-label="Configurações da coluna" class="btn btn-sm btn-link text-body-secondary btn-icon btn-icon-sm">
+                            <button type="button" @click="open = !open" title="Configurações da coluna" aria-label="Configurações da coluna" class="btn btn-ghost btn-icon btn-icon-sm">
                                 <x-icon name="gear" />
                             </button>
 
@@ -111,7 +111,7 @@
                             wire:click="openCreate({{ $column->id }})"
                             title="Adicionar tarefa"
                             aria-label="Adicionar tarefa"
-                            class="btn btn-sm btn-link text-body-secondary btn-icon btn-icon-sm flex-shrink-0"
+                            class="btn btn-ghost btn-icon btn-icon-sm flex-shrink-0"
                         >
                             <x-icon name="plus" />
                         </button>

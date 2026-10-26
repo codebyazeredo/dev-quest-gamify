@@ -55,7 +55,7 @@
                     </div>
                 </td>
                 <td class="text-end pe-4 text-nowrap">
-                    <button type="button" wire:click="duplicate({{ $achievement->id }})" title="Duplicar" aria-label="Duplicar" class="btn btn-outline-secondary btn-icon btn-icon-sm">
+                    <button type="button" wire:click="duplicate({{ $achievement->id }})" title="Duplicar" aria-label="Duplicar" class="btn btn-ghost btn-icon btn-icon-sm">
                         <i class="bi bi-copy" aria-hidden="true"></i>
                     </button>
                     <x-row-actions :edit="'edit('.$achievement->id.')'" :delete="'delete('.$achievement->id.')'" confirm="Excluir esta conquista?" />

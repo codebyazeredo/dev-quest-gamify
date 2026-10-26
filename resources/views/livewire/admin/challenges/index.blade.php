@@ -66,7 +66,7 @@
                     </div>
                 </td>
                 <td class="text-end pe-4 text-nowrap">
-                    <button type="button" wire:click="duplicate({{ $challenge->id }})" title="Duplicar para o próximo período" aria-label="Duplicar" class="btn btn-outline-secondary btn-icon btn-icon-sm">
+                    <button type="button" wire:click="duplicate({{ $challenge->id }})" title="Duplicar para o próximo período" aria-label="Duplicar" class="btn btn-ghost btn-icon btn-icon-sm">
                         <i class="bi bi-copy" aria-hidden="true"></i>
                     </button>
                     <x-row-actions :edit="'edit('.$challenge->id.')'" :delete="'delete('.$challenge->id.')'" confirm="Excluir este desafio?" />

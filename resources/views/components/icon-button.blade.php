@@ -1,7 +1,12 @@
-@props(['icon', 'label', 'href' => null, 'variant' => 'outline-secondary'])
+@props(['icon', 'label', 'href' => null, 'variant' => 'default'])
 
 @php
-    $classes = "btn btn-{$variant} btn-icon".($variant === 'outline-secondary' ? ' bg-body' : '');
+    $variantClass = match ($variant) {
+        'primary' => 'btn-ghost-primary',
+        'danger' => 'btn-ghost-danger',
+        default => '',
+    };
+    $classes = trim("btn btn-ghost btn-icon {$variantClass}");
     $tooltip = ['data-bs-toggle' => 'tooltip', 'data-bs-title' => $label, 'aria-label' => $label];
 @endphp
 

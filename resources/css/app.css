@@ -543,3 +543,64 @@ html[data-bs-theme='dark'] .jira-tag {
     max-height: 24rem;
     overflow-y: auto;
 }
+
+/* ---------- Botões só com ícone (sem caixa nem contorno) ---------- */
+.btn-ghost {
+    --bs-btn-color: var(--bs-secondary-color);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: var(--bs-primary-text-emphasis);
+    --bs-btn-hover-bg: rgba(var(--bs-primary-rgb), 0.12);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-color: var(--bs-primary-text-emphasis);
+    --bs-btn-active-bg: rgba(var(--bs-primary-rgb), 0.2);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+    --bs-btn-disabled-color: var(--bs-tertiary-color);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: transparent;
+    font-size: 1.1rem;
+}
+
+.btn-ghost.is-active {
+    color: var(--bs-btn-hover-color);
+    background-color: var(--bs-btn-hover-bg);
+}
+
+.btn-ghost-primary {
+    --bs-btn-color: var(--bs-primary);
+}
+
+.btn-ghost-danger {
+    --bs-btn-hover-color: var(--bs-danger-text-emphasis);
+    --bs-btn-hover-bg: rgba(var(--bs-danger-rgb), 0.12);
+    --bs-btn-active-color: var(--bs-danger-text-emphasis);
+    --bs-btn-active-bg: rgba(var(--bs-danger-rgb), 0.2);
+    --bs-btn-focus-shadow-rgb: var(--bs-danger-rgb);
+}
+
+.btn-ghost-danger:hover,
+.btn-ghost-danger.is-active {
+    color: var(--bs-danger-text-emphasis);
+}
+
+.btn-icon-sm.btn-ghost {
+    font-size: 0.95rem;
+}
+
+/* ---------- Navbar superior ---------- */
+.app-topbar {
+    min-height: 3.25rem;
+}
+
+.theme-icon-dark {
+    display: none;
+}
+
+html[data-bs-theme='dark'] .theme-icon-dark {
+    display: inline;
+}
+
+html[data-bs-theme='dark'] .theme-icon-light {
+    display: none;
+}
