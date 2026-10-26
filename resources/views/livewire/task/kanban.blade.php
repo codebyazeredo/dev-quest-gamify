@@ -19,12 +19,28 @@
             @endforeach
         </select>
 
-        <button type="button" class="btn" :class="mine ? 'btn-primary' : 'btn-outline-secondary'" x-on:click="mine = ! mine" :aria-pressed="mine">
-            <i class="bi bi-person-check" aria-hidden="true"></i> Minhas tarefas
+        @php
+            $assignees = $board->columns->flatMap->tasks->pluck('assignedTo')->filter()->unique('id')->sortBy('name');
+        @endphp
+
+        <select x-model="assignee" class="form-select w-auto" aria-label="Filtrar por responsável">
+            <option value="">Todos os responsáveis</option>
+            <option value="none">Sem responsável</option>
+            @foreach ($assignees as $assignee)
+                <option value="{{ $assignee->id }}">{{ $assignee->name }}</option>
+            @endforeach
+        </select>
+
+        <button type="button" class="btn btn-icon" :class="mine ? 'btn-primary' : 'btn-outline-secondary bg-body'" x-on:click="mine = ! mine" :aria-pressed="mine" data-bs-toggle="tooltip" data-bs-title="Minhas tarefas" aria-label="Minhas tarefas">
+            <i class="bi bi-person-check" aria-hidden="true"></i>
         </button>
 
-        <button type="button" class="btn btn-link text-decoration-none" x-show="hasFilters" x-cloak x-on:click="clearFilters()">
-            <i class="bi bi-x-circle" aria-hidden="true"></i> Limpar filtros
+        <button type="button" class="btn btn-icon" :class="late ? 'btn-danger' : 'btn-outline-secondary bg-body'" x-on:click="late = ! late" :aria-pressed="late" data-bs-toggle="tooltip" data-bs-title="Somente atrasadas" aria-label="Somente atrasadas">
+            <i class="bi bi-alarm" aria-hidden="true"></i>
+        </button>
+
+        <button type="button" class="btn btn-icon btn-outline-danger" x-show="hasFilters" x-cloak x-on:click="clearFilters()" data-bs-toggle="tooltip" data-bs-title="Limpar filtros" aria-label="Limpar filtros">
+            <i class="bi bi-funnel" aria-hidden="true"></i>
         </button>
     </div>
 

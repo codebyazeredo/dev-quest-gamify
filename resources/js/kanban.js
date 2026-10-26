@@ -11,17 +11,21 @@ document.addEventListener('alpine:init', () => {
         search: '',
         category: '',
         priority: '',
+        assignee: '',
         mine: false,
+        late: false,
 
         get hasFilters() {
-            return Boolean(this.search || this.category || this.priority || this.mine);
+            return Boolean(this.search || this.category || this.priority || this.assignee || this.mine || this.late);
         },
 
         clearFilters() {
             this.search = '';
             this.category = '';
             this.priority = '';
+            this.assignee = '';
             this.mine = false;
+            this.late = false;
         },
 
         matches(card) {
@@ -30,12 +34,14 @@ document.addEventListener('alpine:init', () => {
             return (!this.search || data.search.includes(this.search.toLowerCase()))
                 && (!this.category || data.category === this.category)
                 && (!this.priority || data.priority === this.priority)
-                && (!this.mine || data.mine === '1');
+                && (!this.assignee || data.assignee === this.assignee)
+                && (!this.mine || data.mine === '1')
+                && (!this.late || data.late === '1');
         },
 
         countVisible(section) {
             // Lê os filtros para que o Alpine reavalie o contador quando eles mudarem.
-            void [this.search, this.category, this.priority, this.mine];
+            void [this.search, this.category, this.priority, this.assignee, this.mine, this.late];
 
             return [...section.querySelectorAll('[data-task-id]')].filter((card) => this.matches(card)).length;
         },
