@@ -53,7 +53,9 @@
                     @endif
                 </a>
 
-                <div class="mt-auto">
+                <div class="mt-auto d-flex flex-column align-items-center gap-2">
+                    <livewire:notifications.bell placement="rail" />
+
                     <div class="dropend">
                         <button type="button" class="btn p-0 border-0 rounded-circle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu do usuário">
                             <x-avatar :user="$currentUser" class="border border-2 border-white border-opacity-50" />
@@ -133,7 +135,10 @@
                         <i class="bi bi-list fs-3" aria-hidden="true"></i>
                     </button>
                     <span class="fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
-                    <x-avatar :user="$currentUser" />
+                    <div class="d-flex align-items-center gap-2">
+                        <livewire:notifications.bell placement="top" />
+                        <x-avatar :user="$currentUser" />
+                    </div>
                 </header>
 
                 <main class="flex-grow-1 min-h-0 overflow-auto d-flex flex-column px-3 px-lg-4 py-3 py-lg-4">

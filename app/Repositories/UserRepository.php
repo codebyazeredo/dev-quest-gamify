@@ -24,6 +24,11 @@ class UserRepository extends Repository
         return $this->query()->whereKey($ids)->get();
     }
 
+    public function withRole(string $role): Collection
+    {
+        return User::role($role)->get();
+    }
+
     public function countWithRole(string $role): int
     {
         return User::role($role)->count();

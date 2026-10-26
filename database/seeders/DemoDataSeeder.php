@@ -11,9 +11,11 @@ use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
+use App\Notifications\TaskProgress;
 use App\Services\CheckinService;
 use App\Services\TaskService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
 class DemoDataSeeder extends Seeder
@@ -31,6 +33,7 @@ class DemoDataSeeder extends Seeder
         $this->seedCheckins($users);
         $this->seedTasks($users);
         $this->seedSelectedTitles();
+        $this->seedNotifications();
 
         Carbon::setTestNow();
     }
@@ -386,6 +389,50 @@ class DemoDataSeeder extends Seeder
             $this->taskService->move($task, $columns[TaskStatus::REVIEW->value], 0, $dev);
             $this->taskService->move($task, $columns[TaskStatus::TESTING->value], 0, $tester);
             $this->taskService->reject($task, $tester, $reasons[$i % count($reasons)]);
+        }
+    }
+
+    /**
+     * O fluxo do seed gera milhares de avisos; eles são descartados e cada usuário de demonstração
+     * recebe poucos avisos recentes, a maioria ainda não lida.
+     */
+    private function seedNotifications(): void
+    {
+        DB::table('notifications')->delete();
+
+        $kinds = [
+            ['assigned', 'atribuiu esta tarefa a você.'],
+            ['moved', 'moveu para Em Andamento.'],
+            ['testing', 'moveu para Em Teste, pronta para validação.'],
+            ['approved', 'aprovou a tarefa.'],
+            ['rejected', 'reprovou a tarefa: faltou cobrir o caso de borda.'],
+            ['done', 'concluiu a tarefa.'],
+        ];
+
+        $recipients = User::whereIn('email', [
+            'admin@devquestgamify.test',
+            'po@devquestgamify.test',
+            'dev@devquestgamify.test',
+            'tester@devquestgamify.test',
+            'marina.ferreira@devquestgamify.test',
+        ])->get();
+
+        foreach ($recipients as $user) {
+            $tasks = Task::whereNull('archived_at')->inRandomOrder()->limit(7)->get();
+
+            foreach ($tasks as $index => $task) {
+                [$kind, $message] = $kinds[$index % count($kinds)];
+                $actor = User::inRandomOrder()->where('id', '!=', $user->id)->first();
+
+                $user->notify(new TaskProgress($task->id, $task->title, $kind, "{$actor->name} {$message}"));
+            }
+
+            $user->notifications()->get()->each(function ($notification, $index) {
+                $notification->forceFill([
+                    'created_at' => now()->subMinutes(($index + 1) * 37),
+                    'read_at' => $index >= 4 ? now()->subMinutes($index * 20) : null,
+                ])->save();
+            });
         }
     }
 

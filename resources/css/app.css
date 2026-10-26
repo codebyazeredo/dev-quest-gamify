@@ -510,3 +510,36 @@ html[data-bs-theme='dark'] .jira-tag {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* ---------- Notificações ---------- */
+.notification-badge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.2rem;
+    min-width: 1.1rem;
+    padding: 0.15rem 0.3rem;
+    font-size: 0.65rem;
+    line-height: 1;
+}
+
+.notification-menu {
+    width: min(23rem, calc(100vw - 1.5rem));
+    z-index: 1060;
+}
+
+.notification-menu--rail {
+    position: absolute;
+    bottom: 0;
+    left: calc(100% + 0.75rem);
+}
+
+.notification-menu--top {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+}
+
+.notification-list {
+    max-height: 24rem;
+    overflow-y: auto;
+}
