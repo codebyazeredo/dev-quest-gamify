@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ChallengeType;
 use App\Enums\XpSourceType;
 use App\Events\StreakBonusEarned;
 use App\Models\DailyCheckin;
@@ -16,7 +17,11 @@ class CheckinService
 
     public const STREAK_BONUS_AMOUNT = 5;
 
-    public function __construct(private XpService $xpService) {}
+    public function __construct(
+        private XpService $xpService,
+        private ChallengeService $challengeService,
+        private AchievementService $achievementService,
+    ) {}
 
     public function checkIn(User $user): DailyCheckin
     {
@@ -52,6 +57,9 @@ class CheckinService
 
                 event(new StreakBonusEarned($user, $streakCount, self::STREAK_BONUS_AMOUNT));
             }
+
+            $this->challengeService->recordProgress($user, ChallengeType::CHECKINS_MADE, now());
+            $this->achievementService->evaluateForUser($user);
 
             return $checkin;
         });

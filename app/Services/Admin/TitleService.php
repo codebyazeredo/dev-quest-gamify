@@ -2,23 +2,45 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\TitleUnlockType;
 use App\Exceptions\DeletionBlockedException;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
+use App\Services\TitleService as GameTitleService;
 use Illuminate\Support\Str;
 
 class TitleService
 {
-    public function __construct(private TitleRepository $titles) {}
+    public function __construct(
+        private TitleRepository $titles,
+        private GameTitleService $gameTitles,
+    ) {}
 
     public function create(array $data): Title
     {
-        return $this->titles->create($this->mapAttributes($data));
+        $title = $this->titles->create($this->mapAttributes($data));
+
+        $this->gameTitles->grantToEligibleUsers($title);
+
+        return $title;
     }
 
     public function update(Title $title, array $data): Title
     {
-        return $this->titles->update($title, $this->mapAttributes($data));
+        $title = $this->titles->update($title, $this->mapAttributes($data));
+
+        $this->gameTitles->grantToEligibleUsers($title);
+
+        return $title;
+    }
+
+    public function toggleActive(Title $title): Title
+    {
+        $title = $this->titles->update($title, ['active' => ! $title->active]);
+
+        $this->gameTitles->grantToEligibleUsers($title);
+
+        return $title;
     }
 
     public function delete(Title $title): void
@@ -32,11 +54,17 @@ class TitleService
 
     private function mapAttributes(array $data): array
     {
+        $unlockType = TitleUnlockType::from($data['unlock_type'] ?? TitleUnlockType::ACHIEVEMENT->value);
+
         $attributes = [
             'name' => $data['name'],
             'slug' => Str::slug($data['name']),
-            'icon' => $data['icon'],
-            'achievement_id' => $data['achievement_id'],
+            'icon' => $data['icon'] ?? null,
+            'description' => $data['description'] ?? null,
+            'unlock_type' => $unlockType,
+            'achievement_id' => $unlockType === TitleUnlockType::ACHIEVEMENT ? ($data['achievement_id'] ?? null) : null,
+            'challenge_id' => $unlockType === TitleUnlockType::CHALLENGE ? ($data['challenge_id'] ?? null) : null,
+            'challenges_required' => $unlockType === TitleUnlockType::CHALLENGES_COUNT ? ($data['challenges_required'] ?? null) : null,
         ];
 
         if (array_key_exists('active', $data)) {

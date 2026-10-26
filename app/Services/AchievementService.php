@@ -7,16 +7,18 @@ use App\Enums\TaskEventType;
 use App\Enums\XpSourceType;
 use App\Events\AchievementUnlocked;
 use App\Models\Achievement;
+use App\Models\DailyCheckin;
 use App\Models\Task;
 use App\Models\TaskEvent;
 use App\Models\User;
 use App\Models\UserAchievement;
 use App\Models\UserTitle;
+use App\Repositories\UserChallengeRepository;
 use Illuminate\Support\Facades\DB;
 
 class AchievementService
 {
-    public function __construct(private XpService $xpService) {}
+    public function __construct(private XpService $xpService, private UserChallengeRepository $userChallenges) {}
 
     public function evaluateForUser(User $user): void
     {
@@ -58,6 +60,10 @@ class AchievementService
             AchievementConditionType::TASKS_COMPLETED_TOTAL => Task::where('assigned_to', $user->id)
                 ->whereNotNull('completed_at')
                 ->count(),
+
+            AchievementConditionType::CHALLENGES_COMPLETED => $this->userChallenges->countCompletedBy($user),
+
+            AchievementConditionType::CHECKINS_TOTAL => DailyCheckin::where('user_id', $user->id)->count(),
         };
     }
 

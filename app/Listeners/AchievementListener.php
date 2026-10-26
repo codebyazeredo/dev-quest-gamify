@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Enums\TaskEventType;
+use App\Events\ChallengeCompleted;
 use App\Events\TaskCompleted;
 use App\Events\TaskEventCreated;
 use App\Services\AchievementService;
@@ -31,5 +32,10 @@ class AchievementListener
         if ($assignee !== null) {
             $this->achievementService->evaluateForUser($assignee);
         }
+    }
+
+    public function handleChallengeCompleted(ChallengeCompleted $event): void
+    {
+        $this->achievementService->evaluateForUser($event->user);
     }
 }
