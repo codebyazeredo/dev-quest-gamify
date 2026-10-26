@@ -23,9 +23,9 @@
                             </div>
 
                             @if ($selectedTitleId === $title->id)
-                                <button type="button" wire:click="clearTitle" class="btn btn-sm btn-outline-secondary bg-body">Remover</button>
+                                <x-icon-button wire:click="clearTitle" icon="x-circle" label="Remover título" class="btn-sm" />
                             @else
-                                <button type="button" wire:click="selectTitle({{ $title->id }})" class="btn btn-sm btn-primary">Selecionar</button>
+                                <x-icon-button wire:click="selectTitle({{ $title->id }})" icon="check2-circle" label="Usar este título" variant="primary" />
                             @endif
                         </div>
                     </x-card>

@@ -18,15 +18,9 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('achievements') }}" class="btn btn-outline-secondary bg-body">
-                    <i class="bi bi-award" aria-hidden="true"></i> Conquistas
-                </a>
-                <a href="{{ route('titles') }}" class="btn btn-outline-secondary bg-body">
-                    <i class="bi bi-patch-check" aria-hidden="true"></i> Títulos
-                </a>
-                <button type="button" wire:click="toggleEditProfile" class="btn btn-primary">
-                    <x-icon name="pencil" /> Editar dados
-                </button>
+                <x-icon-button :href="route('achievements')" icon="award" label="Conquistas" />
+                <x-icon-button :href="route('titles')" icon="patch-check" label="Títulos" />
+                <x-icon-button wire:click="toggleEditProfile" icon="pencil-square" label="Editar meus dados" variant="primary" />
             </div>
         </div>
     </div>
@@ -68,7 +62,7 @@
                                 <span class="small text-body-secondary">{{ $openTask->board->name }} · {{ $openTask->category->name }}</span>
                             </div>
 
-                            @if ($openTask->isLate())
+                            @if ($openTask->isOverdue())
                                 <x-badge color="danger"><x-icon name="alert" /> Atrasada · {{ $openTask->due_at->format('d/m') }}</x-badge>
                             @elseif ($openTask->due_at)
                                 <x-badge :color="$openTask->due_at->isToday() ? 'warning' : 'secondary'"><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ $openTask->due_at->isToday() ? 'Hoje' : $openTask->due_at->format('d/m H:i') }}</x-badge>

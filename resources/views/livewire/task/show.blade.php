@@ -16,24 +16,18 @@
 
         @can('unarchive', $task)
             @if ($task->isArchived())
-                <button type="button" wire:click="unarchive" class="btn btn-outline-secondary bg-body">
-                    <x-icon name="archive" /> Desarquivar
-                </button>
+                <x-icon-button wire:click="unarchive" icon="box-arrow-up" label="Desarquivar" />
             @endif
         @endcan
 
         @can('archive', $task)
             @unless ($task->isArchived())
-                <button type="button" wire:click="archive" wire:confirm="Arquivar esta tarefa? Ela sairá do quadro, mas continuará acessível pelo arquivo." class="btn btn-outline-secondary bg-body">
-                    <x-icon name="archive" /> Arquivar
-                </button>
+                <x-icon-button wire:click="archive" wire:confirm="Arquivar esta tarefa? Ela sairá do quadro, mas continuará acessível pelo arquivo." icon="archive" label="Arquivar" />
             @endunless
         @endcan
 
         @can('update', $task)
-            <button type="button" wire:click="toggleEdit" class="btn btn-outline-secondary bg-body">
-                <x-icon name="pencil" /> Editar
-            </button>
+            <x-icon-button wire:click="toggleEdit" icon="pencil-square" label="Editar tarefa" />
         @endcan
     </x-page-header>
 

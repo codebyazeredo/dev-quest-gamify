@@ -1,8 +1,6 @@
 <div>
     <x-page-header title="Usuários" subtitle="Contas de acesso ao sistema." :back="route('admin.index')" backLabel="Configurações">
-        <a href="{{ route('admin.people') }}" class="btn btn-outline-secondary bg-body">
-            <x-icon name="id-card" /> Gerenciar pessoas
-        </a>
+        <x-icon-button :href="route('admin.people')" icon="person-vcard" label="Gerenciar pessoas" />
 
         @can('create', \App\Models\User::class)
             <x-button wire:click="toggleCreate"><x-icon name="plus" /> Novo usuário</x-button>

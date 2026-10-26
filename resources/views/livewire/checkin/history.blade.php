@@ -17,7 +17,7 @@
                         <button type="button" wire:click="previousMonth" title="Mês anterior" aria-label="Mês anterior" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-chevron-left" aria-hidden="true"></i>
                         </button>
-                        <button type="button" wire:click="goToCurrentMonth" class="btn btn-outline-secondary btn-sm">Hoje</button>
+                        <button type="button" wire:click="goToCurrentMonth" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-title="Ir para o mês atual" aria-label="Ir para o mês atual"><i class="bi bi-calendar-check" aria-hidden="true"></i></button>
                         <button type="button" wire:click="nextMonth" title="Próximo mês" aria-label="Próximo mês" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </button>

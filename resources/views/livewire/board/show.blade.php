@@ -1,13 +1,9 @@
 <div class="d-flex flex-column flex-grow-1 min-h-0">
     <x-page-header :title="$board->name" :subtitle="$board->description" :back="route('boards.index')" backLabel="Quadros">
-        <a href="{{ route('boards.archive', $board) }}" class="btn btn-outline-secondary bg-body">
-            <x-icon name="archive" /> Arquivo
-        </a>
+        <x-icon-button :href="route('boards.archive', $board)" icon="archive" label="Arquivo do quadro" />
 
         @can('update', $board)
-            <button type="button" wire:click="toggleEdit" class="btn btn-outline-secondary bg-body">
-                <x-icon name="pencil" /> Editar quadro
-            </button>
+            <x-icon-button wire:click="toggleEdit" icon="pencil-square" label="Editar quadro" />
         @endcan
     </x-page-header>
 
