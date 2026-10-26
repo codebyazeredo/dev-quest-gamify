@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
             TaskEventRuleSeeder::class,
             TaskPrioritySeeder::class,
             AchievementSeeder::class,
-            TitleSeeder::class,
             ChallengeSeeder::class,
+            TitleSeeder::class,
             DemoDataSeeder::class,
         ]);
     }

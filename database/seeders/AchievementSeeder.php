@@ -47,6 +47,42 @@ class AchievementSeeder extends Seeder
                 'condition_value' => 1,
                 'xp_reward' => 25,
             ],
+            [
+                'name' => 'Primeira Caça',
+                'slug' => 'primeira-caca',
+                'description' => 'Resolva 3 bugs',
+                'icon' => 'target',
+                'condition_type' => AchievementConditionType::BUGS_RESOLVED,
+                'condition_value' => 3,
+                'xp_reward' => 40,
+            ],
+            [
+                'name' => 'Máquina de Entregas',
+                'slug' => 'maquina-de-entregas',
+                'description' => 'Conclua 15 tarefas',
+                'icon' => 'gem',
+                'condition_type' => AchievementConditionType::TASKS_COMPLETED_TOTAL,
+                'condition_value' => 15,
+                'xp_reward' => 90,
+            ],
+            [
+                'name' => 'Presença Garantida',
+                'slug' => 'presenca-garantida',
+                'description' => 'Faça 10 check-ins',
+                'icon' => 'fire',
+                'condition_type' => AchievementConditionType::CHECKINS_TOTAL,
+                'condition_value' => 10,
+                'xp_reward' => 50,
+            ],
+            [
+                'name' => 'Caçador de Desafios',
+                'slug' => 'cacador-de-desafios',
+                'description' => 'Conclua 2 desafios',
+                'icon' => 'flag',
+                'condition_type' => AchievementConditionType::CHALLENGES_COMPLETED,
+                'condition_value' => 2,
+                'xp_reward' => 80,
+            ],
         ];
 
         foreach ($achievements as $achievement) {

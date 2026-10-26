@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Person;
+use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
@@ -29,6 +30,7 @@ class DemoDataSeeder extends Seeder
         $users = $this->seedPeopleAndUsers();
         $this->seedCheckins($users);
         $this->seedTasks($users);
+        $this->seedSelectedTitles();
 
         Carbon::setTestNow();
     }
@@ -44,6 +46,12 @@ class DemoDataSeeder extends Seeder
             ['nome' => 'Diego Fernandes Cardoso', 'email' => 'diego.cardoso@devquestgamify.test', 'role' => 'suporte', 'cpfBase' => '606707808', 'sexo' => 1],
             ['nome' => 'Larissa Gomes Barbosa', 'email' => 'larissa.barbosa@devquestgamify.test', 'role' => 'suporte', 'cpfBase' => '707808909', 'sexo' => 2],
             ['nome' => 'Thiago Ribeiro Nunes', 'email' => 'thiago.nunes@devquestgamify.test', 'role' => 'product_owner', 'cpfBase' => '808909010', 'sexo' => 1],
+            ['nome' => 'Gabriel Martins Teixeira', 'email' => 'gabriel.teixeira@devquestgamify.test', 'role' => 'dev', 'cpfBase' => '909010111', 'sexo' => 1],
+            ['nome' => 'Fernanda Lopes Dias', 'email' => 'fernanda.dias@devquestgamify.test', 'role' => 'dev', 'cpfBase' => '010111212', 'sexo' => 2],
+            ['nome' => 'Lucas Araújo Moreira', 'email' => 'lucas.moreira@devquestgamify.test', 'role' => 'dev', 'cpfBase' => '111212313', 'sexo' => 1],
+            ['nome' => 'Aline Batista Correia', 'email' => 'aline.correia@devquestgamify.test', 'role' => 'dev', 'cpfBase' => '414515616', 'sexo' => 2],
+            ['nome' => 'Patrícia Mendes Duarte', 'email' => 'patricia.duarte@devquestgamify.test', 'role' => 'tester', 'cpfBase' => '212313414', 'sexo' => 2],
+            ['nome' => 'Vinícius Campos Freitas', 'email' => 'vinicius.freitas@devquestgamify.test', 'role' => 'suporte', 'cpfBase' => '313414515', 'sexo' => 1],
         ];
 
         $cities = [
@@ -115,6 +123,15 @@ class DemoDataSeeder extends Seeder
             [$users['tester'][0] ?? null, 4],
             [$users['suporte'][0] ?? null, 8],
             [$users['dev'][2] ?? null, 1],
+            [$users['dev'][3] ?? null, 15],
+            [$users['dev'][4] ?? null, 9],
+            [$users['dev'][5] ?? null, 5],
+            [$users['dev'][6] ?? null, 3],
+            [$users['tester'][1] ?? null, 7],
+            [$users['tester'][2] ?? null, 2],
+            [$users['suporte'][1] ?? null, 10],
+            [$users['suporte'][2] ?? null, 4],
+            [$users['product_owner'][0] ?? null, 6],
         ];
 
         foreach ($streaks as [$user, $days]) {
@@ -133,75 +150,164 @@ class DemoDataSeeder extends Seeder
         }
     }
 
+    private function boardPlans(): array
+    {
+        return [
+            'Sistema Principal' => [
+                'old' => 22, 'archived' => 8, 'recent' => 10, 'rejected' => 3,
+                'stages' => [
+                    TaskStatus::BACKLOG->value => 10,
+                    TaskStatus::TODO->value => 7,
+                    TaskStatus::DOING->value => 6,
+                    TaskStatus::REVIEW->value => 4,
+                    TaskStatus::TESTING->value => 4,
+                    TaskStatus::APPROVED->value => 3,
+                ],
+            ],
+            'Aplicativo Mobile' => [
+                'old' => 8, 'archived' => 2, 'recent' => 4, 'rejected' => 1,
+                'stages' => [
+                    TaskStatus::BACKLOG->value => 5,
+                    TaskStatus::TODO->value => 4,
+                    TaskStatus::DOING->value => 3,
+                    TaskStatus::REVIEW->value => 2,
+                    TaskStatus::TESTING->value => 2,
+                    TaskStatus::APPROVED->value => 1,
+                ],
+            ],
+            'Portal do Cliente' => [
+                'old' => 6, 'archived' => 1, 'recent' => 3, 'rejected' => 1,
+                'stages' => [
+                    TaskStatus::BACKLOG->value => 4,
+                    TaskStatus::TODO->value => 3,
+                    TaskStatus::DOING->value => 3,
+                    TaskStatus::REVIEW->value => 1,
+                    TaskStatus::TESTING->value => 1,
+                    TaskStatus::APPROVED->value => 1,
+                ],
+            ],
+            'Infraestrutura e DevOps' => [
+                'old' => 5, 'archived' => 1, 'recent' => 2, 'rejected' => 0,
+                'stages' => [
+                    TaskStatus::BACKLOG->value => 3,
+                    TaskStatus::TODO->value => 2,
+                    TaskStatus::DOING->value => 2,
+                    TaskStatus::REVIEW->value => 1,
+                    TaskStatus::TESTING->value => 1,
+                    TaskStatus::APPROVED->value => 0,
+                ],
+            ],
+        ];
+    }
+
     private function seedTasks(array $users): void
     {
-        $board = Board::first();
-        $columns = BoardColumn::where('board_id', $board->id)->get()->keyBy(fn ($c) => $c->status->value);
         $categories = TaskCategory::pluck('id', 'name');
         $priorities = TaskPriority::orderBy('multiplier')->get();
-
-        $devs = $users['dev'];
-        $testers = $users['tester'];
-        $suporte = $users['suporte'];
-        $creators = [...$suporte, $users['product_owner'][0]];
-
         $pool = $this->titlePool();
 
-        $completedCount = 14;
+        foreach ($this->boardPlans() as $boardName => $plan) {
+            $board = Board::where('name', $boardName)->first();
 
-        for ($i = 0; $i < $completedCount; $i++) {
-            $category = array_rand($pool);
-            [$title, $description] = $this->pickTitle($pool, $category);
-            $dev = $devs[array_rand($devs)];
-            $tester = $testers[array_rand($testers)];
-            $creator = $creators[array_rand($creators)];
-            $priority = $priorities[array_rand($priorities->all())];
+            if ($board === null) {
+                continue;
+            }
 
-            $daysAgo = rand(2, 21);
-            Carbon::setTestNow(now()->subDays($daysAgo + 4));
+            $context = [
+                'columns' => BoardColumn::where('board_id', $board->id)->get()->keyBy(fn ($c) => $c->status->value),
+                'categories' => $categories,
+                'priorities' => $priorities,
+                'pool' => $pool,
+                'users' => $users,
+            ];
 
-            $task = $this->taskService->create([
-                'title' => $title,
-                'description' => $description,
-                'category_id' => $categories[$category],
-                'priority_id' => $priority->id,
-                'column_id' => $columns[TaskStatus::BACKLOG->value]->id,
-                'assigned_to' => $dev->id,
-                'due_at' => now()->addDays(rand(3, 6))->format('Y-m-d H:i:s'),
-            ], $creator);
-
-            $this->taskService->move($task, $columns[TaskStatus::TODO->value], 0, $creator);
-            $this->taskService->move($task, $columns[TaskStatus::DOING->value], 0, $dev);
-            Carbon::setTestNow(now()->addDay());
-            $this->taskService->move($task, $columns[TaskStatus::REVIEW->value], 0, $dev);
-            Carbon::setTestNow(now()->addDay());
-            $this->taskService->move($task, $columns[TaskStatus::TESTING->value], 0, $tester);
-            Carbon::setTestNow(now()->addHours(4));
-            $this->taskService->approve($task, $tester);
-            Carbon::setTestNow(now()->addHours(3));
-            $this->taskService->markHomologationCompleted($task, $dev);
-            Carbon::setTestNow(now()->addHours(1));
-            $this->taskService->markDeployed($task, $dev);
-
-            Carbon::setTestNow();
+            $this->seedFinishedTasks($context, $plan['old'], $plan['archived']);
+            $this->seedRecentlyFinishedTasks($context, $plan['recent']);
+            $this->seedInProgressTasks($context, $plan['stages']);
+            $this->seedRejectedTasks($context, $plan['rejected']);
         }
+    }
 
-        $stages = [
-            TaskStatus::BACKLOG->value => 9,
-            TaskStatus::TODO->value => 6,
-            TaskStatus::DOING->value => 5,
-            TaskStatus::REVIEW->value => 3,
-            TaskStatus::TESTING->value => 3,
-            TaskStatus::APPROVED->value => 2,
-        ];
+    private function seedFinishedTasks(array $context, int $count, int $archivedCount): void
+    {
+        for ($i = 0; $i < $count; $i++) {
+            $task = $this->runFullFlow($context, (rand(2, 21) + 4) * 24, 6);
 
+            if ($i < $archivedCount) {
+                $this->taskService->archive($task);
+            }
+        }
+    }
+
+    private function seedRecentlyFinishedTasks(array $context, int $count): void
+    {
+        $devs = $context['users']['dev'];
+
+        for ($i = 0; $i < $count; $i++) {
+            $dev = $devs[$i % 2];
+            $category = $i % 2 === 0 ? 'Bug' : array_rand($context['pool']);
+
+            $this->runFullFlow($context, rand(0, 6) * 24 + 9, 1, $dev, $category);
+        }
+    }
+
+    private function runFullFlow(array $context, int $hoursAgo, int $dueOffsetDays, ?User $dev = null, ?string $category = null): Task
+    {
+        $columns = $context['columns'];
+        $users = $context['users'];
+        $creators = [...$users['suporte'], $users['product_owner'][0]];
+
+        $category ??= array_rand($context['pool']);
+        [$title, $description] = $this->pickTitle($context['pool'], $category);
+        $dev ??= $users['dev'][array_rand($users['dev'])];
+        $tester = $users['tester'][array_rand($users['tester'])];
+        $creator = $creators[array_rand($creators)];
+        $priority = $context['priorities'][array_rand($context['priorities']->all())];
+
+        Carbon::setTestNow(now()->subHours($hoursAgo));
+
+        $task = $this->taskService->create([
+            'title' => $title,
+            'description' => $description,
+            'category_id' => $context['categories'][$category],
+            'priority_id' => $priority->id,
+            'column_id' => $columns[TaskStatus::BACKLOG->value]->id,
+            'assigned_to' => $dev->id,
+            'due_at' => now()->addDays($dueOffsetDays + 3)->format('Y-m-d H:i:s'),
+        ], $creator);
+
+        $this->taskService->move($task, $columns[TaskStatus::TODO->value], 0, $creator);
+        $this->taskService->move($task, $columns[TaskStatus::DOING->value], 0, $dev);
+        Carbon::setTestNow(now()->addHours(2));
+        $this->taskService->move($task, $columns[TaskStatus::REVIEW->value], 0, $dev);
+        Carbon::setTestNow(now()->addHours(2));
+        $this->taskService->move($task, $columns[TaskStatus::TESTING->value], 0, $tester);
+        Carbon::setTestNow(now()->addHours(1));
+        $this->taskService->approve($task, $tester);
+        Carbon::setTestNow(now()->addHours(1));
+        $this->taskService->markHomologationCompleted($task, $dev);
+        Carbon::setTestNow(now()->addHours(1));
+        $this->taskService->markDeployed($task, $dev);
+
+        Carbon::setTestNow();
+
+        return $task->refresh();
+    }
+
+    private function seedInProgressTasks(array $context, array $stages): void
+    {
+        $columns = $context['columns'];
+        $users = $context['users'];
+        $devs = $users['dev'];
+        $testers = $users['tester'];
+        $creators = [...$users['suporte'], $users['product_owner'][0]];
         $dueOffsets = [-6, -3, -1, 1, 2, 4, 7, 14, 21, null, null];
 
         foreach ($stages as $statusValue => $count) {
             for ($i = 0; $i < $count; $i++) {
-                $category = array_rand($pool);
-                [$title, $description] = $this->pickTitle($pool, $category);
-                $priority = $priorities[array_rand($priorities->all())];
+                $category = array_rand($context['pool']);
+                [$title, $description] = $this->pickTitle($context['pool'], $category);
+                $priority = $context['priorities'][array_rand($context['priorities']->all())];
                 $creator = $creators[array_rand($creators)];
 
                 $assignTo = $statusValue === TaskStatus::BACKLOG->value && rand(0, 1) === 0
@@ -214,7 +320,7 @@ class DemoDataSeeder extends Seeder
                 $task = $this->taskService->create([
                     'title' => $title,
                     'description' => $description,
-                    'category_id' => $categories[$category],
+                    'category_id' => $context['categories'][$category],
                     'priority_id' => $priority->id,
                     'column_id' => $columns[TaskStatus::BACKLOG->value]->id,
                     'assigned_to' => $assignTo,
@@ -244,6 +350,54 @@ class DemoDataSeeder extends Seeder
                 }
             }
         }
+    }
+
+    private function seedRejectedTasks(array $context, int $count): void
+    {
+        $reasons = [
+            'O cenário de borda com valores vazios ainda quebra a tela.',
+            'Faltou cobrir o caso de usuário sem permissão.',
+            'O comportamento no celular não segue o que foi combinado.',
+        ];
+
+        $columns = $context['columns'];
+        $users = $context['users'];
+        $creators = [...$users['suporte'], $users['product_owner'][0]];
+
+        for ($i = 0; $i < $count; $i++) {
+            $category = array_rand($context['pool']);
+            [$title, $description] = $this->pickTitle($context['pool'], $category);
+            $dev = $users['dev'][array_rand($users['dev'])];
+            $tester = $users['tester'][array_rand($users['tester'])];
+            $priority = $context['priorities'][array_rand($context['priorities']->all())];
+
+            $task = $this->taskService->create([
+                'title' => $title,
+                'description' => $description,
+                'category_id' => $context['categories'][$category],
+                'priority_id' => $priority->id,
+                'column_id' => $columns[TaskStatus::BACKLOG->value]->id,
+                'assigned_to' => $dev->id,
+                'due_at' => now()->addDays(rand(2, 8))->format('Y-m-d H:i:s'),
+            ], $creators[array_rand($creators)]);
+
+            $this->taskService->move($task, $columns[TaskStatus::TODO->value], 0, $dev);
+            $this->taskService->move($task, $columns[TaskStatus::DOING->value], 0, $dev);
+            $this->taskService->move($task, $columns[TaskStatus::REVIEW->value], 0, $dev);
+            $this->taskService->move($task, $columns[TaskStatus::TESTING->value], 0, $tester);
+            $this->taskService->reject($task, $tester, $reasons[$i % count($reasons)]);
+        }
+    }
+
+    private function seedSelectedTitles(): void
+    {
+        User::whereHas('unlockedTitles')->get()->each(function (User $user) {
+            $title = $user->unlockedTitles()->with('title')->get()->pluck('title')->filter()->first();
+
+            if ($title !== null) {
+                $user->update(['selected_title_id' => $title->id]);
+            }
+        });
     }
 
     private function titlePool(): array
