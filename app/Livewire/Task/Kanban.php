@@ -36,15 +36,12 @@ class Kanban extends Component
     public function mount(Board $board): void
     {
         $this->board = $board;
-
-        $this->loadBoard();
     }
 
     protected function loadBoard(): void
     {
         $this->board->load([
             'columns.tasks' => fn ($query) => $query->whereNull('archived_at')
-                ->visibleTo(auth()->user())
                 ->with(['category', 'priority', 'assignedTo.person', 'taskEvents']),
         ]);
     }
@@ -74,7 +71,6 @@ class Kanban extends Component
     {
         $this->creatingInColumnId = null;
         $this->editingTaskId = null;
-        $this->loadBoard();
     }
 
     #[On('close-modal')]
@@ -106,7 +102,6 @@ class Kanban extends Component
         app(TaskService::class)->move($task, $column, $position, auth()->user());
 
         $this->toastSuccess('Tarefa movida', "\"{$task->title}\" foi movida para {$column->name}.");
-        $this->loadBoard();
         $this->flushToasts();
     }
 
@@ -124,6 +119,10 @@ class Kanban extends Component
             return 'Tarefas em teste só saem por aprovação ou reprovação do testador.';
         }
 
+        if ($task->assigned_to !== null && $task->assigned_to !== auth()->id()) {
+            return 'Esta tarefa pertence a '.($task->assignedTo?->name ?? 'outra pessoa').'. Só o responsável pode movê-la.';
+        }
+
         return 'Você não tem permissão para mover esta tarefa para esta coluna.';
     }
 
@@ -136,7 +135,6 @@ class Kanban extends Component
         app(TaskService::class)->assign($task, auth()->user());
 
         $this->toastSuccess('Tarefa assumida', 'Você agora é o responsável por esta tarefa.');
-        $this->loadBoard();
         $this->flushToasts();
     }
 
@@ -149,7 +147,6 @@ class Kanban extends Component
         app(BoardColumnService::class)->create($this->board, $this->newColumnName);
 
         $this->newColumnName = '';
-        $this->loadBoard();
     }
 
     public function renameColumn(int $columnId, string $name): void
@@ -165,8 +162,6 @@ class Kanban extends Component
         $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
 
         app(BoardColumnService::class)->rename($column, $name);
-
-        $this->loadBoard();
     }
 
     public function setMilestone(int $columnId, ?int $status): void
@@ -183,8 +178,6 @@ class Kanban extends Component
 
             return;
         }
-
-        $this->loadBoard();
     }
 
     public function moveColumnUp(int $columnId): void
@@ -194,8 +187,6 @@ class Kanban extends Component
         $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
 
         app(BoardColumnService::class)->moveUp($column);
-
-        $this->loadBoard();
     }
 
     public function moveColumnDown(int $columnId): void
@@ -205,8 +196,6 @@ class Kanban extends Component
         $column = $this->board->columns->firstWhere('id', $columnId) ?? abort(404);
 
         app(BoardColumnService::class)->moveDown($column);
-
-        $this->loadBoard();
     }
 
     public function confirmDeleteColumn(int $columnId): void
@@ -234,12 +223,13 @@ class Kanban extends Component
         }
 
         $this->toastSuccess('Coluna excluída', 'A coluna foi removida do quadro.');
-        $this->loadBoard();
         $this->flushToasts();
     }
 
     public function render(): View
     {
+        $this->loadBoard();
+
         return view('livewire.task.kanban', [
             'statuses' => TaskStatus::cases(),
             'categories' => app(TaskCategoryRepository::class)->all(),

@@ -14,6 +14,12 @@
     };
     $searchText = mb_strtolower($task->title.' dq-'.$task->id.' '.$task->category->name.' '.($task->assignedTo?->name ?? ''));
     $isMine = $task->assigned_to === auth()->id() ? '1' : '0';
+
+    // Espelha TaskPolicy::move: dev move tarefa própria, sem responsável ou em revisão (aprovação entre pares).
+    $viewer = auth()->user();
+    $canDrag = ! $readOnly && ($viewer->isAdmin()
+        || $viewer->isProductOwner()
+        || ($viewer->isDeveloper() && ($task->assigned_to === null || $task->assigned_to === $viewer->id || $task->status === \App\Enums\TaskStatus::REVIEW)));
 @endphp
 
 <div
@@ -22,12 +28,14 @@
     data-category="{{ $task->category_id }}"
     data-priority="{{ $task->priority_id }}"
     data-mine="{{ $isMine }}"
+    data-assignee="{{ $task->assigned_to ?? 'none' }}"
+    data-late="{{ $task->isOverdue() ? '1' : '0' }}"
     x-show="matches($el)"
-    @unless ($readOnly)
+    @if ($canDrag)
         draggable="true"
         x-on:dragstart="startDrag($event, {{ $task->id }})"
         :class="{ 'kanban-card--dragging': draggingTaskId === {{ $task->id }} }"
-    @endunless
+    @endif
     class="card kanban-card {{ $isMine === '1' ? 'kanban-card--mine' : '' }}"
 >
     <div class="card-body px-3 py-3">
@@ -60,7 +68,7 @@
                 <x-badge color="warning">Não implantado</x-badge>
             @endif
 
-            @if ($task->isLate())
+            @if ($task->isLate() || $task->isOverdue())
                 <x-badge color="danger"><x-icon name="alert" /> Atrasada</x-badge>
             @elseif ($task->due_at && ! $task->completed_at)
                 <x-badge><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ $task->due_at->format('d/m H:i') }}</x-badge>
@@ -79,8 +87,8 @@
                 @if ($task->assignedTo)
                     <x-avatar :user="$task->assignedTo" size="sm" :title="$task->assignedTo->name" />
                 @elseif (! $readOnly && auth()->user()->can('claim', $task))
-                    <button type="button" wire:click="claim({{ $task->id }})" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
-                        Assumir
+                    <button type="button" wire:click="claim({{ $task->id }})" class="btn btn-outline-primary btn-icon btn-icon-sm" data-bs-toggle="tooltip" data-bs-title="Assumir tarefa" aria-label="Assumir tarefa">
+                        <i class="bi bi-hand-index-thumb" aria-hidden="true"></i>
                     </button>
                 @else
                     <span class="avatar avatar-sm bg-body-secondary text-body-tertiary" title="Não atribuído"><i class="bi bi-person" aria-hidden="true"></i></span>

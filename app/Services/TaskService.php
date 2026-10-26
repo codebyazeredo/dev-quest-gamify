@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Enums\TaskEventType;
 use App\Enums\TaskStatus;
 use App\Enums\XpSourceType;
+use App\Events\TaskAssigned;
 use App\Events\TaskCompleted;
 use App\Events\TaskEventCreated;
+use App\Events\TaskMoved;
 use App\Exceptions\MissingMilestoneColumnException;
 use App\Models\Board;
 use App\Models\BoardColumn;
@@ -77,6 +79,10 @@ class TaskService
                 $task->column_id = $destination->id;
                 $task->position = $position;
                 $task->status = $destination->status;
+
+                if ($this->shouldAutoAssign($task, $destination, $actor)) {
+                    $task->assigned_to = $actor->id;
+                }
             }
 
             $this->applyLifecycleSideEffects($task, $destination);
@@ -93,12 +99,22 @@ class TaskService
                     'note' => $note,
                     'created_at' => now(),
                 ]);
+
+                event(new TaskMoved($task, $destination, $actor));
             }
 
             $this->recordLifecycleEvents($task, $destination, $previousStatus, $actor);
 
             return $task;
         });
+    }
+
+    /** Desenvolvedor que move uma tarefa sem responsável passa a ser o responsável por ela. */
+    private function shouldAutoAssign(Task $task, BoardColumn $destination, User $actor): bool
+    {
+        return $task->assigned_to === null
+            && $actor->isDeveloper()
+            && $destination->status !== TaskStatus::TESTING;
     }
 
     public function approve(Task $task, User $actor): Task
@@ -144,9 +160,13 @@ class TaskService
         return $this->columns->findTaggedWith($board, $status);
     }
 
-    public function assign(Task $task, ?User $user): Task
+    public function assign(Task $task, ?User $user, ?User $actor = null): Task
     {
         $task->update(['assigned_to' => $user?->id]);
+
+        if ($user !== null && $actor !== null && $user->id !== $actor->id) {
+            event(new TaskAssigned($task, $user, $actor));
+        }
 
         return $task;
     }

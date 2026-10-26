@@ -16,94 +16,49 @@ class TaskBoardVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_developer_only_sees_unassigned_tasks_in_backlog(): void
+    private function boardWithTasks(): array
     {
-        $developer = User::factory()->developer()->create();
-        $board = Board::factory()->create();
-        $backlog = BoardColumn::factory()->for($board)->status(TaskStatus::BACKLOG)->create();
-
-        $unassigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $backlog->id, 'status' => TaskStatus::BACKLOG, 'assigned_to' => null]);
-        $assignedToSomeoneElse = Task::factory()->create(['board_id' => $board->id, 'column_id' => $backlog->id, 'status' => TaskStatus::BACKLOG, 'assigned_to' => User::factory()->developer()->create()->id]);
-        $assignedToSelf = Task::factory()->create(['board_id' => $board->id, 'column_id' => $backlog->id, 'status' => TaskStatus::BACKLOG, 'assigned_to' => $developer->id]);
-
-        $tasks = Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
-
-        $this->assertTrue($tasks->contains('id', $unassigned->id));
-        $this->assertFalse($tasks->contains('id', $assignedToSomeoneElse->id));
-        $this->assertFalse($tasks->contains('id', $assignedToSelf->id));
-    }
-
-    public function test_developer_only_sees_own_tasks_outside_backlog_and_review(): void
-    {
-        $developer = User::factory()->developer()->create();
-        $otherDeveloper = User::factory()->developer()->create();
         $board = Board::factory()->create();
         $todo = BoardColumn::factory()->for($board)->status(TaskStatus::TODO)->create();
+        $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
 
-        $mine = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $developer->id]);
-        $someoneElses = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => $otherDeveloper->id]);
+        $unassigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => null]);
+        $someoneElses = Task::factory()->create(['board_id' => $board->id, 'column_id' => $todo->id, 'status' => TaskStatus::TODO, 'assigned_to' => User::factory()->developer()->create()->id]);
+        $inTesting = Task::factory()->create(['board_id' => $board->id, 'column_id' => $testing->id, 'status' => TaskStatus::TESTING, 'assigned_to' => User::factory()->developer()->create()->id]);
 
-        $tasks = Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
-
-        $this->assertTrue($tasks->contains('id', $mine->id));
-        $this->assertFalse($tasks->contains('id', $someoneElses->id));
+        return [$board, collect([$unassigned, $someoneElses, $inTesting])];
     }
 
-    public function test_developer_sees_every_task_in_review_for_peer_sign_off(): void
+    public function test_every_role_sees_every_task_on_the_board(): void
     {
-        $developer = User::factory()->developer()->create();
-        $otherDeveloper = User::factory()->developer()->create();
-        $board = Board::factory()->create();
-        $review = BoardColumn::factory()->for($board)->status(TaskStatus::REVIEW)->create();
+        [$board, $tasks] = $this->boardWithTasks();
 
-        $mine = Task::factory()->create(['board_id' => $board->id, 'column_id' => $review->id, 'status' => TaskStatus::REVIEW, 'assigned_to' => $developer->id]);
-        $someoneElses = Task::factory()->create(['board_id' => $board->id, 'column_id' => $review->id, 'status' => TaskStatus::REVIEW, 'assigned_to' => $otherDeveloper->id]);
+        $viewers = [
+            User::factory()->admin()->create(),
+            User::factory()->developer()->create(),
+        ];
 
-        $tasks = Livewire::actingAs($developer)
-            ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
+        foreach ($viewers as $viewer) {
+            $component = Livewire::actingAs($viewer)->test(Kanban::class, ['board' => $board]);
 
-        $this->assertTrue($tasks->contains('id', $mine->id));
-        $this->assertTrue($tasks->contains('id', $someoneElses->id));
+            foreach ($tasks as $task) {
+                $component->assertSee($task->title);
+            }
+        }
     }
 
-    public function test_developer_sees_unassigned_tasks_in_untagged_columns(): void
+    public function test_tasks_stay_visible_to_a_developer_after_they_move_to_testing(): void
     {
         $developer = User::factory()->developer()->create();
         $board = Board::factory()->create();
-        $freeColumn = BoardColumn::factory()->for($board)->untagged()->create();
+        $doing = BoardColumn::factory()->for($board)->status(TaskStatus::DOING)->create();
+        $testing = BoardColumn::factory()->for($board)->status(TaskStatus::TESTING)->create();
+        $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $testing->id, 'status' => TaskStatus::TESTING, 'assigned_to' => $developer->id]);
 
-        $unassigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => null]);
-        $assignedToSomeoneElse = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => User::factory()->developer()->create()->id]);
-        $assignedToSelf = Task::factory()->create(['board_id' => $board->id, 'column_id' => $freeColumn->id, 'status' => null, 'assigned_to' => $developer->id]);
-
-        $tasks = Livewire::actingAs($developer)
+        Livewire::actingAs($developer)
             ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
+            ->assertSee($task->title);
 
-        $this->assertTrue($tasks->contains('id', $unassigned->id));
-        $this->assertFalse($tasks->contains('id', $assignedToSomeoneElse->id));
-        $this->assertTrue($tasks->contains('id', $assignedToSelf->id));
-    }
-
-    public function test_admin_sees_every_task_unfiltered(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $board = Board::factory()->create();
-        $backlog = BoardColumn::factory()->for($board)->status(TaskStatus::BACKLOG)->create();
-
-        $unassigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $backlog->id, 'status' => TaskStatus::BACKLOG, 'assigned_to' => null]);
-        $assigned = Task::factory()->create(['board_id' => $board->id, 'column_id' => $backlog->id, 'status' => TaskStatus::BACKLOG, 'assigned_to' => User::factory()->developer()->create()->id]);
-
-        $tasks = Livewire::actingAs($admin)
-            ->test(Kanban::class, ['board' => $board])
-            ->get('board')->columns->first()->tasks;
-
-        $this->assertTrue($tasks->contains('id', $unassigned->id));
-        $this->assertTrue($tasks->contains('id', $assigned->id));
+        $this->assertNotNull($doing);
     }
 }

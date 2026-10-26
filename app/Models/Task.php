@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -91,31 +90,16 @@ class Task extends Model
             && $this->completed_at->gt($this->due_at);
     }
 
+    /** Ainda aberta e com o prazo já vencido. */
+    public function isOverdue(): bool
+    {
+        return $this->completed_at === null
+            && $this->due_at !== null
+            && $this->due_at->isPast();
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
-    }
-
-    public function scopeVisibleTo(Builder $query, User $user): Builder
-    {
-        if (! $user->isDeveloper()) {
-            return $query;
-        }
-
-        return $query->where(function (Builder $visible) use ($user) {
-            $visible->where(function (Builder $backlog) {
-                $backlog->where('status', TaskStatus::BACKLOG)->whereNull('assigned_to');
-            })
-                ->orWhere('status', TaskStatus::REVIEW)
-                ->orWhere(function (Builder $untaggedUnassigned) {
-                    $untaggedUnassigned->whereNull('status')->whereNull('assigned_to');
-                })
-                ->orWhere(function (Builder $mine) use ($user) {
-                    $mine->where(function (Builder $notBacklogOrReview) {
-                        $notBacklogOrReview->whereNotIn('status', [TaskStatus::BACKLOG, TaskStatus::REVIEW])
-                            ->orWhereNull('status');
-                    })->where('assigned_to', $user->id);
-                });
-        });
     }
 }

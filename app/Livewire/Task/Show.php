@@ -80,7 +80,7 @@ class Show extends Component
             return;
         }
 
-        app(TaskService::class)->assign($this->task, User::findOrFail($this->assignToUserId));
+        app(TaskService::class)->assign($this->task, User::findOrFail($this->assignToUserId), auth()->user());
 
         $this->assignToUserId = null;
         $this->task->refresh();

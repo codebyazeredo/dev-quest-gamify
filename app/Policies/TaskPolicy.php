@@ -71,7 +71,8 @@ class TaskPolicy
             return $task->assigned_to !== $user->id;
         }
 
-        return $task->assigned_to === $user->id;
+        // Sem responsável, o desenvolvedor pode pegar a tarefa movendo-a (o serviço o define como responsável).
+        return $task->assigned_to === $user->id || $task->assigned_to === null;
     }
 
     public function approve(User $user, Task $task): bool
