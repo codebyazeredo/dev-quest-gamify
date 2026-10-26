@@ -20,7 +20,6 @@
 
         <x-theme-style :color="$appSettings->primaryColor()" />
 
-        @livewireStyles
     </head>
     <body class="auth-page d-flex flex-column align-items-center justify-content-center px-3 py-5">
         <div class="auth-card p-4 p-sm-5">
@@ -52,6 +51,5 @@
 
         <x-footer class="text-center mt-4" />
 
-        @livewireScripts
     </body>
 </html>

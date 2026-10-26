@@ -46,7 +46,7 @@
 
             @unless ($readOnly)
                 @can('update', $task)
-                    <button type="button" x-on:click="$dispatch('open-task-edit', { taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="btn btn-ghost btn-icon btn-icon-sm flex-shrink-0">
+                    <button type="button" x-on:click="$dispatch('open-task-form', { mode: 'edit', taskId: {{ $task->id }} })" title="Editar" aria-label="Editar" class="btn btn-ghost btn-icon btn-icon-sm flex-shrink-0">
                         <x-icon name="pencil" />
                     </button>
                 @endcan
@@ -87,7 +87,7 @@
                 @if ($task->assignedTo)
                     <x-avatar :user="$task->assignedTo" size="sm" :title="$task->assignedTo->name" />
                 @elseif (! $readOnly && auth()->user()->can('claim', $task))
-                    <button type="button" wire:click="claim({{ $task->id }})" class="btn btn-ghost btn-ghost-primary btn-icon btn-icon-sm" data-bs-toggle="tooltip" data-bs-title="Assumir tarefa" aria-label="Assumir tarefa">
+                    <button type="button" x-on:click="act('post', '/api/tasks/{{ $task->id }}/claim')" class="btn btn-ghost btn-ghost-primary btn-icon btn-icon-sm" data-bs-toggle="tooltip" data-bs-title="Assumir tarefa" aria-label="Assumir tarefa">
                         <i class="bi bi-hand-index-thumb" aria-hidden="true"></i>
                     </button>
                 @else

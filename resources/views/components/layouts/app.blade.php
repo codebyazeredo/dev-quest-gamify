@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         @php
             $appSettings = \App\Models\AppSetting::current();
@@ -34,13 +35,14 @@
 
         <x-theme-init />
 
+        <script>window.flavorIcons = @js(\App\Support\FlavorIcons::bootstrapNames());</script>
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <x-theme-style :color="$appSettings->primaryColor()" />
 
-        @livewireStyles
     </head>
     <body>
         <div class="d-flex vh-100 overflow-hidden">
@@ -134,7 +136,7 @@
 
                     <div class="ms-auto d-flex align-items-center gap-1">
                         <x-theme-toggle />
-                        <livewire:notifications.bell placement="top" />
+                        <x-notification-bell placement="top" />
                         <x-avatar :user="$currentUser" class="d-lg-none ms-1" />
                     </div>
                 </header>
@@ -204,6 +206,5 @@
             </template>
         </div>
 
-        @livewireScripts
     </body>
 </html>

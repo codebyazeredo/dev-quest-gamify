@@ -1,4 +1,4 @@
-@props(['users', 'model', 'placeholder' => 'Não atribuído'])
+@props(['users', 'placeholder' => 'Não atribuído'])
 
 @php
     $options = $users->map(fn ($u) => [
@@ -11,9 +11,11 @@
 @endphp
 
 <div
+    x-modelable="selected"
+    {{ $attributes }}
     x-data="{
         open: false,
-        selected: @entangle($model),
+        selected: null,
         options: @js($options),
         get selectedOption() { return this.options.find(o => o.id === this.selected) ?? null },
     }"
