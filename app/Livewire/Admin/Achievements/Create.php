@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Achievements;
 
 use App\Enums\AchievementConditionType;
 use App\Livewire\Concerns\FlushesToasts;
+use App\Livewire\Concerns\ValidatesRewardTitle;
 use App\Models\Achievement;
 use App\Services\Admin\AchievementService;
 use App\Support\FlavorIcons;
@@ -13,6 +14,7 @@ use Livewire\Component;
 class Create extends Component
 {
     use FlushesToasts;
+    use ValidatesRewardTitle;
 
     public string $name = '';
 
@@ -40,7 +42,13 @@ class Create extends Component
             'condition_type' => ['required', 'integer'],
             'condition_value' => ['required', 'integer', 'min:1'],
             'xp_reward' => ['required', 'integer', 'min:0'],
+            ...$this->rewardTitleRules(),
         ];
+    }
+
+    protected function messages(): array
+    {
+        return $this->rewardTitleMessages();
     }
 
     public function save(): void
@@ -49,7 +57,7 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        $achievement = app(AchievementService::class)->create($validated);
+        $achievement = app(AchievementService::class)->create($validated, $this->rewardTitleData($validated));
 
         $this->toastSuccess('Conquista criada', "\"{$achievement->name}\" foi criada.");
         $this->flushToasts();

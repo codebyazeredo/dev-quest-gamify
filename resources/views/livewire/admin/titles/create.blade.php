@@ -1,18 +1,16 @@
-<x-modal title="Novo título">
+<x-modal title="Novo título" size="lg">
     <form wire:submit="save" class="vstack gap-3">
         <x-input name="name" label="Nome" wire:model="name" autofocus />
 
+        <x-textarea name="description" label="Descrição" wire:model="description" rows="2" />
+
         <div>
-            <label class="form-label fw-medium small mb-1">Ícone</label>
+            <span class="form-label fw-medium small d-block mb-1">Ícone</span>
             <x-icon-picker model="icon" :icons="$icons" />
             @error('icon') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
         </div>
 
-        <x-select name="achievement_id" label="Conquista" wire:model="achievement_id" placeholder="Nenhuma">
-            @foreach ($achievements as $achievement)
-                <option value="{{ $achievement->id }}">{{ $achievement->name }}</option>
-            @endforeach
-        </x-select>
+        @include('livewire.admin.titles.partials.unlock-rule')
 
         <div class="d-flex justify-content-end gap-2">
             <x-button variant="secondary" wire:click="cancel">Cancelar</x-button>

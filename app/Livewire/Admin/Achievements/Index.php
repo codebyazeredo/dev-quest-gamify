@@ -12,6 +12,7 @@ use App\Services\Admin\AchievementService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -26,6 +27,12 @@ class Index extends Component
     public bool $showCreateModal = false;
 
     public ?int $editingAchievementId = null;
+
+    #[Url(as: 'busca')]
+    public string $search = '';
+
+    #[Url(as: 'situacao')]
+    public string $status = '';
 
     public function mount(): void
     {
@@ -78,10 +85,41 @@ class Index extends Component
         $this->flushToasts();
     }
 
+    public function updated($property): void
+    {
+        if (in_array($property, ['search', 'status'], true)) {
+            $this->resetPage();
+        }
+    }
+
+    public function toggleActive(int $achievementId): void
+    {
+        $achievement = app(AchievementRepository::class)->findOrFail($achievementId);
+
+        $this->authorize('update', $achievement);
+
+        $achievement = app(AchievementService::class)->toggleActive($achievement);
+
+        $this->toastSuccess($achievement->active ? 'Conquista ativada' : 'Conquista desativada', "\"{$achievement->name}\" foi atualizada.");
+        $this->flushToasts();
+    }
+
+    public function duplicate(int $achievementId): void
+    {
+        $this->authorize('create', Achievement::class);
+
+        $source = app(AchievementRepository::class)->findOrFail($achievementId);
+
+        $copy = app(AchievementService::class)->duplicate($source);
+
+        $this->toastSuccess('Conquista duplicada', "\"{$copy->name}\" foi criada como inativa.");
+        $this->flushToasts();
+    }
+
     public function render(): View
     {
         return view('livewire.admin.achievements.index', [
-            'achievements' => app(AchievementRepository::class)->paginate($this->perPage),
+            'achievements' => app(AchievementRepository::class)->paginateFiltered($this->perPage, trim($this->search), $this->status),
         ]);
     }
 }

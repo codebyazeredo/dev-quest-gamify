@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Titles;
 
+use App\Enums\TitleUnlockType;
 use App\Exceptions\DeletionBlockedException;
 use App\Livewire\Concerns\FlushesToasts;
 use App\Livewire\Concerns\RequiresAdminAccess;
@@ -12,6 +13,7 @@ use App\Services\Admin\TitleService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -26,6 +28,15 @@ class Index extends Component
     public bool $showCreateModal = false;
 
     public ?int $editingTitleId = null;
+
+    #[Url(as: 'busca')]
+    public string $search = '';
+
+    #[Url(as: 'regra')]
+    public string $unlockType = '';
+
+    #[Url(as: 'situacao')]
+    public string $status = '';
 
     public function mount(): void
     {
@@ -46,6 +57,25 @@ class Index extends Component
         $this->authorize('update', $title);
 
         $this->editingTitleId = $titleId;
+    }
+
+    public function updated($property): void
+    {
+        if (in_array($property, ['search', 'unlockType', 'status'], true)) {
+            $this->resetPage();
+        }
+    }
+
+    public function toggleActive(int $titleId): void
+    {
+        $title = app(TitleRepository::class)->findOrFail($titleId);
+
+        $this->authorize('update', $title);
+
+        $title = app(TitleService::class)->toggleActive($title);
+
+        $this->toastSuccess($title->active ? 'Título ativado' : 'Título desativado', "\"{$title->name}\" foi atualizado.");
+        $this->flushToasts();
     }
 
     #[On('close-modal')]
@@ -81,7 +111,8 @@ class Index extends Component
     public function render(): View
     {
         return view('livewire.admin.titles.index', [
-            'titles' => app(TitleRepository::class)->paginate($this->perPage),
+            'titles' => app(TitleRepository::class)->paginateFiltered($this->perPage, trim($this->search), $this->unlockType, $this->status),
+            'unlockTypes' => TitleUnlockType::cases(),
         ]);
     }
 }

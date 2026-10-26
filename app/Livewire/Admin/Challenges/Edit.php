@@ -3,22 +3,29 @@
 namespace App\Livewire\Admin\Challenges;
 
 use App\Enums\ChallengeType;
+use App\Livewire\Concerns\AppliesChallengePeriod;
 use App\Livewire\Concerns\FlushesToasts;
+use App\Livewire\Concerns\ValidatesRewardTitle;
 use App\Models\Challenge;
 use App\Repositories\ChallengeRepository;
 use App\Services\Admin\ChallengeService;
+use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Edit extends Component
 {
+    use AppliesChallengePeriod;
     use FlushesToasts;
+    use ValidatesRewardTitle;
 
     public Challenge $challenge;
 
     public string $name = '';
 
     public string $description = '';
+
+    public string $icon = 'flag';
 
     public int $type = 1;
 
@@ -40,6 +47,7 @@ class Edit extends Component
 
         $this->name = $this->challenge->name;
         $this->description = (string) $this->challenge->description;
+        $this->icon = (string) ($this->challenge->icon ?? 'flag');
         $this->type = $this->challenge->type->value;
         $this->target = $this->challenge->target;
         $this->xp_reward = $this->challenge->xp_reward;
@@ -53,11 +61,22 @@ class Edit extends Component
         return [
             'name' => ['required', 'string', 'max:60', 'unique:challenges,name,'.$this->challenge->id],
             'description' => ['nullable', 'string'],
-            'type' => ['required', 'integer'],
+            'icon' => ['nullable', 'string', 'max:20'],
+            'type' => ['required', 'integer', 'in:'.implode(',', array_column(ChallengeType::cases(), 'value'))],
             'target' => ['required', 'integer', 'min:1'],
             'xp_reward' => ['required', 'integer', 'min:0'],
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
+            ...$this->rewardTitleRules(),
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'ends_at.after' => 'O fim do desafio deve ser depois do início.',
+            'type.in' => 'Escolha um tipo de desafio válido.',
+            ...$this->rewardTitleMessages(),
         ];
     }
 
@@ -70,7 +89,7 @@ class Edit extends Component
         $challenge = app(ChallengeService::class)->update($this->challenge, [
             ...$validated,
             'active' => $this->active,
-        ]);
+        ], $this->rewardTitleData($validated));
 
         $this->toastSuccess('Desafio atualizado', "\"{$challenge->name}\" foi atualizado.");
         $this->flushToasts();
@@ -87,6 +106,8 @@ class Edit extends Component
     {
         return view('livewire.admin.challenges.edit', [
             'challengeTypes' => ChallengeType::cases(),
+            'icons' => FlavorIcons::all(),
+            'rewardTitles' => $this->challenge->titles()->get(),
         ]);
     }
 }

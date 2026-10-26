@@ -31,6 +31,13 @@
         'eye' => 'eye',
         'eye-off' => 'eye-slash',
         'plus' => 'plus-lg',
+        'gem' => 'gem',
+        'target' => 'bullseye',
+        'heart' => 'heart-fill',
+        'code' => 'code-slash',
+        'bulb' => 'lightbulb-fill',
+        'book' => 'journal-bookmark-fill',
+        'compass' => 'compass-fill',
     ];
 @endphp
 

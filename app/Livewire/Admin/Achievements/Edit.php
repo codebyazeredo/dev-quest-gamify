@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Achievements;
 
 use App\Enums\AchievementConditionType;
 use App\Livewire\Concerns\FlushesToasts;
+use App\Livewire\Concerns\ValidatesRewardTitle;
 use App\Models\Achievement;
 use App\Repositories\AchievementRepository;
 use App\Services\Admin\AchievementService;
@@ -14,6 +15,7 @@ use Livewire\Component;
 class Edit extends Component
 {
     use FlushesToasts;
+    use ValidatesRewardTitle;
 
     public Achievement $achievement;
 
@@ -55,7 +57,13 @@ class Edit extends Component
             'condition_type' => ['required', 'integer'],
             'condition_value' => ['required', 'integer', 'min:1'],
             'xp_reward' => ['required', 'integer', 'min:0'],
+            ...$this->rewardTitleRules(),
         ];
+    }
+
+    protected function messages(): array
+    {
+        return $this->rewardTitleMessages();
     }
 
     public function save(): void
@@ -67,7 +75,7 @@ class Edit extends Component
         $achievement = app(AchievementService::class)->update($this->achievement, [
             ...$validated,
             'active' => $this->active,
-        ]);
+        ], $this->rewardTitleData($validated));
 
         $this->toastSuccess('Conquista atualizada', "\"{$achievement->name}\" foi atualizada.");
         $this->flushToasts();
@@ -85,6 +93,7 @@ class Edit extends Component
         return view('livewire.admin.achievements.edit', [
             'conditionTypes' => AchievementConditionType::cases(),
             'icons' => FlavorIcons::all(),
+            'rewardTitles' => $this->achievement->title()->get(),
         ]);
     }
 }

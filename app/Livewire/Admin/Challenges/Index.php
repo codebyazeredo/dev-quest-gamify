@@ -12,6 +12,7 @@ use App\Services\Admin\ChallengeService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -26,6 +27,12 @@ class Index extends Component
     public bool $showCreateModal = false;
 
     public ?int $editingChallengeId = null;
+
+    #[Url(as: 'busca')]
+    public string $search = '';
+
+    #[Url(as: 'situacao')]
+    public string $status = '';
 
     public function mount(): void
     {
@@ -78,10 +85,41 @@ class Index extends Component
         $this->flushToasts();
     }
 
+    public function updated($property): void
+    {
+        if (in_array($property, ['search', 'status'], true)) {
+            $this->resetPage();
+        }
+    }
+
+    public function toggleActive(int $challengeId): void
+    {
+        $challenge = app(ChallengeRepository::class)->findOrFail($challengeId);
+
+        $this->authorize('update', $challenge);
+
+        $challenge = app(ChallengeService::class)->toggleActive($challenge);
+
+        $this->toastSuccess($challenge->active ? 'Desafio ativado' : 'Desafio desativado', "\"{$challenge->name}\" foi atualizado.");
+        $this->flushToasts();
+    }
+
+    public function duplicate(int $challengeId): void
+    {
+        $this->authorize('create', Challenge::class);
+
+        $source = app(ChallengeRepository::class)->findOrFail($challengeId);
+
+        $copy = app(ChallengeService::class)->duplicate($source);
+
+        $this->toastSuccess('Desafio duplicado', "\"{$copy->name}\" foi criado como inativo para o próximo período.");
+        $this->flushToasts();
+    }
+
     public function render(): View
     {
         return view('livewire.admin.challenges.index', [
-            'challenges' => app(ChallengeRepository::class)->paginate($this->perPage),
+            'challenges' => app(ChallengeRepository::class)->paginateFiltered($this->perPage, trim($this->search), $this->status),
         ]);
     }
 }

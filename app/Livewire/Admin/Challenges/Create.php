@@ -3,19 +3,26 @@
 namespace App\Livewire\Admin\Challenges;
 
 use App\Enums\ChallengeType;
+use App\Livewire\Concerns\AppliesChallengePeriod;
 use App\Livewire\Concerns\FlushesToasts;
+use App\Livewire\Concerns\ValidatesRewardTitle;
 use App\Models\Challenge;
 use App\Services\Admin\ChallengeService;
+use App\Support\FlavorIcons;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Create extends Component
 {
+    use AppliesChallengePeriod;
     use FlushesToasts;
+    use ValidatesRewardTitle;
 
     public string $name = '';
 
     public string $description = '';
+
+    public string $icon = 'flag';
 
     public int $type = 1;
 
@@ -31,8 +38,7 @@ class Create extends Component
     {
         $this->authorize('create', Challenge::class);
 
-        $this->starts_at = now()->startOfWeek()->format('Y-m-d\TH:i');
-        $this->ends_at = now()->endOfWeek()->format('Y-m-d\TH:i');
+        $this->applyPeriod('week');
     }
 
     protected function rules(): array
@@ -40,11 +46,22 @@ class Create extends Component
         return [
             'name' => ['required', 'string', 'max:60', 'unique:challenges,name'],
             'description' => ['nullable', 'string'],
-            'type' => ['required', 'integer'],
+            'icon' => ['nullable', 'string', 'max:20'],
+            'type' => ['required', 'integer', 'in:'.implode(',', array_column(ChallengeType::cases(), 'value'))],
             'target' => ['required', 'integer', 'min:1'],
             'xp_reward' => ['required', 'integer', 'min:0'],
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
+            ...$this->rewardTitleRules(),
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'ends_at.after' => 'O fim do desafio deve ser depois do início.',
+            'type.in' => 'Escolha um tipo de desafio válido.',
+            ...$this->rewardTitleMessages(),
         ];
     }
 
@@ -54,7 +71,7 @@ class Create extends Component
 
         $validated = $this->validate();
 
-        $challenge = app(ChallengeService::class)->create($validated);
+        $challenge = app(ChallengeService::class)->create($validated, $this->rewardTitleData($validated));
 
         $this->toastSuccess('Desafio criado', "\"{$challenge->name}\" foi criado.");
         $this->flushToasts();
@@ -71,6 +88,7 @@ class Create extends Component
     {
         return view('livewire.admin.challenges.create', [
             'challengeTypes' => ChallengeType::cases(),
+            'icons' => FlavorIcons::all(),
         ]);
     }
 }
