@@ -15,7 +15,7 @@ Legenda de esforço: **P** (horas), **M** (1–2 dias), **G** (vários dias). Pr
 - **Conquistas:** novas condições (desafios concluídos, check-ins), duplicar, ativar/desativar, filtros, pré-visualização e título criado junto.
 - **Títulos:** regra de desbloqueio por conquista, por **desafio específico** ou por **quantidade de desafios concluídos**; concessão retroativa a quem já cumpriu; evento/notificação de título desbloqueado; lista do jogador mostra títulos bloqueados com a regra e o progresso.
 
-**Ainda pendente do plano:** #5 arrastar no toque, #19 mover consultas dos componentes para repositórios, #18 cache do `AppSetting`, #59 central de notificações, N2 tema por usuário, N6–N10 (revisão fina do escuro), K5–K9, #25 documentação.
+**Ainda pendente do plano:** #5 arrastar no toque, #19 mover consultas dos componentes para repositórios, #18 cache do `AppSetting`, N2 tema por usuário, N6–N10 (revisão fina do escuro), K5–K9, #25 documentação.
 
 ---
 

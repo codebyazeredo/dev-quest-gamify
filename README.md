@@ -109,9 +109,11 @@ O arquivo `.env.example` reflete a configuração padrão para desenvolvimento l
 - Roles e permissions (`admin`, `product_owner`, `dev`, `tester`, `suporte`) via `RoleSeeder`
 - Níveis de XP, categorias e prioridades de tarefa
 - Regras de eventos de tarefa (pontuação)
-- Conquistas, títulos e desafios
-- Board e colunas padrão
-- Usuários de exemplo (`UserSeeder`) e, opcionalmente, dados de demonstração (`DemoDataSeeder`)
+- Conquistas, desafios (semana, mês, encerrado e agendado) e títulos desbloqueados por conquista, por desafio específico ou por quantidade de desafios
+- 5 quadros (um inativo) com colunas padrão
+- Usuários de exemplo (`UserSeeder`) e dados de demonstração (`DemoDataSeeder`): cerca de 20 usuários de todas as roles, ~140 tarefas distribuídas pelos quadros (concluídas, arquivadas, em andamento, reprovadas e atrasadas), histórico de XP dos últimos dias, check-ins com sequências, progresso de desafios e títulos já desbloqueados
+
+Todos os usuários de exemplo usam a senha `password` (ex.: `admin@devquestgamify.test`, `dev@devquestgamify.test`).
 
 ## Testes e qualidade de código
 
