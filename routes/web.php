@@ -1,90 +1,56 @@
 <?php
 
-use App\Livewire\Admin\Achievements\Index as AdminAchievements;
-use App\Livewire\Admin\Categories\Index as AdminCategories;
-use App\Livewire\Admin\Challenges\Index as AdminChallenges;
-use App\Livewire\Admin\EventRules\Index as AdminEventRules;
-use App\Livewire\Admin\Dashboard as AdminDashboard;
-use App\Livewire\Admin\Hub as AdminHub;
-use App\Livewire\Admin\People\Index as AdminPeople;
-use App\Livewire\Admin\Priorities\Index as AdminPriorities;
-use App\Livewire\Admin\Roles\Index as AdminRoles;
-use App\Livewire\Admin\Settings as AdminSettings;
-use App\Livewire\Admin\Titles\Index as AdminTitles;
-use App\Livewire\Admin\Users\Index as AdminUsers;
-use App\Livewire\Board\Archive as BoardArchive;
-use App\Livewire\Board\Index as BoardIndex;
-use App\Livewire\Board\Show as BoardShow;
-use App\Livewire\Checkin\History as CheckinHistory;
-use App\Livewire\Dashboard\Index as DashboardIndex;
-use App\Livewire\Gamification\Achievements;
-use App\Livewire\Gamification\Challenges;
-use App\Livewire\Gamification\Ranking;
-use App\Livewire\Gamification\Titles;
-use App\Livewire\Task\Show as TaskShow;
-use App\Models\Board;
+use App\Http\Controllers\Admin\AchievementPageController;
+use App\Http\Controllers\Admin\AdminDashboardPageController;
+use App\Http\Controllers\Admin\AdminHubPageController;
+use App\Http\Controllers\Admin\AppSettingPageController;
+use App\Http\Controllers\Admin\ChallengePageController;
+use App\Http\Controllers\Admin\EventRulePageController;
+use App\Http\Controllers\Admin\PersonPageController;
+use App\Http\Controllers\Admin\RolePageController;
+use App\Http\Controllers\Admin\TaskCategoryPageController;
+use App\Http\Controllers\Admin\TaskPriorityPageController;
+use App\Http\Controllers\Admin\TitlePageController;
+use App\Http\Controllers\Admin\UserPageController;
+use App\Http\Controllers\Board\BoardPageController;
+use App\Http\Controllers\Gamification\CheckinPageController;
+use App\Http\Controllers\Gamification\RankingPageController;
+use App\Http\Controllers\Gamification\UserAchievementPageController;
+use App\Http\Controllers\Gamification\UserChallengePageController;
+use App\Http\Controllers\Gamification\UserTitlePageController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Profile\DashboardPageController;
+use App\Http\Controllers\Task\TaskPageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check() ? redirect(Board::landingUrl()) : redirect()->route('login'))->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
-    Route::get('/boards', BoardIndex::class)->name('boards.index');
-    Route::get('/boards/{board}', BoardShow::class)->name('boards.show');
-    Route::get('/boards/{board}/archive', BoardArchive::class)->name('boards.archive');
-    Route::get('/tasks/{task}', TaskShow::class)->name('tasks.show');
-    Route::get('/ranking', Ranking::class)->name('ranking');
-    Route::get('/achievements', Achievements::class)->name('achievements');
-    Route::get('/titles', Titles::class)->name('titles');
-    Route::get('/challenges', Challenges::class)->name('challenges');
-    Route::get('/checkin', CheckinHistory::class)->name('checkin');
+    Route::get('/dashboard', [DashboardPageController::class, 'index'])->name('dashboard');
+    Route::get('/boards', [BoardPageController::class, 'index'])->name('boards.index');
+    Route::get('/boards/{board}', [BoardPageController::class, 'show'])->name('boards.show');
+    Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
+    Route::get('/tasks/{task}', [TaskPageController::class, 'show'])->name('tasks.show');
+    Route::get('/ranking', [RankingPageController::class, 'index'])->name('ranking');
+    Route::get('/achievements', [UserAchievementPageController::class, 'index'])->name('achievements');
+    Route::get('/titles', [UserTitlePageController::class, 'index'])->name('titles');
+    Route::get('/challenges', [UserChallengePageController::class, 'index'])->name('challenges');
+    Route::get('/checkin', [CheckinPageController::class, 'index'])->name('checkin');
 });
 
-Route::get('/admin/dashboard', AdminDashboard::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.dashboard');
-Route::get('/admin', AdminHub::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.index');
-
-Route::get('/admin/users', AdminUsers::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.users');
-
-Route::get('/admin/people', AdminPeople::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.people');
-
-Route::get('/admin/categories', AdminCategories::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.categories');
-
-Route::get('/admin/event-rules', AdminEventRules::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.event-rules');
-
-Route::get('/admin/priority-rules', AdminPriorities::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.priority-rules');
-
-Route::get('/admin/achievements', AdminAchievements::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.achievements');
-
-Route::get('/admin/titles', AdminTitles::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.titles');
-
-Route::get('/admin/challenges', AdminChallenges::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.challenges');
-
-Route::get('/admin/settings', AdminSettings::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.settings');
-
-Route::get('/admin/roles', AdminRoles::class)
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.roles');
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminHubPageController::class, 'index'])->name('admin.index');
+    Route::get('/dashboard', [AdminDashboardPageController::class, 'index'])->name('admin.dashboard');
+    Route::get('/users', [UserPageController::class, 'index'])->name('admin.users');
+    Route::get('/people', [PersonPageController::class, 'index'])->name('admin.people');
+    Route::get('/roles', [RolePageController::class, 'index'])->name('admin.roles');
+    Route::get('/categories', [TaskCategoryPageController::class, 'index'])->name('admin.categories');
+    Route::get('/event-rules', [EventRulePageController::class, 'index'])->name('admin.event-rules');
+    Route::get('/priority-rules', [TaskPriorityPageController::class, 'index'])->name('admin.priority-rules');
+    Route::get('/achievements', [AchievementPageController::class, 'index'])->name('admin.achievements');
+    Route::get('/titles', [TitlePageController::class, 'index'])->name('admin.titles');
+    Route::get('/challenges', [ChallengePageController::class, 'index'])->name('admin.challenges');
+    Route::get('/settings', [AppSettingPageController::class, 'index'])->name('admin.settings');
+});
 
 require __DIR__.'/auth.php';
