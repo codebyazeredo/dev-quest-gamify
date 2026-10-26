@@ -6,7 +6,7 @@ Plataforma de gestão de tarefas para equipes de desenvolvimento com sistema de 
 
 - PHP 8.3+
 - Laravel 13
-- Livewire 4 (Blaze)
+- Alpine.js (interações no frontend, consumindo a API JSON interna)
 - Bootstrap 5.3 + Bootstrap Icons + Vite
 - MySQL 8
 - Spatie Laravel Permission (RBAC)
@@ -15,22 +15,32 @@ Plataforma de gestão de tarefas para equipes de desenvolvimento com sistema de 
 
 ## Arquitetura
 
-O código de domínio segue uma separação em camadas. Componentes Livewire não acessam Eloquent diretamente.
+O backend segue uma separação rígida em camadas. Cada camada só conversa com a seguinte:
 
 ```
-Livewire (app/Livewire)  ->  Service (app/Services)  ->  Repository (app/Repositories)  ->  Model (app/Models)
+Request -> Controller -> Service -> Repository -> Model -> Migration
 ```
 
-- **Livewire**: recebe input do usuário, chama Services, expõe estado para a view. Sem regra de negócio e sem query direta.
-- **Service**: regra de negócio, orquestração, transações.
-- **Repository**: acesso a dados via Eloquent. É a única camada que deve montar queries.
-- **Model**: mapeamento de tabela, relacionamentos, casts, escopos simples.
+- **Migration** (`database/migrations`): estrutura do banco.
+- **Model** (`app/Models`): mapeamento de tabela, casts, accessors/mutators e relacionamentos. Sem queries de negócio.
+- **Repository** (`app/Repositories`): único lugar que monta queries e acessa o banco, sempre passando pela Model.
+- **Service** (`app/Services`): regras de negócio, orquestração, transações e disparo de eventos.
+- **Controller / Middleware** (`app/Http/Controllers`, `app/Http/Middleware`): só orquestram a requisição e travam permissões (policies e `role:`). Sem regra de negócio e sem query.
+- **Request** (`app/Http/Requests`): atua como DTO de entrada; dado inválido é recusado antes de chegar ao Controller.
+- **Resource** (`app/Http/Resources`): DTO de saída; define o formato JSON devolvido.
 
-Ao adicionar uma funcionalidade nova, mantenha essa cadeia. Não chame `Model::query()` a partir de um componente Livewire ou de um controller.
+Ao adicionar uma funcionalidade nova, mantenha essa cadeia. Não chame `Model::query()` a partir de um Controller ou de um Service.
+
+### API e frontend
+
+- A API JSON fica em `routes/api.php` (prefixo `/api`) e usa a sessão + CSRF do próprio sistema (grupo `web` + `auth`); não há tokens no JavaScript.
+- Páginas (`routes/web.php`) são servidas por Controllers de página, que passam os dados já preparados pelo Service para a view Blade.
+- O JavaScript (`resources/js`) chama a API pelo cliente `api.js`. O Alpine.js cuida de modais, filtros e drag-and-drop; ações que alteram o estado da página guardam os avisos e recarregam a tela.
+- Erros da API sempre trazem `message` específico e o código HTTP adequado (401, 403, 404, 409, 422); o frontend exibe apenas essa mensagem. Toasts de gamificação (level up, conquistas etc.) viajam no campo `toasts` da resposta.
 
 Outros pontos relevantes:
 
-- A navegação principal fica em uma sidebar fixa (offcanvas no mobile), definida em `components/layouts/app.blade.php`. Telas administrativas ficam centralizadas em `/admin` (`AdminHub`).
+- A navegação principal fica em uma sidebar fixa (offcanvas no mobile), definida em `components/layouts/app.blade.php`. Telas administrativas ficam centralizadas em `/admin` (`AdminHubPageController`).
 - A UI usa apenas Bootstrap 5.3 (classes utilitárias, componentes e Bootstrap Icons). A cor primária é configurável em Configurações > Identidade da empresa (`app_settings.primary_color`) e aplicada em runtime pelo componente `x-theme-style`, que sobrescreve as variáveis CSS `--bs-primary*`.
 - Autorização usa `spatie/laravel-permission`. Há um `Gate::before` global em [AppServiceProvider.php](app/Providers/AppServiceProvider.php) que libera qualquer ability para quem tem a role `admin`, exceto a ability `move` (que tem regra estrutural própria e não deve ser bypassada por permissão).
 - O quadro Kanban usa colunas livres por board (estilo Trello), não um pipeline fixo de status. Tarefas podem ser arquivadas individualmente por admin/PO; cada board tem uma página de arquivo separada em concluídas/não concluídas.
@@ -137,11 +147,11 @@ app/
   Enums/            Enumerações de domínio (status de tarefa, tipo de evento de XP, roles, etc.)
   Events/           Eventos de domínio
   Http/
-    Controllers/    Controllers (uso mínimo; a maior parte da aplicação é Livewire)
+    Controllers/    Controllers da API e das páginas, organizados por área (Admin, Board, Task, Gamification, Profile)
     Middleware/      Middlewares HTTP, incluindo checagem de role
-    Requests/        Form Requests
+    Requests/        Requests (validação de entrada, atuam como DTOs)
+    Resources/       Resources (formato JSON de saída)
   Listeners/        Listeners de eventos
-  Livewire/         Componentes Livewire, organizados por área (Admin, Board, Task, Dashboard, Gamification, Checkin, Profile)
   Models/           Models Eloquent
   Policies/         Policies de autorização
   Repositories/     Camada de acesso a dados
@@ -153,9 +163,11 @@ database/
   seeders/          Seeders
   factories/        Factories para testes
 resources/
-  views/            Views Blade, incluindo templates dos componentes Livewire
+  views/            Views Blade e componentes Blade
+  js/               Cliente da API e componentes Alpine.js
 routes/
-  web.php           Rotas autenticadas e rotas administrativas (role:admin)
+  web.php           Páginas autenticadas e administrativas (role:admin)
+  api.php           API JSON consumida pelo frontend (sessão + CSRF)
   auth.php          Rotas de autenticação
 tests/
   Feature/          Testes de feature, incluindo área administrativa
