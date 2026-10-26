@@ -1,24 +1,41 @@
-<div class="d-flex flex-column flex-grow-1 min-h-0" x-data="{ draggingTaskId: null, overColumnId: null, search: '', mine: false }">
+<div class="d-flex flex-column flex-grow-1 min-h-0" x-data="kanbanBoard" x-on:dragend.window="endDrag()">
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <div class="input-group" style="max-width: 16rem;">
             <input type="search" x-model.debounce.150ms="search" class="form-control" placeholder="Buscar tarefas" aria-label="Buscar tarefas">
             <span class="input-group-text bg-body-tertiary"><i class="bi bi-search" aria-hidden="true"></i></span>
         </div>
 
+        <select x-model="category" class="form-select w-auto" aria-label="Filtrar por categoria">
+            <option value="">Todas as categorias</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
+        </select>
+
+        <select x-model="priority" class="form-select w-auto" aria-label="Filtrar por prioridade">
+            <option value="">Todas as prioridades</option>
+            @foreach ($priorities as $priority)
+                <option value="{{ $priority->id }}">{{ $priority->name }}</option>
+            @endforeach
+        </select>
+
         <button type="button" class="btn" :class="mine ? 'btn-primary' : 'btn-outline-secondary'" x-on:click="mine = ! mine" :aria-pressed="mine">
             <i class="bi bi-person-check" aria-hidden="true"></i> Minhas tarefas
         </button>
 
-        <button type="button" class="btn btn-link text-decoration-none" x-show="search || mine" x-cloak x-on:click="search = ''; mine = false">Limpar filtros</button>
+        <button type="button" class="btn btn-link text-decoration-none" x-show="hasFilters" x-cloak x-on:click="clearFilters()">
+            <i class="bi bi-x-circle" aria-hidden="true"></i> Limpar filtros
+        </button>
     </div>
 
-    <div class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2">
+    <div class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2" x-ref="board">
         @foreach ($board->columns as $column)
             <section
                 class="kanban-column d-flex flex-column p-2"
                 :class="{ 'kanban-column--over': overColumnId === {{ $column->id }} }"
-                x-on:dragover.prevent="overColumnId = {{ $column->id }}"
-                x-on:drop="overColumnId = null; $wire.moveTask(draggingTaskId, {{ $column->id }}, {{ $column->tasks->count() }})"
+                x-on:dragover="dragOver($event, {{ $column->id }}, $el)"
+                x-on:dragleave="leaveColumn($event, $el)"
+                x-on:drop.prevent="drop({{ $column->id }})"
                 wire:key="column-{{ $column->id }}"
             >
                 <header class="d-flex align-items-center gap-1 px-1 pb-2 flex-shrink-0">
@@ -36,7 +53,7 @@
                         @endif
                     </div>
 
-                    <span class="small fw-semibold text-body-secondary flex-shrink-0 px-1">{{ $column->tasks->count() }}</span>
+                    <span class="kanban-count flex-shrink-0" x-text="countVisible($el.closest('section'))">{{ $column->tasks->count() }}</span>
 
                     @can('update', $board)
                         <div class="position-relative flex-shrink-0" x-data="{ open: false }" @click.outside="open = false">
@@ -85,11 +102,11 @@
                     @endcan
                 </header>
 
-                <div class="flex-grow-1 min-h-0 overflow-y-auto vstack gap-2 px-1 pb-1">
+                <div class="kanban-cards flex-grow-1 min-h-0 overflow-y-auto vstack gap-2 px-1 pb-1">
                     @forelse ($column->tasks as $task)
                         <x-task-card :task="$task" wire:key="task-{{ $task->id }}" />
                     @empty
-                        <div class="text-center small text-body-tertiary border border-2 rounded-3 py-4" style="border-style: dashed !important;">
+                        <div class="kanban-empty text-center small text-body-tertiary border border-2 rounded-3 py-4" style="border-style: dashed !important;">
                             Sem tarefas
                         </div>
                     @endforelse

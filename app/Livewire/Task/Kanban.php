@@ -9,6 +9,8 @@ use App\Livewire\Concerns\FlushesToasts;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
+use App\Repositories\TaskCategoryRepository;
+use App\Repositories\TaskPriorityRepository;
 use App\Services\BoardColumnService;
 use App\Services\TaskService;
 use App\Support\ToastCollector;
@@ -240,6 +242,8 @@ class Kanban extends Component
     {
         return view('livewire.task.kanban', [
             'statuses' => TaskStatus::cases(),
+            'categories' => app(TaskCategoryRepository::class)->all(),
+            'priorities' => app(TaskPriorityRepository::class)->all(),
         ]);
     }
 }

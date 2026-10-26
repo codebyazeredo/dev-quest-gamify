@@ -17,20 +17,22 @@
 @endphp
 
 <div
+    data-task-id="{{ $task->id }}"
     data-search="{{ $searchText }}"
+    data-category="{{ $task->category_id }}"
+    data-priority="{{ $task->priority_id }}"
     data-mine="{{ $isMine }}"
-    x-show="(! search || $el.dataset.search.includes(search.toLowerCase())) && (! mine || $el.dataset.mine === '1')"
+    x-show="matches($el)"
     @unless ($readOnly)
         draggable="true"
-        x-on:dragstart="draggingTaskId = {{ $task->id }}"
-        x-on:dragend="draggingTaskId = null; overColumnId = null"
+        x-on:dragstart="startDrag($event, {{ $task->id }})"
         :class="{ 'kanban-card--dragging': draggingTaskId === {{ $task->id }} }"
     @endunless
-    class="card kanban-card"
+    class="card kanban-card {{ $isMine === '1' ? 'kanban-card--mine' : '' }}"
 >
     <div class="card-body px-3 py-3">
         <div class="d-flex align-items-start justify-content-between gap-2">
-            <a href="{{ route('tasks.show', $task) }}" class="text-body text-decoration-none lh-base">
+            <a href="{{ route('tasks.show', $task) }}" draggable="false" class="text-body text-decoration-none lh-base">
                 {{ $task->title }}
             </a>
 

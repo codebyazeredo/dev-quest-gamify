@@ -1,4 +1,4 @@
-<div x-data="{ draggingTaskId: null, search: '', mine: false }">
+<div x-data="kanbanBoard">
     <x-page-header title="Arquivo" :subtitle="$board->name" :back="route('boards.show', $board)" backLabel="Voltar ao quadro" />
 
     <section class="mb-5">
