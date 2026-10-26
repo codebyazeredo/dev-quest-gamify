@@ -54,8 +54,6 @@
                 </a>
 
                 <div class="mt-auto d-flex flex-column align-items-center gap-2">
-                    <livewire:notifications.bell placement="rail" />
-
                     <div class="dropend">
                         <button type="button" class="btn p-0 border-0 rounded-circle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu do usuário">
                             <x-avatar :user="$currentUser" class="border border-2 border-white border-opacity-50" />
@@ -121,8 +119,6 @@
                             <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
                         </form>
 
-                        <x-theme-switch class="mt-3" />
-
                         <x-footer class="text-center mt-3" />
                     </div>
                 </div>
@@ -130,14 +126,16 @@
             </aside>
 
             <div class="d-flex flex-column flex-grow-1 min-w-0">
-                <header class="navbar bg-primary d-lg-none px-3" style="color: var(--app-primary-contrast);">
-                    <button type="button" class="rail-item border-0 bg-transparent text-reset" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
-                        <i class="bi bi-list fs-3" aria-hidden="true"></i>
+                <header class="app-topbar d-flex align-items-center gap-2 px-3 px-lg-4 border-bottom bg-body flex-shrink-0">
+                    <button type="button" class="btn btn-ghost btn-icon d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
+                        <i class="bi bi-list fs-4" aria-hidden="true"></i>
                     </button>
-                    <span class="fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
-                    <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold text-truncate d-lg-none">{{ $appSettings->displayName() }}</span>
+
+                    <div class="ms-auto d-flex align-items-center gap-1">
+                        <x-theme-toggle />
                         <livewire:notifications.bell placement="top" />
-                        <x-avatar :user="$currentUser" />
+                        <x-avatar :user="$currentUser" class="d-lg-none ms-1" />
                     </div>
                 </header>
 

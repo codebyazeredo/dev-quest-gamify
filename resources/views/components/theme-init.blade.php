@@ -1,11 +1,14 @@
+{{-- Aplica o tema salvo antes do CSS carregar, evitando o "flash" claro no modo escuro. --}}
 <script>
     (function () {
+        var theme = 'light';
+
         try {
-            var preference = localStorage.getItem('theme') || 'auto';
-            var dark = preference === 'dark' || (preference === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+            theme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
         } catch (error) {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
+            theme = 'light';
         }
+
+        document.documentElement.setAttribute('data-bs-theme', theme);
     })();
 </script>

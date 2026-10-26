@@ -10,7 +10,7 @@
 @endphp
 
 <div wire:poll.20s x-data="{ open: false }" x-on:click.outside="open = false" class="position-relative">
-    <button type="button" x-on:click="open = ! open" class="{{ $placement === 'rail' ? 'rail-item' : 'rail-item border-0 bg-transparent text-reset' }} position-relative" aria-label="Notificações" aria-haspopup="true" x-bind:aria-expanded="open">
+    <button type="button" x-on:click="open = ! open" class="btn btn-ghost btn-icon position-relative" data-bs-toggle="tooltip" data-bs-title="Notificações" aria-label="Notificações" aria-haspopup="true" x-bind:aria-expanded="open">
         <i class="bi {{ $unreadCount > 0 ? 'bi-bell-fill' : 'bi-bell' }}" aria-hidden="true"></i>
 
         @if ($unreadCount > 0)
