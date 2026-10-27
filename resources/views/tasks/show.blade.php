@@ -51,11 +51,17 @@
                         <h2 class="h6 text-body-secondary text-uppercase mb-2">Git</h2>
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             @if ($task->branch_name)
-                                <code><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</code>
+                                <span class="d-inline-flex align-items-center gap-1">
+                                    <code><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</code>
+                                    <x-icon-button icon="clipboard" label="Copiar branch" data-copy="{{ $task->branch_name }}" data-copy-label="Branch copiada" class="btn-icon-sm" />
+                                </span>
                             @endif
 
                             @if ($task->pull_request_url)
-                                <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
+                                <span class="d-inline-flex align-items-center gap-1">
+                                    <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
+                                    <x-icon-button icon="clipboard" label="Copiar link do pull request" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn-icon-sm" />
+                                </span>
                             @endif
                         </div>
                     </x-card>

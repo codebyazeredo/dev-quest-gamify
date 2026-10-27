@@ -78,11 +78,14 @@
         @if ($task->branch_name || $task->pull_request_url)
             <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
                 @if ($task->branch_name)
-                    <span class="text-body-secondary text-truncate" style="max-width: 10rem;" title="Branch: {{ $task->branch_name }}"><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</span>
+                    <button type="button" draggable="false" data-copy="{{ $task->branch_name }}" data-copy-label="Branch copiada" class="btn btn-link btn-sm p-0 text-body-secondary text-decoration-none text-truncate" style="max-width: 11rem;" title="Copiar branch: {{ $task->branch_name }}"><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</button>
                 @endif
 
                 @if ($task->pull_request_url)
-                    <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer" draggable="false" class="text-decoration-none" title="Abrir pull request"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> PR</a>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer" draggable="false" class="text-decoration-none" title="Abrir pull request"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> PR</a>
+                        <button type="button" draggable="false" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn btn-link btn-sm p-0 text-body-secondary" title="Copiar link do pull request" aria-label="Copiar link do pull request"><i class="bi bi-clipboard" aria-hidden="true"></i></button>
+                    </span>
                 @endif
             </div>
         @endif

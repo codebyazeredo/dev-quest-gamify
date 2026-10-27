@@ -38,6 +38,7 @@ class TaskGitLinksTest extends TestCase
             ->get(route('boards.show', $board))
             ->assertOk()
             ->assertSee('feature/dq-12-portal')
+            ->assertSee('data-copy="feature/dq-12-portal"', false)
             ->assertSee('https://github.com/acme/app/pull/12', false);
     }
 
