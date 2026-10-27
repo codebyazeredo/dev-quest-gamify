@@ -80,15 +80,7 @@
                         </div>
                     </div>
 
-                    <h3 class="h6 border-top pt-3 mb-0">Endereço</h3>
-
-                    <div class="row g-3">
-                        <div class="col-sm-6"><x-form-input name="cep" label="CEP" placeholder="00000-000" /></div>
-                        <div class="col-sm-6"><x-form-input name="numero" label="Número" placeholder="Sem número" /></div>
-                        <div class="col-12"><x-form-input name="logradouro" label="Logradouro" /></div>
-                        <div class="col-sm-6"><x-form-input name="cidade" label="Cidade" /></div>
-                        <div class="col-sm-6"><x-form-input name="estado" label="Estado (UF)" maxlength="2" placeholder="SP" class="text-uppercase" /></div>
-                    </div>
+                    <x-form-address />
 
                     <x-form-actions create-label="Salvar pessoa" />
                 </form>

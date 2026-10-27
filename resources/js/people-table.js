@@ -11,11 +11,15 @@ const EMPTY_PERSON = {
     telefone1: '',
     telefone2: '',
     foto: null,
+    country_id: '',
     cep: '',
     logradouro: '',
     numero: '',
+    complemento: '',
+    bairro: '',
     cidade: '',
     estado: '',
+    referencia: '',
 };
 
 const MASKED_FIELDS = ['cpf', 'telefone1', 'telefone2'];
@@ -36,6 +40,12 @@ export function peopleTable() {
             MASKED_FIELDS.forEach((field) => data.set(field, onlyDigits(data.get(field))));
 
             return data;
+        },
+
+        openCreate() {
+            table.openCreate.call(this);
+
+            this.form.country_id = this.extra.default_country_id ?? '';
         },
 
         openEdit(row) {
