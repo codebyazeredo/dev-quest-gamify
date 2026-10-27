@@ -32,6 +32,11 @@ class BoardRepository extends Repository
         return $this->query()->where('is_active', true)->get();
     }
 
+    public function findByGithubRepository(string $repositoryName): ?Board
+    {
+        return $this->query()->whereRaw('LOWER(github_repository) = ?', [strtolower($repositoryName)])->first();
+    }
+
     public function loadKanban(Board $board): Board
     {
         return $board->load([

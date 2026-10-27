@@ -20,6 +20,7 @@ use App\Http\Controllers\Gamification\RankingPageController;
 use App\Http\Controllers\Gamification\UserAchievementPageController;
 use App\Http\Controllers\Gamification\UserChallengePageController;
 use App\Http\Controllers\Gamification\UserTitlePageController;
+use App\Http\Controllers\Github\GithubWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Portal\PortalAttachmentController;
 use App\Http\Controllers\Portal\PortalAuthController;
@@ -30,9 +31,15 @@ use App\Http\Controllers\Task\TaskPageController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
 use App\Http\Controllers\Ticket\TicketPageController;
 use App\Http\Middleware\EnsurePortalClient;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::post('/webhooks/github', GithubWebhookController::class)
+    ->withoutMiddleware(ValidateCsrfToken::class)
+    ->middleware('throttle:60,1')
+    ->name('webhooks.github');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardPageController::class, 'index'])->name('dashboard');

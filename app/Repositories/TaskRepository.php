@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Board;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -19,6 +20,15 @@ class TaskRepository extends Repository
     protected function active(): Builder
     {
         return $this->query()->whereNull('archived_at');
+    }
+
+    public function findLinkedToPullRequest(Board $board, string $pullRequestUrl, string $branchName): ?Task
+    {
+        return $this->active()
+            ->where('board_id', $board->id)
+            ->where(fn (Builder $query) => $query->where('pull_request_url', $pullRequestUrl)->orWhere('branch_name', $branchName))
+            ->orderByRaw('pull_request_url = ? DESC', [$pullRequestUrl])
+            ->first();
     }
 
     public function countInColumn(int $columnId): int
