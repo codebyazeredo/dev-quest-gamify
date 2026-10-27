@@ -6,18 +6,22 @@ use App\Enums\Gender;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ProfileRequest;
 use App\Http\Resources\ProfileResource;
+use App\Services\AddressService;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public function __construct(private ProfileService $profile) {}
+    public function __construct(
+        private ProfileService $profile,
+        private AddressService $addresses,
+    ) {}
 
     public function show(Request $request): JsonResponse
     {
         return ProfileResource::make($this->profile->personOf($request->user()))
-            ->additional(['genders' => $this->genderOptions()])
+            ->additional(['genders' => $this->genderOptions(), ...$this->addresses->countryOptions()])
             ->response();
     }
 

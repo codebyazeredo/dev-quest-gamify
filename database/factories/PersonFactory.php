@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Gender;
+use App\Models\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PersonFactory extends Factory
@@ -20,6 +21,11 @@ class PersonFactory extends Factory
             'telefone2' => null,
             'foto_path' => null,
         ];
+    }
+
+    public function withAddress(?Address $address = null): static
+    {
+        return $this->state(fn () => ['address_id' => $address?->id ?? Address::factory()->create()->id]);
     }
 
     private function fakeValidCpf(): string

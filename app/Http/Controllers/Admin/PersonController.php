@@ -9,18 +9,22 @@ use App\Http\Requests\PaginatedListRequest;
 use App\Http\Resources\PersonResource;
 use App\Models\Person;
 use App\Services\Admin\PersonService;
+use App\Services\AddressService;
 use Illuminate\Http\JsonResponse;
 
 class PersonController extends Controller
 {
-    public function __construct(private PersonService $people) {}
+    public function __construct(
+        private PersonService $people,
+        private AddressService $addresses,
+    ) {}
 
     public function index(PaginatedListRequest $request): JsonResponse
     {
         $this->authorize('viewAny', Person::class);
 
         return PersonResource::collection($this->people->paginate($request->perPage()))
-            ->additional(['genders' => $this->genderOptions()])
+            ->additional(['genders' => $this->genderOptions(), ...$this->addresses->countryOptions()])
             ->response();
     }
 

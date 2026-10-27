@@ -4,8 +4,8 @@ namespace App\Services\Admin;
 
 use App\Exceptions\DeletionBlockedException;
 use App\Models\Person;
-use App\Repositories\AddressRepository;
 use App\Repositories\PersonRepository;
+use App\Services\AddressService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ class PersonService
 {
     public function __construct(
         private PersonRepository $people,
-        private AddressRepository $addresses,
+        private AddressService $addresses,
     ) {}
 
     public function paginate(int $perPage): LengthAwarePaginator
@@ -26,11 +26,11 @@ class PersonService
     public function create(array $data, ?UploadedFile $photo): Person
     {
         return DB::transaction(function () use ($data, $photo) {
-            $person = $this->people->create([...$this->personAttributes($data), 'foto_path' => $photo?->store('people', 'public')]);
-
-            $this->addresses->updateOrCreateForPerson($person->id, $this->addressAttributes($data));
-
-            return $person;
+            return $this->people->create([
+                ...$this->personAttributes($data),
+                'address_id' => $this->addresses->resolve($data)->id,
+                'foto_path' => $photo?->store('people', 'public'),
+            ]);
         });
     }
 
@@ -47,12 +47,16 @@ class PersonService
                 $fotoPath = $photo->store('people', 'public');
             }
 
+            $previousAddressId = $person->address_id;
+            $address = $this->addresses->resolve($data);
+
             $person = $this->people->update($person, [
                 ...$this->personAttributes($data),
+                'address_id' => $address->id,
                 'foto_path' => $fotoPath,
             ]);
 
-            $this->addresses->updateOrCreateForPerson($person->id, $this->addressAttributes($data));
+            $this->addresses->releaseIfUnused($previousAddressId === $address->id ? null : $previousAddressId);
 
             return $person;
         });
@@ -65,6 +69,7 @@ class PersonService
         }
 
         $this->people->delete($person);
+        $this->addresses->releaseIfUnused($person->address_id);
     }
 
     private function personAttributes(array $data): array
@@ -78,17 +83,6 @@ class PersonService
             'email' => $data['email'],
             'telefone1' => $data['telefone1'],
             'telefone2' => filled($data['telefone2'] ?? null) ? $data['telefone2'] : null,
-        ];
-    }
-
-    private function addressAttributes(array $data): array
-    {
-        return [
-            'cep' => $data['cep'],
-            'logradouro' => $data['logradouro'],
-            'numero' => filled($data['numero'] ?? null) ? $data['numero'] : null,
-            'cidade' => $data['cidade'],
-            'estado' => strtoupper($data['estado']),
         ];
     }
 }

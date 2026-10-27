@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\Gender;
+use App\Http\Requests\Concerns\ValidatesAddress;
 use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 /** Valida criação e edição de pessoa (dados pessoais, foto e endereço). */
 class PersonRequest extends FormRequest
 {
+    use ValidatesAddress;
+
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
@@ -25,17 +28,13 @@ class PersonRequest extends FormRequest
             'telefone1' => ['required', 'string', 'max:20'],
             'telefone2' => ['nullable', 'string', 'max:20'],
             'foto' => ['nullable', 'image', 'max:2048'],
-            'cep' => ['required', 'string', 'max:9'],
-            'logradouro' => ['required', 'string', 'max:255'],
-            'numero' => ['nullable', 'string', 'max:20'],
-            'cidade' => ['required', 'string', 'max:120'],
-            'estado' => ['required', 'string', 'size:2'],
+            ...$this->addressRules(required: true),
         ];
     }
 
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['foto' => 'foto', 'cep' => 'CEP', 'estado' => 'estado (UF)'];
+        return ['foto' => 'foto', ...$this->addressAttributes()];
     }
 }

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Person;
 use App\Models\User;
-use App\Repositories\AddressRepository;
 use App\Repositories\PersonRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\UploadedFile;
@@ -16,7 +15,7 @@ class ProfileService
 {
     public function __construct(
         private PersonRepository $people,
-        private AddressRepository $addresses,
+        private AddressService $addresses,
         private UserRepository $users,
     ) {}
 
@@ -33,6 +32,10 @@ class ProfileService
         return DB::transaction(function () use ($user, $data, $photo) {
             $person = $this->personOf($user);
 
+            $previousAddressId = $person->address_id;
+            $hasAddress = $previousAddressId !== null || filled($data['cep'] ?? null);
+            $addressId = $hasAddress ? $this->addresses->resolve($data)->id : null;
+
             $this->people->update($person, [
                 'nome' => $data['nome'],
                 'cpf' => $data['cpf'],
@@ -43,17 +46,10 @@ class ProfileService
                 'telefone1' => $data['telefone1'],
                 'telefone2' => $data['telefone2'] ?? null,
                 'foto_path' => $photo !== null ? $this->replacePhoto($person, $photo) : $person->foto_path,
+                'address_id' => $addressId ?? $previousAddressId,
             ]);
 
-            if ($person->address !== null || filled($data['cep'] ?? null)) {
-                $this->addresses->updateOrCreateForPerson($person->id, [
-                    'cep' => $data['cep'],
-                    'logradouro' => $data['logradouro'],
-                    'numero' => $data['numero'] ?? null,
-                    'cidade' => $data['cidade'],
-                    'estado' => strtoupper($data['estado']),
-                ]);
-            }
+            $this->addresses->releaseIfUnused($addressId !== null && $addressId !== $previousAddressId ? $previousAddressId : null);
 
             $this->users->update($user, array_filter([
                 'name' => $data['nome'],

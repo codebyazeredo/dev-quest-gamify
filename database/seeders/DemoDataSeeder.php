@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\TaskStatus;
-use App\Models\Address;
 use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Person;
@@ -12,6 +11,7 @@ use App\Models\TaskCategory;
 use App\Models\TaskPriority;
 use App\Models\User;
 use App\Notifications\TaskProgress;
+use App\Services\AddressService;
 use App\Services\CheckinService;
 use App\Services\TaskService;
 use Illuminate\Database\Seeder;
@@ -70,9 +70,18 @@ class DemoDataSeeder extends Seeder
         foreach ($accounts as $i => $account) {
             $city = $cities[$i % count($cities)];
 
+            $address = app(AddressService::class)->resolve([
+                'cep' => $city['cep'],
+                'logradouro' => $city['logradouro'],
+                'numero' => (string) (50 + $i * 137),
+                'cidade' => $city['cidade'],
+                'estado' => $city['estado'],
+            ]);
+
             $person = Person::firstOrCreate(
                 ['email' => $account['email']],
                 [
+                    'address_id' => $address->id,
                     'nome' => $account['nome'],
                     'cpf' => $this->validCpf($account['cpfBase']),
                     'rg' => null,
@@ -81,17 +90,6 @@ class DemoDataSeeder extends Seeder
                     'telefone1' => '119'.rand(10000000, 99999999),
                     'telefone2' => null,
                     'foto_path' => null,
-                ]
-            );
-
-            Address::firstOrCreate(
-                ['person_id' => $person->id],
-                [
-                    'cep' => $city['cep'],
-                    'logradouro' => $city['logradouro'],
-                    'numero' => (string) rand(50, 2500),
-                    'cidade' => $city['cidade'],
-                    'estado' => $city['estado'],
                 ]
             );
 
