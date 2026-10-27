@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\TaskAttachment;
 use App\Models\User;
 use App\Repositories\TaskAttachmentRepository;
+use App\Support\StoredFile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -23,10 +24,7 @@ class TaskAttachmentService
         return collect($files)->map(fn (UploadedFile $file) => $this->attachments->create([
             'task_id' => $task->id,
             'user_id' => $user->id,
-            'original_name' => $file->getClientOriginalName(),
-            'path' => $file->store("task-attachments/{$task->id}", TaskAttachment::DISK),
-            'mime_type' => $file->getMimeType() ?? $file->getClientMimeType(),
-            'size' => $file->getSize(),
+            ...StoredFile::store($file, "task-attachments/{$task->id}"),
         ]));
     }
 

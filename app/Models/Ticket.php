@@ -29,6 +29,11 @@ class Ticket extends Model
         return $this->belongsTo(Task::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TicketAttachment::class)->whereNull('ticket_message_id')->oldest();
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(TicketMessage::class)->oldest();
