@@ -3,6 +3,7 @@ import { Tooltip } from 'bootstrap';
 import './kanban.js';
 import './theme.js';
 import './sidebar.js';
+import './clipboard.js';
 import { challengesTable } from './challenges-table.js';
 import { clientsTable } from './clients-table.js';
 import { crudTable } from './crud-table.js';
