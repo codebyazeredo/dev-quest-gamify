@@ -1,5 +1,9 @@
 @props(['title', 'subtitle' => null, 'back' => null, 'backLabel' => 'Voltar'])
 
+@push('page-title')
+    <h1 class="h5 mb-0 text-truncate">{{ $title }}</h1>
+@endpush
+
 <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-3 mb-4">
     <div class="min-w-0">
         @if ($back)
@@ -11,10 +15,8 @@
             </nav>
         @endif
 
-        <h1 class="h3 mb-0 text-truncate">{{ $title }}</h1>
-
         @if ($subtitle)
-            <div class="text-body-secondary mt-1">
+            <div class="text-body-secondary">
                 @if ($subtitle instanceof \Illuminate\View\ComponentSlot)
                     {!! $subtitle !!}
                 @else
