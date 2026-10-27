@@ -2,7 +2,7 @@
 
 @push('page-title')
     <div class="min-w-0 lh-sm">
-        <h1 class="fs-6 fw-semibold mb-0 text-truncate">{{ $title }}</h1>
+        <h1 class="fs-5 fw-bold mb-0 text-truncate">{{ $title }}</h1>
 
         @if ($subtitle)
             <div class="small text-body-secondary text-truncate">
