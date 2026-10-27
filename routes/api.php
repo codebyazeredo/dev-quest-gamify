@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AchievementController;
 use App\Http\Controllers\Admin\AppSettingController;
 use App\Http\Controllers\Admin\ChallengeController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\EventRuleController;
 use App\Http\Controllers\Admin\PersonController;
 use App\Http\Controllers\Admin\RoleController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Gamification\TitleSelectionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Task\TaskController;
+use App\Http\Controllers\Ticket\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -54,7 +56,13 @@ Route::post('tasks/{task}/deploy', [TaskController::class, 'markDeployed'])->nam
 Route::post('tasks/{task}/archive', [TaskController::class, 'archive'])->name('tasks.archive');
 Route::post('tasks/{task}/unarchive', [TaskController::class, 'unarchive'])->name('tasks.unarchive');
 
+Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
+Route::put('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.status');
+Route::post('tickets/{ticket}/messages', [TicketController::class, 'reply'])->name('tickets.reply');
+Route::post('tickets/{ticket}/task', [TicketController::class, 'convertToTask'])->name('tickets.task');
+
 Route::middleware('role:admin')->group(function () {
+    Route::apiResource('clients', ClientController::class)->except('show');
     Route::apiResource('categories', TaskCategoryController::class)->parameters(['categories' => 'category'])->except('show');
     Route::apiResource('priorities', TaskPriorityController::class)->parameters(['priorities' => 'priority'])->except('show');
     Route::apiResource('people', PersonController::class)->parameters(['people' => 'person'])->except('show');

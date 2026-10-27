@@ -16,7 +16,7 @@ class PaginatedListRequest extends FormRequest
             'per_page' => ['nullable', 'integer', 'in:10,25,50'],
             'page' => ['nullable', 'integer', 'min:1'],
             'search' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'string', 'in:active,inactive,running,scheduled,ended'],
+            'status' => ['nullable', 'string', 'in:active,inactive,running,scheduled,ended,open,in_progress,resolved'],
             'unlock_type' => ['nullable', 'string', 'in:achievement,challenge,challenges_count'],
         ];
     }

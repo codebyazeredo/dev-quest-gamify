@@ -22,6 +22,10 @@
                 ],
             ];
 
+            if ($currentUser->can('viewAny', \App\Models\Ticket::class)) {
+                $navigation['Geral'][] = ['route' => 'tickets.index', 'active' => 'tickets.*', 'label' => 'Chamados', 'icon' => 'bi-headset'];
+            }
+
             if ($currentUser->isAdmin()) {
                 $navigation['Geral'][] = ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Painel administrativo', 'icon' => 'bi-speedometer2'];
             }
