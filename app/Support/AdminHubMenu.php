@@ -20,6 +20,7 @@ class AdminHubMenu
                 'items' => [
                     ['route' => 'admin.users', 'label' => 'Usuários', 'description' => 'Contas de acesso ao sistema.', 'icon' => 'users'],
                     ['route' => 'admin.people', 'label' => 'Pessoas', 'description' => 'Dados cadastrais da equipe.', 'icon' => 'id-card'],
+                    ['route' => 'admin.clients', 'label' => 'Clientes', 'description' => 'Empresas do portal de chamados.', 'icon' => 'id-card'],
                     ['route' => 'admin.roles', 'label' => 'Roles', 'description' => 'Papéis e permissões.', 'icon' => 'shield'],
                 ],
             ],
