@@ -103,13 +103,15 @@ class AddressCentralizationTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $address = app(AddressService::class)->resolve([...self::ADDRESS, 'bairro' => 'Bela Vista', 'latitude' => -23.5614, 'longitude' => -46.6558]);
-        Person::factory()->withAddress($address)->create();
+        $person = Person::factory()->withAddress($address)->create();
 
-        $this->actingAs($admin)->getJson(route('api.people.index'))
-            ->assertOk()
-            ->assertJsonPath('data.0.bairro', 'Bela Vista')
-            ->assertJsonPath('data.0.country_id', $address->country_id)
-            ->assertJsonPath('data.0.latitude', '-23.5614000')
-            ->assertJsonPath('default_country_id', $address->country_id);
+        $response = $this->actingAs($admin)->getJson(route('api.people.index'))->assertOk();
+
+        $row = collect($response->json('data'))->firstWhere('id', $person->id);
+
+        $this->assertSame('Bela Vista', $row['bairro']);
+        $this->assertSame($address->country_id, $row['country_id']);
+        $this->assertSame('-23.5614000', $row['latitude']);
+        $response->assertJsonPath('default_country_id', $address->country_id);
     }
 }

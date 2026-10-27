@@ -18,7 +18,9 @@ class TaskGitLinksTest extends TestCase
     public function test_branch_and_pull_request_are_saved_and_returned_for_editing(): void
     {
         $admin = User::factory()->admin()->create();
-        $task = Task::factory()->create();
+        $board = Board::factory()->create();
+        $column = BoardColumn::factory()->for($board)->untagged()->create();
+        $task = Task::factory()->create(['board_id' => $board->id, 'column_id' => $column->id]);
 
         $this->actingAs($admin)
             ->putJson(route('api.tasks.update', $task), [
@@ -33,7 +35,7 @@ class TaskGitLinksTest extends TestCase
             ->assertJsonPath('data.pull_request_url', 'https://github.com/acme/app/pull/12');
 
         $this->actingAs($admin)
-            ->get(route('boards.show', $task->board))
+            ->get(route('boards.show', $board))
             ->assertOk()
             ->assertSee('feature/dq-12-portal')
             ->assertSee('https://github.com/acme/app/pull/12', false);

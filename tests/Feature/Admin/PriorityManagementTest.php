@@ -56,7 +56,7 @@ class PriorityManagementTest extends TestCase
         $this->actingAs($admin)->getJson(route('api.priorities.index'))
             ->assertOk()
             ->assertJsonCount(10, 'data')
-            ->assertJsonPath('meta.last_page', 2);
+            ->assertJsonPath('meta.last_page', (int) ceil(TaskPriority::count() / 10));
     }
 
     public function test_developer_is_forbidden_on_the_page_and_on_the_api(): void
