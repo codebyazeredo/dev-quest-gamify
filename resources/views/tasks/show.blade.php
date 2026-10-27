@@ -60,6 +60,9 @@
                             @if ($task->pull_request_url)
                                 <span class="d-inline-flex align-items-center gap-1">
                                     <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
+                                    @if ($task->pull_request_state)
+                                        <span class="badge text-bg-{{ $task->pull_request_state->badgeVariant() }}">{{ $task->pull_request_state->label() }}</span>
+                                    @endif
                                     <x-icon-button icon="clipboard" label="Copiar link do pull request" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn-icon-sm" />
                                 </span>
                             @endif

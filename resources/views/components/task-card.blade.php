@@ -83,6 +83,9 @@
                 @if ($task->pull_request_url)
                     <span class="d-inline-flex align-items-center gap-1">
                         <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer" draggable="false" class="text-decoration-none" title="Abrir pull request"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> PR</a>
+                        @if ($task->pull_request_state)
+                            <span class="badge text-bg-{{ $task->pull_request_state->badgeVariant() }}">{{ $task->pull_request_state->label() }}</span>
+                        @endif
                         <button type="button" draggable="false" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn btn-link btn-sm p-0 text-body-secondary" title="Copiar link do pull request" aria-label="Copiar link do pull request"><i class="bi bi-clipboard" aria-hidden="true"></i></button>
                     </span>
                 @endif
