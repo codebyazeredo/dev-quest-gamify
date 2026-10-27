@@ -63,6 +63,11 @@ class Task extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TaskAttachment::class)->latest();
+    }
+
     public function taskEvents(): HasMany
     {
         return $this->hasMany(TaskEvent::class)->orderBy('occurred_at');

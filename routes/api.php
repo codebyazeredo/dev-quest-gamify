@@ -17,6 +17,7 @@ use App\Http\Controllers\Gamification\CheckinController;
 use App\Http\Controllers\Gamification\TitleSelectionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Task\TaskAttachmentController;
 use App\Http\Controllers\Task\TaskController;
 use App\Http\Controllers\Ticket\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,8 @@ Route::post('tasks/{task}/approve', [TaskController::class, 'approve'])->name('t
 Route::post('tasks/{task}/reject', [TaskController::class, 'reject'])->name('tasks.reject');
 Route::post('tasks/{task}/homologation', [TaskController::class, 'markHomologationCompleted'])->name('tasks.homologation');
 Route::post('tasks/{task}/deploy', [TaskController::class, 'markDeployed'])->name('tasks.deploy');
+Route::post('tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
+Route::delete('attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('attachments.destroy');
 Route::post('tasks/{task}/archive', [TaskController::class, 'archive'])->name('tasks.archive');
 Route::post('tasks/{task}/unarchive', [TaskController::class, 'unarchive'])->name('tasks.unarchive');
 
