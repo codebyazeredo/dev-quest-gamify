@@ -820,7 +820,17 @@ html[data-bs-theme='dark'] .app-sidebar .nav-link .bi {
 }
 
 .sidebar-collapsed .app-sidebar .nav-link {
-    padding: 0.6rem 0;
+    padding: 0.25rem 0;
+}
+
+.sidebar-collapsed .app-sidebar .nav-link.active {
+    background: transparent;
+    box-shadow: none;
+}
+
+.sidebar-collapsed .app-sidebar .nav-link.active .bi {
+    background: var(--bs-primary);
+    color: var(--app-primary-contrast, #fff);
 }
 
 .app-footer {
