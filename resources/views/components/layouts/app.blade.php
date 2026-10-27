@@ -14,12 +14,14 @@
                     ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Minha conta', 'icon' => 'bi-person-circle'],
                 ],
                 'Gamificação' => [
-                    ['route' => 'ranking', 'active' => 'ranking', 'label' => 'Ranking', 'icon' => 'bi-trophy'],
                     ['route' => 'challenges', 'active' => 'challenges', 'label' => 'Desafios', 'icon' => 'bi-flag'],
-                    ['route' => 'checkin', 'active' => 'checkin', 'label' => 'Check-in', 'icon' => 'bi-fire'],
                     ['route' => 'achievements', 'active' => 'achievements', 'label' => 'Conquistas', 'icon' => 'bi-award'],
-                    ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
                 ],
+            ];
+
+            $userMenuLinks = [
+                ['route' => 'checkin', 'active' => 'checkin', 'label' => 'Check-in', 'icon' => 'bi-fire'],
+                ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
             ];
 
             if ($currentUser->can('viewAny', \App\Models\Ticket::class)) {
@@ -71,6 +73,12 @@
                                 <div class="small text-body-secondary">{{ $currentUser->email }}</div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
+                            @foreach ($userMenuLinks as $link)
+                                <li>
+                                    <a href="{{ route($link['route']) }}" class="dropdown-item {{ request()->routeIs($link['active']) ? 'active' : '' }}"><i class="bi {{ $link['icon'] }} me-2" aria-hidden="true"></i>{{ $link['label'] }}</a>
+                                </li>
+                            @endforeach
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -113,19 +121,25 @@
                     </nav>
 
                     <div class="border-top pt-3 mt-3">
-                        <form method="POST" action="{{ route('logout') }}" class="d-lg-none mb-2">
-                            @csrf
-                            <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
-                        </form>
+                        <div class="d-lg-none mb-2">
+                            @foreach ($userMenuLinks as $link)
+                                <a href="{{ route($link['route']) }}" class="nav-link {{ request()->routeIs($link['active']) ? 'active' : '' }}"><i class="bi {{ $link['icon'] }}" aria-hidden="true"></i> {{ $link['label'] }}</a>
+                            @endforeach
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
+                            </form>
+                        </div>
 
                         <div class="sidebar-footer">
+                            <x-footer class="justify-content-start" />
+
                             @can('accessAdminPanel', \App\Models\User::class)
                                 <a href="{{ route('admin.index') }}" class="sidebar-settings {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" title="Configurações" aria-label="Configurações" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
                                     <i class="bi bi-gear" aria-hidden="true"></i>
                                 </a>
                             @endcan
-
-                            <x-footer />
                         </div>
                     </div>
                 </div>
@@ -144,6 +158,9 @@
 
                     <div class="ms-auto d-flex align-items-center gap-1">
                         <x-theme-toggle />
+                        <a href="{{ route('ranking') }}" class="btn btn-ghost btn-icon {{ request()->routeIs('ranking') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-title="Ranking" aria-label="Ranking" @if (request()->routeIs('ranking')) aria-current="page" @endif>
+                            <i class="bi bi-trophy" aria-hidden="true"></i>
+                        </a>
                         <x-notification-bell placement="top" />
                         <x-avatar :user="$currentUser" class="d-lg-none ms-1" />
                     </div>
