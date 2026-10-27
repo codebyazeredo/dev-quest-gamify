@@ -58,6 +58,8 @@ class TaskService
                 'created_by' => $creator->id,
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
+                'branch_name' => $data['branch_name'] ?? null,
+                'pull_request_url' => $data['pull_request_url'] ?? null,
                 'status' => $column->status,
                 'position' => $position,
                 'base_points' => $category->base_points,
@@ -215,6 +217,13 @@ class TaskService
             $task->title = $data['title'] ?? $task->title;
             $task->description = $data['description'] ?? $task->description;
             $task->due_at = $data['due_at'] ?? $task->due_at;
+
+            // Branch e PR podem ser limpos, por isso a chave presente (mesmo nula) prevalece.
+            foreach (['branch_name', 'pull_request_url'] as $gitField) {
+                if (array_key_exists($gitField, $data)) {
+                    $task->{$gitField} = $data[$gitField];
+                }
+            }
 
             $categoryChanged = isset($data['category_id']) && (int) $data['category_id'] !== $task->category_id;
             $priorityChanged = isset($data['priority_id']) && (int) $data['priority_id'] !== $task->priority_id;

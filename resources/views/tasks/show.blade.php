@@ -46,6 +46,21 @@
                     <p class="mb-0" style="white-space: pre-line;">{{ $task->description ?: 'Sem descrição.' }}</p>
                 </x-card>
 
+                @if ($task->branch_name || $task->pull_request_url)
+                    <x-card>
+                        <h2 class="h6 text-body-secondary text-uppercase mb-2">Git</h2>
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            @if ($task->branch_name)
+                                <code><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</code>
+                            @endif
+
+                            @if ($task->pull_request_url)
+                                <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
+                            @endif
+                        </div>
+                    </x-card>
+                @endif
+
                 @if ($task->status === \App\Enums\TaskStatus::TESTING)
                     <x-card variant="highlight">
                         <h2 class="h6 mb-3"><i class="bi bi-clipboard2-check me-1" aria-hidden="true"></i> Revisão de teste</h2>

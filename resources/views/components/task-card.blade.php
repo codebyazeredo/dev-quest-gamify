@@ -75,6 +75,18 @@
             @endif
         </div>
 
+        @if ($task->branch_name || $task->pull_request_url)
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
+                @if ($task->branch_name)
+                    <span class="text-body-secondary text-truncate" style="max-width: 10rem;" title="Branch: {{ $task->branch_name }}"><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</span>
+                @endif
+
+                @if ($task->pull_request_url)
+                    <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer" draggable="false" class="text-decoration-none" title="Abrir pull request"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> PR</a>
+                @endif
+            </div>
+        @endif
+
         <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
             <span class="d-flex align-items-center gap-2">
                 <i class="bi {{ $priorityIcon }} fs-5 lh-1" title="Prioridade: {{ $task->priority->name }}" aria-label="Prioridade {{ $task->priority->name }}"></i>

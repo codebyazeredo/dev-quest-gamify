@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'board_id', 'column_id', 'category_id', 'priority_id', 'assigned_to', 'created_by',
-    'title', 'description', 'status', 'position',
+    'title', 'description', 'branch_name', 'pull_request_url', 'status', 'position',
     'base_points', 'priority_multiplier', 'due_at',
     'rejection_reason', 'rejected_at', 'approved_by',
     'started_at', 'completed_at', 'archived_at',

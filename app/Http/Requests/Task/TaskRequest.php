@@ -18,6 +18,8 @@ class TaskRequest extends FormRequest
             'priority_id' => ['required', 'exists:task_priorities,id'],
             'assigned_to' => $this->isMethod('POST') ? ['nullable', 'exists:users,id'] : ['prohibited'],
             'due_at' => ['nullable', 'date'],
+            'branch_name' => ['nullable', 'string', 'max:120', 'regex:/^[\w\-\.\/]+$/'],
+            'pull_request_url' => ['nullable', 'url:http,https', 'max:500'],
         ];
     }
 
@@ -32,6 +34,8 @@ class TaskRequest extends FormRequest
             'priority_id' => 'prioridade',
             'assigned_to' => 'responsável',
             'due_at' => 'prazo',
+            'branch_name' => 'branch',
+            'pull_request_url' => 'link do pull request',
         ];
     }
 }

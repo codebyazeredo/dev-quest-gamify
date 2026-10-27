@@ -1,9 +1,9 @@
 import { modalForm } from './modal-form';
 
-const EDITABLE_FIELDS = ['title', 'description', 'category_id', 'priority_id', 'due_at'];
+const EDITABLE_FIELDS = ['title', 'description', 'category_id', 'priority_id', 'due_at', 'branch_name', 'pull_request_url'];
 
 function emptyTask(columnId) {
-    return { column_id: columnId, title: '', description: '', category_id: '', priority_id: '', assigned_to: null, due_at: '' };
+    return { column_id: columnId, title: '', description: '', category_id: '', priority_id: '', assigned_to: null, due_at: '', branch_name: '', pull_request_url: '' };
 }
 
 /** Modal de criar/editar tarefa; `tasksById` traz os dados editáveis das tarefas já exibidas na página. */

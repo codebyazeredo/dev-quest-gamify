@@ -44,6 +44,11 @@
 
                 <x-form-input name="due_at" label="Prazo" type="datetime-local" />
 
+                <div class="row g-3">
+                    <div class="col-sm-5"><x-form-input name="branch_name" label="Branch" placeholder="feature/minha-tarefa" /></div>
+                    <div class="col-sm-7"><x-form-input name="pull_request_url" label="Link do pull request" type="url" placeholder="https://github.com/org/repo/pull/1" /></div>
+                </div>
+
                 <div class="d-flex justify-content-end gap-2">
                     <x-button variant="secondary" x-on:click="close">Cancelar</x-button>
                     <x-button type="submit" x-bind:disabled="isSaving" x-text="isEdit ? 'Salvar' : 'Criar tarefa'"></x-button>
