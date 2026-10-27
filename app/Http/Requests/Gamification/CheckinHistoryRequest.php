@@ -24,6 +24,6 @@ class CheckinHistoryRequest extends FormRequest
 
         return $month !== null
             ? Carbon::createFromFormat('Y-m-d', $month.'-01')->startOfDay()
-            : now()->startOfMonth();
+            : Carbon::instance(now())->startOfMonth();
     }
 }
