@@ -6,7 +6,7 @@
     <template x-if="isOpen">
         <x-modal title="Tarefa" size="lg">
             <form x-on:submit.prevent="save" class="vstack gap-3">
-                <x-form-input name="title" label="Título" class="form-control-lg fw-semibold" placeholder="O que precisa ser feito?" required autofocus />
+                <x-form-input name="title" label="Título" placeholder="O que precisa ser feito?" required autofocus />
                 <x-form-textarea name="description" label="Descrição" rows="4" placeholder="Contexto, critérios de aceite, links úteis..." />
 
                 <section class="form-section">
@@ -60,7 +60,7 @@
                                     x-model="form.branch_name"
                                     x-on:input="isBranchAuto = false"
                                     x-bind:class="{ 'is-invalid': firstError('branch_name') }"
-                                    class="form-control font-monospace"
+                                    class="form-control"
                                     placeholder="Gerada a partir do tipo e do título"
                                     autocomplete="off"
                                     spellcheck="false"

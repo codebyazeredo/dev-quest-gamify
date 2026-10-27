@@ -847,3 +847,25 @@ html[data-bs-theme='dark'] .app-sidebar .nav-link .bi {
     text-transform: uppercase;
     color: var(--bs-tertiary-color);
 }
+
+.form-control,
+.form-select,
+.input-group-text {
+    font-size: 0.875rem;
+}
+
+.form-label {
+    font-size: 0.8125rem;
+}
+
+.form-text {
+    font-size: 0.75rem;
+}
+
+.btn {
+    --bs-btn-font-size: 0.875rem;
+}
+
+.btn-sm {
+    --bs-btn-font-size: 0.8125rem;
+}
