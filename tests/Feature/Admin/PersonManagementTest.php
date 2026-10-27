@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Address;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,8 +69,7 @@ class PersonManagementTest extends TestCase
     public function test_admin_can_update_a_person(): void
     {
         $admin = User::factory()->admin()->create();
-        $person = Person::factory()->create(['nome' => 'Old Name']);
-        Address::factory()->for($person)->create();
+        $person = Person::factory()->withAddress()->create(['nome' => 'Old Name']);
 
         $this->actingAs($admin)
             ->putJson(route('api.people.update', $person), $this->payload(['nome' => 'New Name', 'cpf' => $person->cpf, 'email' => $person->email]))
