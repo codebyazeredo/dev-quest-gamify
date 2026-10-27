@@ -21,6 +21,8 @@ class AppSettingController extends Controller
 
         return AppSettingResource::make($setting)
             ->additional(['message' => 'Configurações salvas. As alterações foram aplicadas.'])
-            ->response();
+            ->response()
+            // A linha única de configurações pode ser criada nesta mesma requisição; o recurso então responderia 201.
+            ->setStatusCode(200);
     }
 }
