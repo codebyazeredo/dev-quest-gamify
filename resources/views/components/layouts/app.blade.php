@@ -86,20 +86,20 @@
                 </div>
 
                 <div class="offcanvas-body d-flex flex-column p-3 overflow-y-auto h-100">
-                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none px-2 mb-2">
+                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none px-2 mb-2 sidebar-brand">
                         <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
                         <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
                     </a>
 
                     <nav class="flex-grow-1">
                         @foreach ($navigation as $heading => $items)
-                            <div class="sidebar-heading">{{ $heading }}</div>
+                            <div class="sidebar-heading"><span class="sidebar-label">{{ $heading }}</span></div>
                             <ul class="nav flex-column gap-1">
                                 @foreach ($items as $item)
                                     <li>
-                                        <a href="{{ route($item['route']) }}" class="nav-link {{ request()->routeIs($item['active']) ? 'active' : '' }}" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
+                                        <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}" class="nav-link {{ request()->routeIs($item['active']) ? 'active' : '' }}" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
                                             <i class="bi {{ $item['icon'] }}" aria-hidden="true"></i>
-                                            {{ $item['label'] }}
+                                            <span class="sidebar-label">{{ $item['label'] }}</span>
                                         </a>
                                     </li>
                                 @endforeach
@@ -110,9 +110,9 @@
 
                     <div class="border-top pt-3 mt-3">
                         @can('accessAdminPanel', \App\Models\User::class)
-                            <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
+                            <a href="{{ route('admin.index') }}" title="Configurações" class="nav-link {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
                                 <i class="bi bi-gear" aria-hidden="true"></i>
-                                Configurações
+                                <span class="sidebar-label">Configurações</span>
                             </a>
                         @endcan
 
@@ -121,7 +121,7 @@
                             <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
                         </form>
 
-                        <x-footer class="text-center mt-3" />
+                        <x-footer class="mt-3" />
                     </div>
                 </div>
               </div>
@@ -132,7 +132,10 @@
                     <button type="button" class="btn btn-ghost btn-icon d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
                         <i class="bi bi-list fs-4" aria-hidden="true"></i>
                     </button>
-                    <span class="fw-semibold text-truncate d-lg-none">{{ $appSettings->displayName() }}</span>
+                    <button type="button" class="btn btn-ghost btn-icon d-none d-lg-inline-flex" data-sidebar-toggle aria-label="Recolher ou expandir menu" data-bs-toggle="tooltip" data-bs-title="Recolher/expandir menu">
+                        <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+                    </button>
+                    @stack('page-title')
 
                     <div class="ms-auto d-flex align-items-center gap-1">
                         <x-theme-toggle />

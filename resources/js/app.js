@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import { Tooltip } from 'bootstrap';
 import './kanban.js';
 import './theme.js';
+import './sidebar.js';
 import { challengesTable } from './challenges-table.js';
 import { crudTable } from './crud-table.js';
 import { modalForm } from './modal-form.js';
