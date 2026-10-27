@@ -18,6 +18,6 @@ class AddressRepository extends Repository
 
     public function deleteIfUnused(int $addressId): void
     {
-        Address::query()->whereKey($addressId)->whereDoesntHave('people')->delete();
+        Address::query()->whereKey($addressId)->whereDoesntHave('people')->whereDoesntHave('clients')->delete();
     }
 }

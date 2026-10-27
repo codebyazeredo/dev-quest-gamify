@@ -14,7 +14,7 @@ class ClientRepository extends Repository
 
     protected function query(): Builder
     {
-        return parent::query()->orderBy('razao_social');
+        return parent::query()->with(['address', 'businessSector'])->orderBy('razao_social');
     }
 
     public function findActiveByCnpjAndEmail(string $cnpj, string $email): ?Client

@@ -17,7 +17,8 @@
                         <tr class="small text-body-secondary text-uppercase">
                             <th class="ps-4">Razão social</th>
                             <th>CNPJ</th>
-                            <th>E-mail</th>
+                            <th>Ramo</th>
+                            <th>Cidade</th>
                             <th>Situação</th>
                             <th class="text-end pe-4"></th>
                         </tr>
@@ -25,9 +26,13 @@
                     <tbody>
                         <template x-for="row in rows" :key="row.id">
                             <tr>
-                                <td class="ps-4 fw-medium" x-text="row.razao_social"></td>
+                                <td class="ps-4">
+                                    <div class="fw-medium" x-text="row.razao_social"></div>
+                                    <div class="small text-body-secondary" x-text="row.email"></div>
+                                </td>
                                 <td x-text="formatCnpj(row.cnpj)"></td>
-                                <td x-text="row.email"></td>
+                                <td x-text="row.business_sector ?? '—'"></td>
+                                <td x-text="row.cidade ? `${row.cidade}/${row.estado}` : '—'"></td>
                                 <td>
                                     <span x-show="row.is_active" class="lozenge bg-success-subtle text-success-emphasis">Ativo</span>
                                     <span x-show="! row.is_active" class="lozenge bg-secondary-subtle text-secondary-emphasis">Inativo</span>
@@ -37,7 +42,7 @@
                         </template>
 
                         <tr x-show="! isLoading && rows.length === 0" x-cloak>
-                            <td colspan="5" class="text-center text-body-secondary py-5">Nenhum cliente cadastrado.</td>
+                            <td colspan="6" class="text-center text-body-secondary py-5">Nenhum cliente cadastrado.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -47,12 +52,24 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Cliente">
+            <x-modal title="Cliente" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
-                    <x-form-input name="razao_social" label="Razão social" autofocus />
-                    <x-form-input name="cnpj" label="CNPJ" placeholder="00.000.000/0000-00" inputmode="numeric" x-on:input="form.cnpj = formatCnpj(form.cnpj)" />
-                    <x-form-input name="email" label="E-mail de acesso ao portal" type="email" hint="O cliente entra no portal com o CNPJ e este e-mail." />
-                    <x-form-switch name="is_active" label="Ativo" />
+                    <div class="row g-3">
+                        <div class="col-12"><x-form-input name="razao_social" label="Razão social" autofocus /></div>
+                        <div class="col-sm-6"><x-form-input name="cnpj" label="CNPJ" placeholder="00.000.000/0000-00" inputmode="numeric" x-on:input="form.cnpj = formatCnpj(form.cnpj)" /></div>
+                        <div class="col-sm-6">
+                            <x-form-select name="business_sector_id" label="Ramo de atuação" placeholder="Selecione">
+                                <template x-for="sector in extra.sectors ?? []" :key="sector.id">
+                                    <option x-bind:value="sector.id" x-text="sector.name"></option>
+                                </template>
+                            </x-form-select>
+                        </div>
+                        <div class="col-12"><x-form-input name="email" label="E-mail de acesso ao portal" type="email" hint="O cliente entra no portal com o CNPJ e este e-mail." /></div>
+                        <div class="col-12"><x-form-switch name="is_active" label="Ativo" /></div>
+                    </div>
+
+                    <x-form-address />
+
                     <x-form-actions create-label="Criar cliente" />
                 </form>
             </x-modal>

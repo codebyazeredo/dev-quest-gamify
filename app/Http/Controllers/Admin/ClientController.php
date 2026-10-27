@@ -18,7 +18,9 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', Client::class);
 
-        return ClientResource::collection($this->clients->paginate($request->perPage()))->response();
+        return ClientResource::collection($this->clients->paginate($request->perPage()))
+            ->additional($this->clients->formOptions())
+            ->response();
     }
 
     public function store(ClientRequest $request): JsonResponse

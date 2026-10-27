@@ -8,16 +8,17 @@ trait ValidatesAddress
     protected function addressRules(bool $required): array
     {
         $requiredRule = $required ? 'required' : 'nullable';
+        $dependentRule = $required ? 'required' : 'required_with:cep';
 
         return [
             'country_id' => ['nullable', 'integer', 'exists:countries,id'],
             'cep' => [$requiredRule, 'string', 'max:9'],
-            'logradouro' => [$requiredRule, 'string', 'max:255'],
+            'logradouro' => [$dependentRule, 'string', 'max:255'],
             'numero' => ['nullable', 'string', 'max:20'],
             'complemento' => ['nullable', 'string', 'max:100'],
             'bairro' => ['nullable', 'string', 'max:120'],
-            'cidade' => [$requiredRule, 'string', 'max:120'],
-            'estado' => [$requiredRule, 'string', 'size:2'],
+            'cidade' => [$dependentRule, 'string', 'max:120'],
+            'estado' => [$dependentRule, 'string', 'size:2'],
             'referencia' => ['nullable', 'string', 'max:255'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],

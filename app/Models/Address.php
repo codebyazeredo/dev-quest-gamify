@@ -47,4 +47,9 @@ class Address extends Model
     {
         return $this->hasMany(Person::class);
     }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }
