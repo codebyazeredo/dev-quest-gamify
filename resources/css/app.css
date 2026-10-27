@@ -919,3 +919,52 @@ html[data-bs-theme='dark'] .app-sidebar .nav-link .bi {
     color: var(--bs-primary-text-emphasis);
     font-size: 1.35rem;
 }
+
+.attachment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 18rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+    font-size: 0.8125rem;
+    text-decoration: none;
+}
+
+.attachment-chip:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
+
+.attachment-chip-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    object-fit: cover;
+}
+
+.ticket-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+}
+
+.ticket-steps li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--bs-tertiary-color);
+}
+
+.ticket-steps li.is-done {
+    color: var(--bs-success);
+}
+
+.ticket-steps li.is-current {
+    color: var(--bs-primary);
+    font-weight: 600;
+}

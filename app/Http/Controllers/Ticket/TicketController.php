@@ -38,7 +38,7 @@ class TicketController extends Controller
     {
         $this->authorize('update', $ticket);
 
-        $this->tickets->reply($ticket, $request->validated('body'), $request->user());
+        $this->tickets->reply($ticket, $request->validated('body'), $request->user(), $request->file('files', []));
 
         return response()->json(['message' => 'Resposta enviada ao cliente.'], 201);
     }

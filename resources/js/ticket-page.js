@@ -1,17 +1,30 @@
 import { pageActions } from './page-actions';
 
-export function ticketPage(ticketId) {
-    const base = pageActions();
+export function ticketPage(ticketId, boards, ticketTitle) {
     const endpoint = (action) => `/api/tickets/${ticketId}/${action}`;
 
     return {
-        ...base,
+        ...pageActions(),
 
+        boards,
         replyBody: '',
-        task: { column_id: '', category_id: '', priority_id: '' },
+        replyFiles: [],
+        task: { board_id: '', column_id: '', title: ticketTitle, category_id: '', priority_id: '' },
+
+        columns() {
+            return boards.find((board) => String(board.id) === String(this.task.board_id))?.columns ?? [];
+        },
+
+        pickReplyFiles(event) {
+            this.replyFiles = Array.from(event.target.files);
+        },
 
         reply() {
-            return this.act('post', endpoint('messages'), { body: { body: this.replyBody } });
+            const body = new FormData();
+            body.append('body', this.replyBody);
+            this.replyFiles.forEach((file) => body.append('files[]', file));
+
+            return this.act('post', endpoint('messages'), { body });
         },
 
         changeStatus(status) {

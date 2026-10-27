@@ -3,14 +3,17 @@
 namespace App\Http\Requests\Ticket;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ConvertTicketRequest extends FormRequest
 {
-    /** @return array<string, array<int, string>> */
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
         return [
-            'column_id' => ['required', 'integer', 'exists:board_columns,id'],
+            'board_id' => ['required', 'integer', 'exists:boards,id'],
+            'column_id' => ['required', 'integer', Rule::exists('board_columns', 'id')->where('board_id', $this->input('board_id'))],
+            'title' => ['required', 'string', 'max:150'],
             'category_id' => ['required', 'exists:task_categories,id'],
             'priority_id' => ['required', 'exists:task_priorities,id'],
         ];
@@ -19,6 +22,12 @@ class ConvertTicketRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['column_id' => 'coluna', 'category_id' => 'categoria', 'priority_id' => 'prioridade'];
+        return ['board_id' => 'quadro', 'column_id' => 'coluna', 'title' => 'título', 'category_id' => 'categoria', 'priority_id' => 'prioridade'];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return ['column_id.exists' => 'A coluna escolhida não pertence ao quadro selecionado.'];
     }
 }

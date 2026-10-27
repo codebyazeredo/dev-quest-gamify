@@ -29,7 +29,7 @@ class PortalTicketController extends Controller
 
     public function store(OpenTicketRequest $request): RedirectResponse
     {
-        $ticket = $this->tickets->open($this->client($request), $request->validated());
+        $ticket = $this->tickets->open($this->client($request), $request->validated(), $request->file('files', []));
 
         return redirect()->route('portal.tickets.show', $ticket)->with('status', "Chamado #{$ticket->id} aberto. Responderemos por aqui.");
     }
@@ -37,10 +37,12 @@ class PortalTicketController extends Controller
     public function show(Request $request, int $ticket): View
     {
         $client = $this->client($request);
+        $found = $this->tickets->findForClient($client, $ticket);
 
         return view('portal.tickets.show', [
             'client' => $client,
-            'ticket' => $this->tickets->findForClient($client, $ticket),
+            'ticket' => $found,
+            'progress' => $this->tickets->progressFor($found),
         ]);
     }
 
@@ -48,7 +50,7 @@ class PortalTicketController extends Controller
     {
         $found = $this->tickets->findForClient($this->client($request), $ticket);
 
-        $this->tickets->reply($found, $request->validated('body'));
+        $this->tickets->reply($found, $request->validated('body'), null, $request->file('files', []));
 
         return redirect()->route('portal.tickets.show', $found)->with('status', 'Mensagem enviada.');
     }

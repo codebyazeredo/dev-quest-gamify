@@ -37,6 +37,8 @@ class TicketRepository extends Repository
 
     public function findForClient(Client $client, int $ticketId): Ticket
     {
-        return $client->tickets()->with('messages.user')->findOrFail($ticketId);
+        return $client->tickets()
+            ->with(['attachments', 'messages.attachments', 'messages.user', 'task.column', 'task.assignedTo', 'task.board.columns'])
+            ->findOrFail($ticketId);
     }
 }

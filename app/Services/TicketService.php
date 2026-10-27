@@ -9,9 +9,12 @@ use App\Models\Task;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Models\User;
+use App\Repositories\TicketAttachmentRepository;
 use App\Repositories\TicketMessageRepository;
 use App\Repositories\TicketRepository;
+use App\Support\StoredFile;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class TicketService
@@ -19,6 +22,7 @@ class TicketService
     public function __construct(
         private TicketRepository $tickets,
         private TicketMessageRepository $messages,
+        private TicketAttachmentRepository $attachments,
         private TaskService $tasks,
     ) {}
 
@@ -37,20 +41,30 @@ class TicketService
         return $this->tickets->findForClient($client, $ticketId);
     }
 
-    public function open(Client $client, array $data): Ticket
+    /** @param  array<int, UploadedFile>  $files */
+    public function open(Client $client, array $data, array $files = []): Ticket
     {
-        return $this->tickets->create([
-            'client_id' => $client->id,
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'status' => TicketStatus::OPEN,
-        ]);
+        return DB::transaction(function () use ($client, $data, $files) {
+            $ticket = $this->tickets->create([
+                'client_id' => $client->id,
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'status' => TicketStatus::OPEN,
+            ]);
+
+            $this->attach($ticket, null, null, $files);
+
+            return $ticket;
+        });
     }
 
-    public function reply(Ticket $ticket, string $body, ?User $staff = null): TicketMessage
+    /** @param  array<int, UploadedFile>  $files */
+    public function reply(Ticket $ticket, string $body, ?User $staff = null, array $files = []): TicketMessage
     {
-        return DB::transaction(function () use ($ticket, $body, $staff) {
+        return DB::transaction(function () use ($ticket, $body, $staff, $files) {
             $message = $this->messages->create(['ticket_id' => $ticket->id, 'user_id' => $staff?->id, 'body' => $body]);
+
+            $this->attach($ticket, $message, $staff, $files);
 
             if ($staff === null && $ticket->status === TicketStatus::RESOLVED) {
                 $this->changeStatus($ticket, TicketStatus::OPEN);
@@ -78,7 +92,6 @@ class TicketService
         return DB::transaction(function () use ($ticket, $taskData, $staff) {
             $task = $this->tasks->create([
                 ...$taskData,
-                'title' => $ticket->title,
                 'description' => "Chamado #{$ticket->id} — {$ticket->client->razao_social}\n\n{$ticket->description}",
             ], $staff);
 
@@ -90,5 +103,45 @@ class TicketService
 
             return $task;
         });
+    }
+
+    /** @return array<string, mixed>|null */
+    public function progressFor(Ticket $ticket): ?array
+    {
+        $task = $ticket->task;
+
+        if ($task === null) {
+            return null;
+        }
+
+        $columns = $task->board->columns->values();
+        $found = $columns->search(fn ($column) => $column->id === $task->column_id);
+        $currentIndex = $found === false ? 0 : $found;
+        $isCompleted = $task->completed_at !== null;
+
+        return [
+            'is_completed' => $isCompleted,
+            'current' => $isCompleted ? 'Concluída' : $task->column->name,
+            'percent' => $isCompleted ? 100 : (int) round((($currentIndex + 1) / max(1, $columns->count())) * 100),
+            'assignee' => $task->assignedTo?->name,
+            'due_at' => $task->due_at,
+            'steps' => $columns->map(fn ($column, $index) => [
+                'name' => $column->name,
+                'state' => $isCompleted || $index < $currentIndex ? 'done' : ($index === $currentIndex ? 'current' : 'pending'),
+            ])->all(),
+        ];
+    }
+
+    /** @param  array<int, UploadedFile>  $files */
+    private function attach(Ticket $ticket, ?TicketMessage $message, ?User $user, array $files): void
+    {
+        foreach ($files as $file) {
+            $this->attachments->create([
+                'ticket_id' => $ticket->id,
+                'ticket_message_id' => $message?->id,
+                'user_id' => $user?->id,
+                ...StoredFile::store($file, "ticket-attachments/{$ticket->id}"),
+            ]);
+        }
     }
 }

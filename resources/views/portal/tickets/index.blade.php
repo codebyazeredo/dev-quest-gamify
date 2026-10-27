@@ -9,19 +9,28 @@
     <x-card class="mb-4">
         <h2 class="h6 mb-3">Abrir novo chamado</h2>
 
-        <form method="POST" action="{{ route('portal.tickets.store') }}" class="vstack gap-3">
+        <form method="POST" action="{{ route('portal.tickets.store') }}" enctype="multipart/form-data" class="vstack gap-3">
             @csrf
 
             <div>
-                <label for="title" class="form-label fw-medium small mb-1">Assunto</label>
+                <label for="title" class="form-label fw-medium">Assunto</label>
                 <input id="title" type="text" name="title" value="{{ old('title') }}" class="form-control @error('title') is-invalid @enderror" required>
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
             <div>
-                <label for="description" class="form-label fw-medium small mb-1">Descreva o problema ou a solicitação</label>
+                <label for="description" class="form-label fw-medium">Descreva o problema ou a solicitação</label>
                 <textarea id="description" name="description" rows="4" class="form-control @error('description') is-invalid @enderror" required>{{ old('description') }}</textarea>
                 @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div>
+                <label for="files" class="form-label fw-medium">Anexos <span class="text-body-secondary fw-normal">(opcional)</span></label>
+                <input id="files" type="file" name="files[]" multiple class="form-control @if ($errors->has('files') || $errors->has('files.*')) is-invalid @endif">
+                @foreach (collect($errors->get('files'))->merge(collect($errors->get('files.*'))->flatten())->unique() as $message)
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                @endforeach
+                <div class="form-text">Imagens, PDF, documentos, planilhas, texto e ZIP. Até 10 arquivos de 10 MB.</div>
             </div>
 
             <div class="text-end"><button type="submit" class="btn btn-primary"><i class="bi bi-send" aria-hidden="true"></i> Enviar chamado</button></div>

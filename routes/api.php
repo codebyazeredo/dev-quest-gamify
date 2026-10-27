@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AchievementController;
 use App\Http\Controllers\Admin\AppSettingController;
+use App\Http\Controllers\Admin\BusinessSectorController;
 use App\Http\Controllers\Admin\ChallengeController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\EventRuleController;
@@ -66,6 +67,7 @@ Route::post('tickets/{ticket}/task', [TicketController::class, 'convertToTask'])
 
 Route::middleware('role:admin')->group(function () {
     Route::apiResource('clients', ClientController::class)->except('show');
+    Route::apiResource('business-sectors', BusinessSectorController::class)->parameters(['business-sectors' => 'sector'])->except('show');
     Route::apiResource('categories', TaskCategoryController::class)->parameters(['categories' => 'category'])->except('show');
     Route::apiResource('priorities', TaskPriorityController::class)->parameters(['priorities' => 'priority'])->except('show');
     Route::apiResource('people', PersonController::class)->parameters(['people' => 'person'])->except('show');
