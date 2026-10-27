@@ -44,7 +44,7 @@
 
             @can('update', $board)
                 <x-icon-button
-                    x-on:click="$dispatch('open-board-form', { url: '/api/boards/{{ $board->id }}', method: 'put', form: {{ \Illuminate\Support\Js::from(['name' => $board->name, 'description' => (string) $board->description, 'is_active' => $board->is_active]) }} })"
+                    x-on:click="$dispatch('open-board-form', { url: '/api/boards/{{ $board->id }}', method: 'put', form: {{ \Illuminate\Support\Js::from(['name' => $board->name, 'description' => (string) $board->description, 'github_repository' => (string) $board->github_repository, 'is_active' => $board->is_active]) }} })"
                     icon="pencil-square"
                     label="Editar quadro"
                 />

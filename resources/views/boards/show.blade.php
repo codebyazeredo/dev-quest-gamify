@@ -14,6 +14,7 @@
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" required />
                     <x-form-textarea name="description" label="Descrição" rows="2" />
+                    <x-form-input name="github_repository" label="Repositório do GitHub" placeholder="dono/repositorio" />
                     <x-form-switch name="is_active" label="Ativo" />
 
                     <div class="d-flex justify-content-end gap-2">

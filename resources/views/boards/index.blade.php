@@ -2,7 +2,7 @@
     <div x-data="modalForm" x-on:open-board-form.window="open($event.detail)" x-on:close-modal="close">
         <x-page-header title="Quadros" subtitle="Escolha um quadro para acompanhar as tarefas do time.">
             @can('create', \App\Models\Board::class)
-                <x-button x-on:click="$dispatch('open-board-form', { url: '/api/boards', method: 'post', form: { name: '', description: '', is_active: true, seed_default_columns: true } })">
+                <x-button x-on:click="$dispatch('open-board-form', { url: '/api/boards', method: 'post', form: { name: '', description: '', github_repository: '', is_active: true, seed_default_columns: true } })">
                     <x-icon name="plus" /> Novo quadro
                 </x-button>
             @endcan
@@ -47,6 +47,7 @@
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" required autofocus />
                     <x-form-textarea name="description" label="Descrição" />
+                    <x-form-input name="github_repository" label="Repositório do GitHub" placeholder="dono/repositorio" />
                     <x-form-switch name="is_active" label="Ativo" />
 
                     <div class="form-check">

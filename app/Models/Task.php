@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PullRequestState;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'board_id', 'column_id', 'category_id', 'priority_id', 'assigned_to', 'created_by',
-    'title', 'description', 'branch_name', 'pull_request_url', 'status', 'position',
+    'title', 'description', 'branch_name', 'pull_request_url', 'pull_request_state', 'status', 'position',
     'base_points', 'priority_multiplier', 'due_at',
     'rejection_reason', 'rejected_at', 'approved_by',
     'started_at', 'completed_at', 'archived_at',
@@ -24,6 +25,7 @@ class Task extends Model
     {
         return [
             'status' => TaskStatus::class,
+            'pull_request_state' => PullRequestState::class,
             'priority_multiplier' => 'decimal:2',
             'due_at' => 'datetime',
             'rejected_at' => 'datetime',
