@@ -22,10 +22,16 @@
                     <tbody>
                         <template x-for="row in rows" :key="row.id">
                             <tr>
-                                <td class="ps-4 fw-medium" x-text="row.nome"></td>
-                                <td x-text="row.cpf"></td>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <template x-if="row.foto_url"><img x-bind:src="row.foto_url" alt="" class="avatar"></template>
+                                        <template x-if="! row.foto_url"><span class="avatar text-bg-primary" x-text="row.nome.charAt(0).toUpperCase()"></span></template>
+                                        <span class="fw-medium" x-text="row.nome"></span>
+                                    </div>
+                                </td>
+                                <td x-text="formatCpf(row.cpf)"></td>
                                 <td x-text="row.email"></td>
-                                <td x-text="row.telefone1"></td>
+                                <td x-text="formatPhone(row.telefone1)"></td>
                                 <td>
                                     <span x-show="row.has_user" class="lozenge bg-success-subtle text-success-emphasis">Vinculado</span>
                                     <span x-show="! row.has_user" class="lozenge bg-secondary-subtle text-secondary-emphasis">Sem usuário</span>
@@ -49,7 +55,7 @@
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <div class="row g-3">
                         <div class="col-12"><x-form-input name="nome" label="Nome" autofocus /></div>
-                        <div class="col-sm-6"><x-form-input name="cpf" label="CPF" placeholder="00000000000" /></div>
+                        <div class="col-sm-6"><x-form-input name="cpf" label="CPF" placeholder="000.000.000-00" inputmode="numeric" x-on:input="form.cpf = formatCpf(form.cpf)" /></div>
                         <div class="col-sm-6"><x-form-input name="rg" label="RG" /></div>
                         <div class="col-sm-6"><x-form-input name="nascimento" label="Nascimento" type="date" /></div>
                         <div class="col-sm-6">
@@ -60,8 +66,8 @@
                             </x-form-select>
                         </div>
                         <div class="col-sm-6"><x-form-input name="email" label="E-mail" type="email" /></div>
-                        <div class="col-sm-6"><x-form-input name="telefone1" label="Telefone 1" /></div>
-                        <div class="col-sm-6"><x-form-input name="telefone2" label="Telefone 2" /></div>
+                        <div class="col-sm-6"><x-form-input name="telefone1" label="Telefone 1" placeholder="(00) 00000-0000" inputmode="tel" x-on:input="form.telefone1 = formatPhone(form.telefone1)" /></div>
+                        <div class="col-sm-6"><x-form-input name="telefone2" label="Telefone 2" placeholder="(00) 00000-0000" inputmode="tel" x-on:input="form.telefone2 = formatPhone(form.telefone2)" /></div>
 
                         <div class="col-12">
                             <label for="foto" class="form-label fw-medium small mb-1">Foto</label>
