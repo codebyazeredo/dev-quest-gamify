@@ -5,17 +5,7 @@
         x-on:open-board-form.window="open($event.detail)"
         x-on:close-modal="close"
     >
-        <x-page-header :title="$board->name" :subtitle="$board->description" :back="route('boards.index')" backLabel="Quadros">
-            <x-icon-button :href="route('boards.archive', $board)" icon="archive" label="Arquivo do quadro" />
-
-            @can('update', $board)
-                <x-icon-button
-                    x-on:click="$dispatch('open-board-form', { url: '/api/boards/{{ $board->id }}', method: 'put', form: {{ \Illuminate\Support\Js::from(['name' => $board->name, 'description' => (string) $board->description, 'is_active' => $board->is_active]) }} })"
-                    icon="pencil-square"
-                    label="Editar quadro"
-                />
-            @endcan
-        </x-page-header>
+        <x-page-header :title="$board->name" :subtitle="$board->description" :back="route('boards.index')" backLabel="Quadros" />
 
         @include('boards.partials.kanban')
 

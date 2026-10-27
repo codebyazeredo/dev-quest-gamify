@@ -1,25 +1,25 @@
 <div class="d-flex flex-column flex-grow-1 min-h-0" x-data="kanbanBoard" x-on:dragend.window="endDrag()">
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-        <div class="input-group" style="max-width: 16rem;">
-            <input type="search" x-model.debounce.150ms="search" class="form-control" placeholder="Buscar tarefas" aria-label="Buscar tarefas">
-            <span class="input-group-text bg-body-tertiary"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <div class="search-field">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" x-model.debounce.150ms="search" class="form-control form-control-sm" placeholder="Buscar tarefas" aria-label="Buscar tarefas">
         </div>
 
-        <select x-model="category" class="form-select w-auto" aria-label="Filtrar por categoria">
+        <select x-model="category" class="form-select form-select-sm w-auto" aria-label="Filtrar por categoria">
             <option value="">Todas as categorias</option>
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}">{{ $category->name }}</option>
             @endforeach
         </select>
 
-        <select x-model="priority" class="form-select w-auto" aria-label="Filtrar por prioridade">
+        <select x-model="priority" class="form-select form-select-sm w-auto" aria-label="Filtrar por prioridade">
             <option value="">Todas as prioridades</option>
             @foreach ($priorities as $priority)
                 <option value="{{ $priority->id }}">{{ $priority->name }}</option>
             @endforeach
         </select>
 
-        <select x-model="assignee" class="form-select w-auto" aria-label="Filtrar por responsável">
+        <select x-model="assignee" class="form-select form-select-sm w-auto" aria-label="Filtrar por responsável">
             <option value="">Todos os responsáveis</option>
             <option value="none">Sem responsável</option>
             @foreach ($assignees as $assignee)
@@ -27,17 +27,29 @@
             @endforeach
         </select>
 
-        <button type="button" class="btn btn-ghost btn-icon" :class="{ 'is-active': mine }" x-on:click="mine = ! mine" :aria-pressed="mine" data-bs-toggle="tooltip" data-bs-title="Minhas tarefas" aria-label="Minhas tarefas">
+        <button type="button" class="btn btn-ghost btn-icon btn-icon-sm" :class="{ 'is-active': mine }" x-on:click="mine = ! mine" :aria-pressed="mine" data-bs-toggle="tooltip" data-bs-title="Minhas tarefas" aria-label="Minhas tarefas">
             <i class="bi bi-person-check" aria-hidden="true"></i>
         </button>
 
-        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon" :class="{ 'is-active': late }" x-on:click="late = ! late" :aria-pressed="late" data-bs-toggle="tooltip" data-bs-title="Somente atrasadas" aria-label="Somente atrasadas">
+        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon btn-icon-sm" :class="{ 'is-active': late }" x-on:click="late = ! late" :aria-pressed="late" data-bs-toggle="tooltip" data-bs-title="Somente atrasadas" aria-label="Somente atrasadas">
             <i class="bi bi-alarm" aria-hidden="true"></i>
         </button>
 
-        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon" x-show="hasFilters" x-cloak x-on:click="clearFilters()" data-bs-toggle="tooltip" data-bs-title="Limpar filtros" aria-label="Limpar filtros">
+        <button type="button" class="btn btn-ghost btn-ghost-danger btn-icon btn-icon-sm" x-show="hasFilters" x-cloak x-on:click="clearFilters()" data-bs-toggle="tooltip" data-bs-title="Limpar filtros" aria-label="Limpar filtros">
             <i class="bi bi-funnel" aria-hidden="true"></i>
         </button>
+
+        <div class="ms-auto d-flex align-items-center gap-1">
+            <x-icon-button :href="route('boards.archive', $board)" icon="archive" label="Arquivo do quadro" />
+
+            @can('update', $board)
+                <x-icon-button
+                    x-on:click="$dispatch('open-board-form', { url: '/api/boards/{{ $board->id }}', method: 'put', form: {{ \Illuminate\Support\Js::from(['name' => $board->name, 'description' => (string) $board->description, 'is_active' => $board->is_active]) }} })"
+                    icon="pencil-square"
+                    label="Editar quadro"
+                />
+            @endcan
+        </div>
     </div>
 
     <div class="kanban-board d-flex flex-grow-1 min-h-0 gap-3 overflow-x-auto pb-2" x-ref="board">
