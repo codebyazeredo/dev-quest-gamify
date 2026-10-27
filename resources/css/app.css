@@ -634,7 +634,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
 }
 
 .app-sidebar .nav-link.active {
-    box-shadow: inset 3px 0 0 var(--bs-primary);
 }
 
 /* ---------- Busca com ícone interno ---------- */
@@ -709,4 +708,54 @@ html[data-bs-theme='dark'] .theme-icon-light {
     padding: 0.4rem;
     border: 0;
     background: transparent;
+}
+
+/* ---------- Refinos de layout ---------- */
+.topbar-divider {
+    width: 1px;
+    height: 1.25rem;
+    margin: 0 0.25rem;
+    background: var(--bs-border-color);
+}
+
+.app-sidebar .sidebar-brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 3.25rem;
+    margin: 0 -1rem 0.25rem;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    line-height: 1.25;
+}
+
+.app-sidebar .nav-link {
+    gap: 0.7rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.app-sidebar .nav-link .bi {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.sidebar-heading {
+    margin: 1.1rem 0 0.35rem;
+    font-size: 0.65rem;
+}
+
+.app-footer {
+    padding: 0.5rem 0;
+    border: 0;
+    background: transparent;
+}
+
+.app-footer-year {
+    font-size: 0.6875rem;
+}
+
+.app-topbar h1 {
+    min-width: 0;
 }

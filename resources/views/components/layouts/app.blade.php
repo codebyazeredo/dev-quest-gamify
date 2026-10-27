@@ -85,8 +85,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#app-sidebar" aria-label="Fechar"></button>
                 </div>
 
-                <div class="offcanvas-body d-flex flex-column p-3 overflow-y-auto h-100">
-                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none px-2 mb-2 sidebar-brand">
+                <div class="offcanvas-body d-flex flex-column px-3 pb-3 pt-0 overflow-y-auto h-100">
+                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none sidebar-brand">
                         <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
                         <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
                     </a>
@@ -135,6 +135,7 @@
                     <button type="button" class="btn btn-ghost btn-icon d-none d-lg-inline-flex" data-sidebar-toggle aria-label="Recolher ou expandir menu" data-bs-toggle="tooltip" data-bs-title="Recolher/expandir menu">
                         <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
                     </button>
+                    <span class="topbar-divider d-none d-lg-block" aria-hidden="true"></span>
                     @stack('page-title')
 
                     <div class="ms-auto d-flex align-items-center gap-1">
