@@ -1,4 +1,3 @@
-{{-- Seletor de itens por página para listagens renderizadas no servidor (parâmetro "porPagina" na URL). --}}
 @props(['options' => [10, 25, 50]])
 
 @php

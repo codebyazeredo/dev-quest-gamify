@@ -4,7 +4,6 @@ namespace App\Http\Requests\Task;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Valida criação (informa a coluna) e edição dos detalhes de uma tarefa. */
 class TaskRequest extends FormRequest
 {
     /** @return array<string, array<int, string>> */

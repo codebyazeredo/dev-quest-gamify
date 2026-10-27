@@ -9,7 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-/** Valida a edição dos próprios dados; o endereço só é obrigatório para quem já tem um cadastrado. */
 class ProfileRequest extends FormRequest
 {
     use ValidatesAddress;

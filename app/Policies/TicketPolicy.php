@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Ticket;
 use App\Models\User;
 
-/** Atendimento dos chamados: administração, product owner e suporte. */
 class TicketPolicy
 {
     public function viewAny(User $user): bool

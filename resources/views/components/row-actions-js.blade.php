@@ -1,4 +1,3 @@
-{{-- Botões de editar/excluir de uma linha do "crudTable" (variável Alpine `row`). --}}
 @props(['confirm' => 'Excluir este registro?', 'edit' => true, 'delete' => true])
 
 <div class="d-inline-flex gap-1">

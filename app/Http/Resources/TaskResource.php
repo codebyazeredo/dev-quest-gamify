@@ -6,11 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * Campos editáveis de uma tarefa, usados pelo formulário de edição.
- *
- * @mixin Task
- */
+/** @mixin Task */
 class TaskResource extends JsonResource
 {
     private const DATETIME_INPUT_FORMAT = 'Y-m-d\TH:i';

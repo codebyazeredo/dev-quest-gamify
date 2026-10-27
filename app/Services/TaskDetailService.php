@@ -9,7 +9,6 @@ use App\Repositories\TaskRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\XpTransactionRepository;
 
-/** Dados exibidos na página de uma tarefa. */
 class TaskDetailService
 {
     public function __construct(

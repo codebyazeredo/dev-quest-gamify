@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Repositories\TaskRepository;
 use App\Repositories\XpTransactionRepository;
 
-/** Dados da página "Minha conta" do usuário logado. */
 class UserDashboardService
 {
     private const OPEN_TASKS_LIMIT = 6;

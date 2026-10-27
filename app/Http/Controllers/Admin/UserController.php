@@ -58,7 +58,6 @@ class UserController extends Controller
         return response()->json(['message' => "Usuário \"{$user->name}\" excluído."]);
     }
 
-    /** Pessoas ainda sem usuário e roles disponíveis para o formulário. */
     private function formOptions(): array
     {
         $options = $this->users->formOptions();

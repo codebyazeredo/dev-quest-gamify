@@ -6,7 +6,6 @@ use App\Enums\TitleUnlockType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de título, exigindo os campos da regra de desbloqueio escolhida. */
 class TitleRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

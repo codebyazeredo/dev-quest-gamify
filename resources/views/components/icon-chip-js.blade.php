@@ -1,4 +1,3 @@
-{{-- Versão Alpine do icon-chip: `icon` é uma expressão JS com o nome do ícone Bootstrap (ex.: "row.icon"). --}}
 @props(['icon', 'color' => 'primary', 'size' => 'md'])
 
 @php

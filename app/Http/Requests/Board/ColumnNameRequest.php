@@ -4,7 +4,6 @@ namespace App\Http\Requests\Board;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Nome de uma coluna do quadro, na criação ou ao renomear. */
 class ColumnNameRequest extends FormRequest
 {
     /** @return array<string, array<int, string>> */

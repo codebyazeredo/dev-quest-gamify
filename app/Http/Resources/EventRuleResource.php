@@ -7,11 +7,7 @@ use App\Models\TaskEventRule;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * Linha da tela de regras de XP: um tipo de evento e, se já configurada, a sua regra.
- *
- * @property array{type: TaskEventType, rule: ?TaskEventRule} $resource
- */
+/** @property array{type: TaskEventType, rule: ?TaskEventRule} $resource */
 class EventRuleResource extends JsonResource
 {
     /** @return array<string, mixed> */

@@ -80,9 +80,6 @@ class TaskEventTest extends TestCase
 
     public function test_moving_directly_from_todo_to_done_only_grants_the_milestone_actually_reached(): void
     {
-        // Colunas livres não fazem mais "backfill" de marcos pulados: pular direto
-        // de A Fazer pra Concluído só credita o que a coluna de destino dispara
-        // (teste concluído + bônus de conclusão), não os marcos intermediários.
         $board = $this->boardWithStandardColumns();
         $developer = User::factory()->developer()->create();
         $category = TaskCategory::factory()->create(['base_points' => 10]);

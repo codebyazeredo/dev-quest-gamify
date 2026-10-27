@@ -1,4 +1,3 @@
-{{-- Select ligado ao `form` e aos `errors` do componente Alpine "crudTable". As options vêm no slot. --}}
 @props(['name', 'label', 'placeholder' => null])
 
 <div>

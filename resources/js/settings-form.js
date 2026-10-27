@@ -8,7 +8,6 @@ function hexToRgb(hex) {
     return [1, 3, 5].map((start) => parseInt(hex.slice(start, start + 2), 16));
 }
 
-/** Mesmas variáveis CSS que o componente x-theme-style gera no servidor, aplicadas só à pré-visualização. */
 function previewStyle(hex) {
     const [red, green, blue] = hexToRgb(hex);
     const isLight = (red * 299 + green * 587 + blue * 114) / 1000 > LIGHT_BACKGROUND_THRESHOLD;

@@ -4,7 +4,6 @@ async function copyText(text) {
     try {
         await navigator.clipboard.writeText(text);
     } catch {
-        // Sem permissão de área de transferência (ex.: página sem HTTPS), usa o método antigo.
         const field = document.createElement('textarea');
         field.value = text;
         field.style.position = 'fixed';
@@ -16,7 +15,6 @@ async function copyText(text) {
     }
 }
 
-// Qualquer elemento com data-copy copia o valor ao ser clicado; data-copy-label personaliza o aviso.
 document.addEventListener('click', async (event) => {
     const trigger = event.target.closest('[data-copy]');
 

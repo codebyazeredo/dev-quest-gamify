@@ -15,7 +15,6 @@
     $searchText = mb_strtolower($task->title.' dq-'.$task->id.' '.$task->category->name.' '.($task->assignedTo?->name ?? ''));
     $isMine = $task->assigned_to === auth()->id() ? '1' : '0';
 
-    // Espelha TaskPolicy::move: dev move tarefa própria, sem responsável ou em revisão (aprovação entre pares).
     $viewer = auth()->user();
     $canDrag = ! $readOnly && ($viewer->isAdmin()
         || $viewer->isProductOwner()

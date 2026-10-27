@@ -33,7 +33,6 @@ export function peopleTable() {
         formatCpf,
         formatPhone,
 
-        /** CPF e telefones são guardados só com dígitos; a máscara existe apenas na tela. */
         formData() {
             const data = table.formData.call(this);
 
@@ -56,7 +55,6 @@ export function peopleTable() {
             this.form.telefone2 = formatPhone(row.telefone2);
         },
 
-        /** Foto escolhida no formulário ou, na edição, a já cadastrada. */
         photoPreview() {
             if (this.form.foto instanceof File) {
                 return URL.createObjectURL(this.form.foto);

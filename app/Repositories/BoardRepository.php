@@ -19,7 +19,6 @@ class BoardRepository extends Repository
         return parent::query()->orderBy('name');
     }
 
-    /** Quadros com a contagem de tarefas; quem não administra só enxerga os ativos. */
     public function listWithTaskCount(bool $includeInactive): Collection
     {
         return $this->query()
@@ -33,7 +32,6 @@ class BoardRepository extends Repository
         return $this->query()->where('is_active', true)->get();
     }
 
-    /** Colunas do quadro com as tarefas não arquivadas e tudo o que o card precisa. */
     public function loadKanban(Board $board): Board
     {
         return $board->load([

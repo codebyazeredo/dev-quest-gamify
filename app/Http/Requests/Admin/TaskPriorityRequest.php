@@ -5,7 +5,6 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de gravidade; na edição ignora o nome da própria gravidade. */
 class TaskPriorityRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

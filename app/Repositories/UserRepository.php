@@ -26,7 +26,6 @@ class UserRepository extends Repository
         return $this->query()->whereKey($ids)->get();
     }
 
-    /** Usuários do papel ordenados pelo XP somado desde o início do período (ou desde sempre). */
     public function paginateRankedByRole(string $role, ?CarbonInterface $since, int $perPage): LengthAwarePaginator
     {
         return $this->query()
@@ -41,7 +40,6 @@ class UserRepository extends Repository
             ->paginate($perPage);
     }
 
-    /** Todos os usuários, já com pessoa e título, para escolher um responsável. */
     public function allForAssignment(): Collection
     {
         return $this->query()->with('selectedTitle')->get();

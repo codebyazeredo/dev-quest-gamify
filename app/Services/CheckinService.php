@@ -92,11 +92,7 @@ class CheckinService
         return $latest->streak_count;
     }
 
-    /**
-     * Dias exibidos no calendário do mês (semanas completas, de segunda a domingo).
-     *
-     * @return Collection<int, array{date: Carbon, inMonth: bool, isToday: bool, isFuture: bool, checkedIn: bool}>
-     */
+    /** @return Collection<int, array{date: Carbon, inMonth: bool, isToday: bool, isFuture: bool, checkedIn: bool}> */
     public function calendarFor(User $user, Carbon $month): Collection
     {
         $monthStart = $month->copy()->startOfMonth();

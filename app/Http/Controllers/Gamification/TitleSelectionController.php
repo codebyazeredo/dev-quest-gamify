@@ -8,7 +8,6 @@ use App\Services\TitleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/** Título exibido no perfil do usuário logado. */
 class TitleSelectionController extends Controller
 {
     public function __construct(private TitleService $titles) {}

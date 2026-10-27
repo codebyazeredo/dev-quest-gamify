@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Client;
 use App\Repositories\ClientRepository;
 
-/** Identifica o cliente do portal pelo CNPJ e pelo e-mail cadastrado. */
 class PortalAuthService
 {
     public function __construct(private ClientRepository $clients) {}

@@ -1,4 +1,3 @@
-{{-- Campos de endereço ligados ao `form` do Alpine; os países vêm de `extra.countries`. --}}
 <h3 class="h6 border-top pt-3 mb-0">Endereço</h3>
 
 <div class="row g-3">

@@ -1,4 +1,3 @@
-{{-- Rodapé de paginação para telas que usam o componente Alpine "crudTable". --}}
 @props(['options' => [10, 25, 50]])
 
 <div class="card-footer bg-body-tertiary d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">

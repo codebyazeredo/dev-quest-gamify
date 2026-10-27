@@ -17,7 +17,6 @@ enum TicketStatus: string
         };
     }
 
-    /** Variante de cor do badge (Bootstrap). */
     public function color(): string
     {
         return match ($this) {

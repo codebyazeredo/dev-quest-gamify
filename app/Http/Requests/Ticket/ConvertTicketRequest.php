@@ -4,7 +4,6 @@ namespace App\Http\Requests\Ticket;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Dados que o chamado não tem e a tarefa exige: onde ela entra e como é classificada. */
 class ConvertTicketRequest extends FormRequest
 {
     /** @return array<string, array<int, string>> */

@@ -8,7 +8,6 @@ use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de pessoa (dados pessoais, foto e endereço). */
 class PersonRequest extends FormRequest
 {
     use ValidatesAddress;

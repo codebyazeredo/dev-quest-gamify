@@ -6,7 +6,6 @@ use App\Models\Address;
 use App\Repositories\AddressRepository;
 use App\Repositories\CountryRepository;
 
-/** Ponto único para obter e liberar endereços: o mesmo endereço nunca é gravado duas vezes. */
 class AddressService
 {
     public function __construct(
@@ -14,7 +13,6 @@ class AddressService
         private CountryRepository $countries,
     ) {}
 
-    /** Devolve o endereço já cadastrado com estes dados ou cria um novo (país padrão: Brasil). */
     public function resolve(array $data): Address
     {
         return $this->addresses->firstOrCreateShared(
@@ -33,7 +31,6 @@ class AddressService
         );
     }
 
-    /** Remove o endereço antigo quando ninguém mais o utiliza. */
     public function releaseIfUnused(?int $addressId): void
     {
         if ($addressId !== null) {
@@ -50,7 +47,6 @@ class AddressService
         ];
     }
 
-    /** CEP brasileiro vira 00000-000 para que "01310100" e "01310-100" sejam o mesmo endereço. */
     private function normalizePostalCode(string $postalCode): string
     {
         $digits = preg_replace('/\D/', '', $postalCode);

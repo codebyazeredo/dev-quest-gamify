@@ -40,7 +40,6 @@ class UserChallengeRepository extends Repository
         return $this->update($userChallenge, ['completed_at' => now()]);
     }
 
-    /** Progresso do usuário indexado pelo id do desafio. */
     public function keyedByChallengeFor(User $user): Collection
     {
         return $this->query()->where('user_id', $user->id)->get()->keyBy('challenge_id');

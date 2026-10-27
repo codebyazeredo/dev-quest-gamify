@@ -1,4 +1,3 @@
-{{-- Busca por texto e filtros em <select> (slot) para o "crudTable"; usa `filters` e `applyFilters`. --}}
 @props(['placeholder' => 'Buscar'])
 
 <div class="d-flex flex-wrap gap-2 mb-3">

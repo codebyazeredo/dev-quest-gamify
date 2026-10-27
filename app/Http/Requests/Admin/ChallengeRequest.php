@@ -7,7 +7,6 @@ use App\Http\Requests\Concerns\ValidatesRewardTitle;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de desafio, incluindo o título de recompensa opcional. */
 class ChallengeRequest extends FormRequest
 {
     use ValidatesRewardTitle;

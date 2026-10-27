@@ -6,7 +6,6 @@ use App\Enums\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Marco de pontuação de uma coluna; vazio deixa a coluna livre. */
 class ColumnMilestoneRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

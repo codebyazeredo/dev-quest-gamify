@@ -1,4 +1,3 @@
-{{-- Seletor de ícone ligado a `form.<name>` do componente Alpine "crudTable". --}}
 @props(['name' => 'icon', 'icons', 'label' => 'Ícone'])
 
 <div>

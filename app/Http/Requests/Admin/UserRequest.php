@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-/** Valida criação (vincula uma pessoa e exige senha) e edição (senha opcional) de usuário. */
 class UserRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

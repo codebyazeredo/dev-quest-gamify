@@ -35,7 +35,6 @@ class TicketRepository extends Repository
         return $client->tickets()->latest()->paginate($perPage);
     }
 
-    /** Escopo pelo cliente garante que ninguém acesse chamado de outra empresa. */
     public function findForClient(Client $client, int $ticketId): Ticket
     {
         return $client->tickets()->with('messages.user')->findOrFail($ticketId);

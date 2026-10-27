@@ -24,7 +24,6 @@ class TaskEventRepository extends Repository
         return $this->query()->where('task_id', $task->id)->where('type', $type)->first();
     }
 
-    /** Entregas (implantações) registradas em tarefas atribuídas ao usuário. */
     public function countDeploysOfTasksAssignedTo(User $user): int
     {
         return $this->query()

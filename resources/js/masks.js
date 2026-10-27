@@ -10,7 +10,6 @@ export function formatCpf(value) {
         .replace(/\.(\d{3})(\d)/, '.$1-$2');
 }
 
-/** (11) 98765-4321 para celular e (11) 8765-4321 para fixo. */
 export function formatPhone(value) {
     const digits = onlyDigits(value).slice(0, 11);
 

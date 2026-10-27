@@ -7,7 +7,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Exige o cliente identificado no portal e o disponibiliza em `portal_client`. */
 class EnsurePortalClient
 {
     public const SESSION_KEY = 'portal_client_id';

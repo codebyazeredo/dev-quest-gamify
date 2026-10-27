@@ -21,7 +21,6 @@ class ChallengeRepository extends Repository
         return parent::query()->orderByDesc('starts_at');
     }
 
-    /** Desafios ativos de um tipo cujo período contém o instante informado. */
     public function activeOfTypeAt(ChallengeType $type, CarbonInterface $moment): Collection
     {
         return $this->query()

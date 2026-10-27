@@ -1,13 +1,6 @@
 import { api, ApiError } from './api';
 import { stashToasts, toastsOf } from './page-actions';
 
-/**
- * Modal com formulário que envia para a API e, em caso de sucesso, recarrega a página
- * (ou segue para `data.url`, quando a API devolve o endereço do registro criado).
- *
- * O markup define os campos ligados a `form`; quem abre o modal dispara o evento `eventName`
- * com { url, method, form, multipart }.
- */
 export function modalForm() {
     return {
         isOpen: false,
@@ -47,7 +40,6 @@ export function modalForm() {
             }
         },
 
-        /** Arquivos exigem multipart; os demais campos vão como texto (vazio quando ausentes). */
         body() {
             if (!this.target.multipart) {
                 return this.form;

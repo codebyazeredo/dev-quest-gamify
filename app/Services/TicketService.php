@@ -47,7 +47,6 @@ class TicketService
         ]);
     }
 
-    /** Resposta do cliente reabre chamado resolvido; resposta da equipe move chamado aberto para andamento. */
     public function reply(Ticket $ticket, string $body, ?User $staff = null): TicketMessage
     {
         return DB::transaction(function () use ($ticket, $body, $staff) {
@@ -70,7 +69,6 @@ class TicketService
         return $this->tickets->update($ticket, ['status' => $status]);
     }
 
-    /** Cria a tarefa a partir do chamado e o coloca em andamento. */
     public function convertToTask(Ticket $ticket, array $taskData, User $staff): Task
     {
         if ($ticket->task_id !== null) {

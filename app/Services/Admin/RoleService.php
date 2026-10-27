@@ -33,7 +33,6 @@ class RoleService
         return $this->roles->create(['name' => $name, 'guard_name' => 'web'])->load('permissions');
     }
 
-    /** O role admin tem acesso total e não pode ter permissões alteradas. */
     public function togglePermission(Role $role, int $permissionId): Role
     {
         if ($role->name === self::PROTECTED_ROLE) {

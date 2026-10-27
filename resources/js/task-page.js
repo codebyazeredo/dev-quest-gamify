@@ -1,6 +1,5 @@
 import { pageActions } from './page-actions';
 
-/** Ações da página de uma tarefa; cada uma chama a API e recarrega a página. */
 export function taskPage(taskId) {
     const base = pageActions();
     const endpoint = (action) => `/api/tasks/${taskId}/${action}`;

@@ -1,4 +1,3 @@
-{{-- Campo ligado ao `form` e aos `errors` do componente Alpine "crudTable". --}}
 @props(['name', 'label', 'type' => 'text', 'hint' => null])
 
 <div>

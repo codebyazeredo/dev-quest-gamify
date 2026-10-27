@@ -17,7 +17,6 @@ class CheckinHistoryRequest extends FormRequest
         ];
     }
 
-    /** Primeiro dia do mês pedido (ou do mês atual). */
     public function month(): Carbon
     {
         $month = $this->validated('month');

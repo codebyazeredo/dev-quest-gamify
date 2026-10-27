@@ -1,6 +1,5 @@
 import { pageActions } from './page-actions';
 
-/** Ações do atendimento de um chamado; cada uma chama a API e recarrega a página. */
 export function ticketPage(ticketId) {
     const base = pageActions();
     const endpoint = (action) => `/api/tickets/${ticketId}/${action}`;

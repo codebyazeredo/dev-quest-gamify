@@ -22,11 +22,7 @@ class TitleService
         private UserRepository $users,
     ) {}
 
-    /**
-     * Títulos do usuário: desbloqueados (administradores têm todos) e ainda bloqueados, com o progresso em desafios.
-     *
-     * @return array{unlocked: Collection, locked: Collection, completedChallenges: int}
-     */
+    /** @return array{unlocked: Collection, locked: Collection, completedChallenges: int} */
     public function catalogFor(User $user): array
     {
         $unlocked = $user->isAdmin() ? $this->titles->all() : $this->userTitles->titlesUnlockedBy($user);

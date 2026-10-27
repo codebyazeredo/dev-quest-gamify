@@ -9,7 +9,5 @@ document.addEventListener('click', (event) => {
 
     try {
         localStorage.setItem(STORAGE_KEY, isCollapsed ? 'collapsed' : 'expanded');
-    } catch {
-        // Sem localStorage a preferência vale apenas para esta página.
-    }
+    } catch {}
 });

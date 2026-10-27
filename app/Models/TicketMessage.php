@@ -19,7 +19,6 @@ class TicketMessage extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** Mensagens sem usuário vieram do cliente pelo portal. */
     public function isFromStaff(): bool
     {
         return $this->user_id !== null;

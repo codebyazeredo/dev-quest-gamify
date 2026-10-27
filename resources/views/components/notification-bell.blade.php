@@ -1,4 +1,3 @@
-{{-- rail: abre ao lado da barra lateral fina; top: abre abaixo da barra superior (celular). --}}
 @props(['placement' => 'rail'])
 
 <div x-data="notificationBell" x-on:click.outside="open = false" class="position-relative">

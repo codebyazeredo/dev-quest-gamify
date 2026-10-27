@@ -1,4 +1,3 @@
-{{-- Aplica o tema salvo antes do CSS carregar, evitando o "flash" claro no modo escuro. --}}
 <script>
     (function () {
         var theme = 'light';

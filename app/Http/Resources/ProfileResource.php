@@ -6,11 +6,7 @@ use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * Dados do próprio usuário para o formulário "Editar meus dados".
- *
- * @mixin Person
- */
+/** @mixin Person */
 class ProfileResource extends JsonResource
 {
     /** @return array<string, mixed> */

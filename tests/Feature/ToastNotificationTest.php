@@ -105,7 +105,6 @@ class ToastNotificationTest extends TestCase
         $bugCategory = TaskCategory::factory()->create(['slug' => 'bug']);
         $approved = $board->columns->firstWhere('status', TaskStatus::APPROVED);
 
-        // Evita que um level up domine o resultado: o foco aqui é o toast do desafio.
         app(XpService::class)->grant($developer, 10_000_000, XpSourceType::TASK, null, 'test setup buffer');
 
         $toastTypes = [];

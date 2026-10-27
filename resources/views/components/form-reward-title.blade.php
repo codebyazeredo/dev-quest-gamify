@@ -1,4 +1,3 @@
-{{-- Título de recompensa opcional; na edição lista os títulos já ligados (`editingRow.titles`). --}}
 @props(['icons', 'source' => 'desafio'])
 
 <div class="rounded-3 border bg-body-tertiary p-3">

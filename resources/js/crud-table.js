@@ -1,10 +1,5 @@
 import { api, ApiError } from './api';
 
-/**
- * Listagem (paginada ou não) com modal de criação/edição, consumindo um recurso REST.
- * O formulário do modal é definido na view e ligado a `form` via x-model.
- * `keyField` identifica a linha na URL de edição/exclusão (padrão: id).
- */
 export function crudTable({ endpoint, emptyForm, keyField = 'id', multipart = false, filters = {} }) {
     return {
         rows: [],
@@ -31,7 +26,6 @@ export function crudTable({ endpoint, emptyForm, keyField = 'id', multipart = fa
             }
         },
 
-        /** Filtros vazios não vão na query string. */
         activeFilters() {
             return Object.fromEntries(Object.entries(this.filters).filter(([, value]) => value !== ''));
         },
@@ -53,7 +47,6 @@ export function crudTable({ endpoint, emptyForm, keyField = 'id', multipart = fa
 
         openEdit(row) {
             this.editingRow = row;
-            // Cópia profunda: o formulário não pode alterar arrays da linha (ex.: roles) antes de salvar.
             this.form = JSON.parse(JSON.stringify(row));
             this.errors = {};
             this.isModalOpen = true;
@@ -94,12 +87,10 @@ export function crudTable({ endpoint, emptyForm, keyField = 'id', multipart = fa
 
             await api.delete(`${endpoint}/${row[keyField]}`);
 
-            // Ao excluir o último item de uma página, volta para a anterior.
             const page = this.rows.length === 1 ? Math.max(1, this.meta.current_page - 1) : this.meta.current_page;
             await this.load(page);
         },
 
-        /** Campos ausentes viajam vazios; arquivos só são enviados quando escolhidos. */
         formData() {
             const data = new FormData();
 
@@ -116,7 +107,6 @@ export function crudTable({ endpoint, emptyForm, keyField = 'id', multipart = fa
             return data;
         },
 
-        /** Ação pontual sobre uma linha (ex.: ativar/desativar, duplicar) via POST em `${endpoint}/{id}/{path}`. */
         async postAction(row, path) {
             await api.post(`${endpoint}/${row[keyField]}/${path}`);
             await this.load();

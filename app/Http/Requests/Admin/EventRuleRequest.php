@@ -6,7 +6,6 @@ use App\Enums\TaskEventType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação (informa o tipo no corpo) e edição (tipo na URL) de regra de XP. */
 class EventRuleRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

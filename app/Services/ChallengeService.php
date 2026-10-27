@@ -21,11 +21,7 @@ class ChallengeService
         private UserChallengeRepository $userChallenges,
     ) {}
 
-    /**
-     * Desafios em andamento ou agendados com o progresso do usuário em cada um.
-     *
-     * @return Collection<int, array{challenge: Challenge, progress: int, completed: bool}>
-     */
+    /** @return Collection<int, array{challenge: Challenge, progress: int, completed: bool}> */
     public function currentAndUpcomingFor(User $user): Collection
     {
         $progressByChallenge = $this->userChallenges->keyedByChallengeFor($user);

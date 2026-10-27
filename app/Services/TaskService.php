@@ -69,7 +69,6 @@ class TaskService
         });
     }
 
-    /** Explica ao usuário por que a movimentação foi negada pela policy. */
     public function explainMoveDenial(Task $task, BoardColumn $destination, User $actor): string
     {
         if ($destination->status === TaskStatus::APPROVED) {
@@ -144,7 +143,6 @@ class TaskService
         });
     }
 
-    /** Desenvolvedor que move uma tarefa sem responsável passa a ser o responsável por ela. */
     private function shouldAutoAssign(Task $task, BoardColumn $destination, User $actor): bool
     {
         return $task->assigned_to === null
@@ -218,7 +216,6 @@ class TaskService
             $task->description = $data['description'] ?? $task->description;
             $task->due_at = $data['due_at'] ?? $task->due_at;
 
-            // Branch e PR podem ser limpos, por isso a chave presente (mesmo nula) prevalece.
             foreach (['branch_name', 'pull_request_url'] as $gitField) {
                 if (array_key_exists($gitField, $data)) {
                     $task->{$gitField} = $data[$gitField];

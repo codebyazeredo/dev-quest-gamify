@@ -1,4 +1,3 @@
-{{-- Interruptor ligado ao `form` do componente Alpine "crudTable". --}}
 @props(['name', 'label'])
 
 <div class="form-check form-switch">

@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Notifications\TaskProgress;
 use App\Repositories\UserRepository;
 
-/** Decide quem é avisado sobre o andamento de uma tarefa e com qual mensagem. */
 class TaskProgressNotificationService
 {
     public function __construct(private UserRepository $users) {}

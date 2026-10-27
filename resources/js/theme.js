@@ -21,9 +21,7 @@ document.addEventListener('click', (event) => {
 
     try {
         localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-        // Sem localStorage a preferência vale apenas para esta página.
-    }
+    } catch {}
 
     applyTheme(next);
 });

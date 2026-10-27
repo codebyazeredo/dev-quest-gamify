@@ -13,7 +13,6 @@ class UserTitleRepository extends Repository
         return UserTitle::class;
     }
 
-    /** Títulos que o usuário já desbloqueou. */
     public function titlesUnlockedBy(User $user): Collection
     {
         return $this->query()->where('user_id', $user->id)->with('title')->get()->pluck('title');

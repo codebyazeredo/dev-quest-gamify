@@ -11,7 +11,6 @@ export function clientsTable() {
 
         formatCnpj,
 
-        /** O CNPJ é guardado só com dígitos; a máscara existe apenas na tela. */
         async save() {
             this.form.cnpj = onlyDigits(this.form.cnpj);
 

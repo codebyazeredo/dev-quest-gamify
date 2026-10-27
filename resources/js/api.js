@@ -26,7 +26,6 @@ function buildUrl(url, query) {
     return queryString ? `${url}?${queryString}` : url;
 }
 
-// Uploads vão como multipart; o PHP só lê multipart em POST, então PUT/PATCH usam method spoofing.
 function prepareRequest(method, body) {
     const headers = { ...JSON_HEADERS, 'X-CSRF-TOKEN': csrfToken() };
 
@@ -55,7 +54,6 @@ async function request(method, url, { query = {}, body = null, silent = false } 
 
     const payload = await response.json().catch(() => ({}));
 
-    // Com `silent`, quem chamou decide o que exibir (ex.: guardar os toasts antes de recarregar a página).
     if (!silent) {
         (payload.toasts ?? []).forEach(showToast);
     }

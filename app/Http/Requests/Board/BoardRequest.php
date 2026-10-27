@@ -5,7 +5,6 @@ namespace App\Http\Requests\Board;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de quadro; só a criação aceita semear as colunas padrão. */
 class BoardRequest extends FormRequest
 {
     /** @return array<string, array<int, mixed>> */

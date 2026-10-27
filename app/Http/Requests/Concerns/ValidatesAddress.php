@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Concerns;
 
-/** Campos do endereço compartilhados pelos formulários de pessoa e de perfil. */
 trait ValidatesAddress
 {
     /** @return array<string, array<int, string>> */

@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Notifications\Notification;
 
-/** Andamento de uma tarefa exibido no sino de notificações. */
 class TaskProgress extends Notification
 {
     /** @param  string  $kind  assigned|moved|testing|approved|rejected|done */

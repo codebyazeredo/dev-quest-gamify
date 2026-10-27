@@ -84,7 +84,6 @@ class TitleService
             'challenges_required' => $unlockType === TitleUnlockType::CHALLENGES_COUNT ? ($data['challenges_required'] ?? null) : null,
         ];
 
-        // Sem o valor explícito o título nasce ativo; o modelo recém-criado precisa disso para ser concedido já.
         $attributes['active'] = $data['active'] ?? true;
 
         return $attributes;

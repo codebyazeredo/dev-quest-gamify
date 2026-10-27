@@ -46,7 +46,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         countVisible(section) {
-            // Lê os filtros para que o Alpine reavalie o contador quando eles mudarem.
             void [this.search, this.category, this.priority, this.assignee, this.mine, this.late];
 
             return [...section.querySelectorAll('[data-task-id]')].filter((card) => this.matches(card)).length;
@@ -162,7 +161,6 @@ document.addEventListener('alpine:init', () => {
             this.moveTask(taskId, columnId, position);
         },
 
-        /** O card já foi movido na tela; se a API recusar, recarrega para voltar ao estado real. */
         async moveTask(taskId, columnId, position) {
             try {
                 await api.post(`/api/tasks/${taskId}/move`, { column_id: columnId, position });

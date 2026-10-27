@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Endereço único e reutilizável: quem precisa de um endereço referencia esta tabela por `address_id`. */
 #[Fillable([
     'country_id', 'cep', 'logradouro', 'numero', 'complemento', 'bairro',
     'cidade', 'estado', 'referencia', 'latitude', 'longitude',
@@ -26,7 +25,6 @@ class Address extends Model
         ];
     }
 
-    /** Ex.: "Av. Paulista, 1000 - Sala 2 - Bela Vista, São Paulo/SP, 01310-100, Brasil". */
     protected function formatted(): Attribute
     {
         return Attribute::get(function (): string {

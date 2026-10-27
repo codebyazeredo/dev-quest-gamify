@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-/** Seções e atalhos exibidos na página inicial das configurações administrativas. */
 class AdminHubMenu
 {
     /** @return array<int, array{label: string, items: array<int, array<string, string>>}> */

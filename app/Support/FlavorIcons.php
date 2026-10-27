@@ -9,7 +9,6 @@ class FlavorIcons
         return ['star', 'trophy', 'flag', 'fire', 'bug', 'rocket', 'bolt', 'medal', 'gem', 'target', 'heart', 'code', 'bulb', 'book', 'compass', 'shield'];
     }
 
-    /** Nome do ícone de sabor => nome do ícone no Bootstrap Icons. */
     public static function bootstrapNames(): array
     {
         return [

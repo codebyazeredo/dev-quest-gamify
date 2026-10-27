@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Paginação e filtros opcionais comuns às listagens administrativas. */
 class PaginatedListRequest extends FormRequest
 {
     private const DEFAULT_PER_PAGE = 10;

@@ -511,7 +511,6 @@ html[data-bs-theme='dark'] .jira-tag {
     white-space: nowrap;
 }
 
-/* ---------- Notificações ---------- */
 .notification-badge {
     position: absolute;
     top: -0.2rem;
@@ -544,7 +543,6 @@ html[data-bs-theme='dark'] .jira-tag {
     overflow-y: auto;
 }
 
-/* ---------- Botões só com ícone (sem caixa nem contorno) ---------- */
 .btn-ghost {
     --bs-btn-color: var(--bs-secondary-color);
     --bs-btn-bg: transparent;
@@ -588,7 +586,6 @@ html[data-bs-theme='dark'] .jira-tag {
     font-size: 0.95rem;
 }
 
-/* ---------- Navbar superior ---------- */
 .app-topbar {
     min-height: 3.25rem;
 }
@@ -605,7 +602,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
     display: none;
 }
 
-/* ---------- Sidebar recolhível ---------- */
 @media (min-width: 992px) {
     .app-sidebar {
         transition: width 0.2s ease;
@@ -636,7 +632,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
 .app-sidebar .nav-link.active {
 }
 
-/* ---------- Busca com ícone interno ---------- */
 .search-field {
     position: relative;
     width: 14rem;
@@ -655,7 +650,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
     padding-left: 2rem;
 }
 
-/* ---------- Rodapé da marca ---------- */
 .app-footer {
     display: flex;
     align-items: center;
@@ -704,8 +698,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
     color: var(--bs-tertiary-color);
 }
 
-
-/* ---------- Refinos de layout ---------- */
 .sidebar-toggle {
     align-items: center;
     justify-content: center;
@@ -759,7 +751,6 @@ html[data-bs-theme='dark'] .theme-icon-light {
     display: none;
 }
 
-/* Item ativo sólido e ícones em "pastilhas" dão acabamento de aplicativo. */
 .app-sidebar .nav-link {
     margin-bottom: 0.125rem;
     border-radius: 0.625rem;
@@ -838,7 +829,6 @@ html[data-bs-theme='dark'] .app-sidebar .nav-link .bi {
     min-width: 0;
 }
 
-/* ---------- Formulários em seções (modal de tarefa) ---------- */
 .form-section {
     padding: 1rem;
     border: 1px solid var(--bs-border-color);

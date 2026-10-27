@@ -68,7 +68,6 @@ class TitleController extends Controller
         return response()->json(['message' => "Título \"{$title->name}\" excluído."]);
     }
 
-    /** Conquistas e desafios que podem ser ligados a um título. */
     private function formOptions(): array
     {
         $options = $this->titles->formOptions();

@@ -5,10 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Endereço passa a ser uma tabela única e reutilizável: quem tem endereço (hoje, pessoas)
- * guarda apenas o `address_id`, em vez de o endereço guardar o dono (`person_id`).
- */
 return new class extends Migration
 {
     public function up(): void
@@ -49,7 +45,6 @@ return new class extends Migration
         });
     }
 
-    /** Endereços compartilhados voltam para a primeira pessoa que os usava; as demais ficam sem endereço. */
     public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {

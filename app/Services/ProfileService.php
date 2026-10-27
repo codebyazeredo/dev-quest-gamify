@@ -10,7 +10,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-/** Autoatendimento: o usuário logado altera os próprios dados pessoais, endereço e acesso. */
 class ProfileService
 {
     public function __construct(
@@ -24,9 +23,7 @@ class ProfileService
         return $this->people->findWithAddressOrFail((int) $user->person_id);
     }
 
-    /**
-     * @param  array<string, mixed>  $data  dados validados de pessoa, endereço e acesso (login_email, password)
-     */
+    /** @param  array<string, mixed>  $data  dados validados de pessoa, endereço e acesso (login_email, password) */
     public function update(User $user, array $data, ?UploadedFile $photo): Person
     {
         return DB::transaction(function () use ($user, $data, $photo) {

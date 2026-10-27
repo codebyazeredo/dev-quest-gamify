@@ -1,4 +1,3 @@
-{{-- $progress vem de LevelService::progressFor(). --}}
 @props(['progress'])
 
 <x-card>

@@ -1,4 +1,3 @@
-{{-- Modal de criar/editar tarefa. Espera $taskForms (dados editáveis por id), $categories e $priorities. --}}
 <div
     x-data="taskModal(@js($taskForms), @js($categories->pluck('name', 'id')))"
     x-on:open-task-form.window="openTask($event.detail)"

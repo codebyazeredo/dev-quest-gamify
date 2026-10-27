@@ -20,7 +20,6 @@ import { ticketPage } from './ticket-page.js';
 import { ticketsTable } from './tickets-table.js';
 import { taskPage } from './task-page.js';
 
-// Os componentes são registrados em "alpine:init", disparado por Alpine.start() no fim deste arquivo.
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('crudTable', crudTable);
     window.Alpine.data('rolesTable', rolesTable);
@@ -39,15 +38,12 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('profileModal', profileModal);
 });
 
-// Avisos de uma ação que recarregou a página só podem aparecer depois que a pilha de toasts existir.
 document.addEventListener('alpine:initialized', showStashedToasts);
 
-// Delegado ao body para valer também para elementos recriados dinamicamente.
 document.addEventListener('DOMContentLoaded', () => {
     new Tooltip(document.body, { selector: '[data-bs-toggle="tooltip"]', trigger: 'hover', placement: 'bottom' });
 });
 
-// Botões são recriados após a ação; sem isso o balão do botão clicado ficaria preso na tela.
 document.addEventListener('click', () => {
     document.querySelectorAll('.tooltip').forEach((tooltip) => tooltip.remove());
 });

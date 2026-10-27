@@ -29,7 +29,6 @@ function endOfDay(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59);
 }
 
-/** Início e fim de cada atalho de período do formulário. */
 const PERIODS = {
     today: (now) => [startOfDay(now), endOfDay(now)],
     week: (now) => {

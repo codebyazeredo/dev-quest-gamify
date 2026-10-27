@@ -11,7 +11,6 @@ class LevelRepository extends Repository
         return Level::class;
     }
 
-    /** Maior nível cujo XP mínimo já foi alcançado. */
     public function highestReachedWith(int $totalXp): Level
     {
         return $this->query()

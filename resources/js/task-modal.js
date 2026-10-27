@@ -7,10 +7,6 @@ function emptyTask(columnId) {
     return { column_id: columnId, title: '', description: '', category_id: '', priority_id: '', assigned_to: null, due_at: '', branch_name: '', pull_request_url: '' };
 }
 
-/**
- * Modal de criar/editar tarefa; `tasksById` traz os dados editáveis das tarefas já exibidas na página
- * e `categoryNames` (id => nome) alimenta a sugestão de nome da branch.
- */
 export function taskModal(tasksById, categoryNames = {}) {
     return {
         ...modalForm(),
@@ -34,7 +30,6 @@ export function taskModal(tasksById, categoryNames = {}) {
 
             const task = tasksById[taskId];
             this.isLocked = task.locked;
-            // Uma branch já cadastrada nunca é sobrescrita pela sugestão.
             this.isBranchAuto = !task.branch_name;
 
             this.open({
@@ -44,7 +39,6 @@ export function taskModal(tasksById, categoryNames = {}) {
             });
         },
 
-        /** Reexecutada pelo x-effect quando título ou categoria mudam; só age enquanto a branch não foi editada à mão. */
         syncBranch() {
             const suggestion = suggestBranchName({
                 title: this.form.title,

@@ -4,7 +4,6 @@ namespace App\Http\Requests\Gamification;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Filtros da página de ranking; valores inválidos são recusados antes de chegar ao controller. */
 class RankingRequest extends FormRequest
 {
     private const DEFAULT_ROLE = 'dev';

@@ -390,10 +390,6 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    /**
-     * O fluxo do seed gera milhares de avisos; eles são descartados e cada usuário de demonstração
-     * recebe poucos avisos recentes, a maioria ainda não lida.
-     */
     private function seedNotifications(): void
     {
         DB::table('notifications')->delete();

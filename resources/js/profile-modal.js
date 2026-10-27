@@ -1,7 +1,6 @@
 import { api } from './api';
 import { modalForm } from './modal-form';
 
-/** Modal "Editar meus dados": carrega os dados atuais do usuário antes de abrir. */
 export function profileModal() {
     return {
         ...modalForm(),

@@ -4,7 +4,6 @@ namespace App\Http\Requests\Concerns;
 
 use Illuminate\Validation\Rule;
 
-/** Campos opcionais para criar, junto com conquista/desafio, o título concedido ao concluí-lo. */
 trait ValidatesRewardTitle
 {
     /** @return array<string, array<int, mixed>> */

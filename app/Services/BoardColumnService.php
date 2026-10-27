@@ -20,7 +20,6 @@ class BoardColumnService
         return $this->columns->findInBoardOrFail($board, $columnId);
     }
 
-    /** Uma coluna por marco de pontuação, na ordem do fluxo de desenvolvimento. */
     public function seedDefaults(Board $board): void
     {
         foreach (TaskStatus::cases() as $position => $status) {

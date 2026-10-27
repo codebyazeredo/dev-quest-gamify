@@ -6,7 +6,6 @@ use App\Rules\ValidCnpj;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Valida criação e edição de cliente; o CNPJ é único mesmo com ou sem máscara. */
 class ClientRequest extends FormRequest
 {
     protected function prepareForValidation(): void

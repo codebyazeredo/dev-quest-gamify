@@ -26,13 +26,11 @@ class TaskRepository extends Repository
         return $this->query()->where('column_id', $columnId)->count();
     }
 
-    /** Fecha o buraco deixado por uma tarefa que saiu da posição informada. */
     public function closeGap(int $columnId, int $vacatedPosition): void
     {
         $this->query()->where('column_id', $columnId)->where('position', '>', $vacatedPosition)->decrement('position');
     }
 
-    /** Abre espaço para uma tarefa que entra na posição informada. */
     public function openSlot(int $columnId, int $position): void
     {
         $this->query()->where('column_id', $columnId)->where('position', '>=', $position)->increment('position');
@@ -69,7 +67,6 @@ class TaskRepository extends Repository
             ->max('c');
     }
 
-    /** Carrega tudo o que a página da tarefa exibe. */
     public function loadDetails(Task $task): Task
     {
         return $task->load([

@@ -17,13 +17,11 @@ class BoardService
         private UserRepository $users,
     ) {}
 
-    /** Quadros visíveis ao usuário; só administradores enxergam os inativos. */
     public function listFor(User $user): Collection
     {
         return $this->boards->listWithTaskCount($user->isAdmin());
     }
 
-    /** Com um único quadro ativo, leva direto a ele; caso contrário, à lista de quadros. */
     public function landingUrl(): string
     {
         $activeBoards = $this->boards->activeBoards();
@@ -33,7 +31,6 @@ class BoardService
             : route('boards.index');
     }
 
-    /** Usuários a quem a tarefa pode ser atribuída ao criá-la; só administradores e POs atribuem. */
     public function assignableUsersFor(User $user): Collection
     {
         return $user->isAdmin() || $user->isProductOwner() ? $this->users->allForAssignment() : new Collection;

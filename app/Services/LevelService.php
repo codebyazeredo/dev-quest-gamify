@@ -14,11 +14,7 @@ class LevelService
         private XpTransactionRepository $xpTransactions,
     ) {}
 
-    /**
-     * Situação do usuário na escada de níveis.
-     *
-     * @return array{totalXp: int, currentLevel: Level, nextLevel: ?Level, xpIntoLevel: int, xpForNext: int, participatesInLeveling: bool}
-     */
+    /** @return array{totalXp: int, currentLevel: Level, nextLevel: ?Level, xpIntoLevel: int, xpForNext: int, participatesInLeveling: bool} */
     public function progressFor(User $user): array
     {
         $totalXp = $this->totalXpFor($user);

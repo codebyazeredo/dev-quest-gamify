@@ -30,11 +30,7 @@ class AchievementService
         private DailyCheckinRepository $checkins,
     ) {}
 
-    /**
-     * Conquistas ativas com o progresso do usuário; administradores enxergam todas como desbloqueadas.
-     *
-     * @return Collection<int, array{achievement: Achievement, unlocked: bool, progress: int}>
-     */
+    /** @return Collection<int, array{achievement: Achievement, unlocked: bool, progress: int}> */
     public function catalogFor(User $user): Collection
     {
         $unlockedIds = $this->userAchievements->unlockedIdsFor($user);

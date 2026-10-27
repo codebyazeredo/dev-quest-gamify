@@ -42,7 +42,6 @@ class BoardColumnRepository extends Repository
         return $this->create([...$attributes, 'board_id' => $board->id]);
     }
 
-    /** Outra coluna do mesmo quadro já usa este marco de pontuação? */
     public function milestoneTakenByAnother(BoardColumn $column, TaskStatus $status): bool
     {
         return $this->query()

@@ -17,7 +17,6 @@ class XpTransactionRepository extends Repository
         return XpTransaction::class;
     }
 
-    /** Pontuação base concedida ao concluir a tarefa. */
     public function findTaskCompletionBonus(Task $task): ?XpTransaction
     {
         return $this->query()
@@ -36,7 +35,6 @@ class XpTransactionRepository extends Repository
         return (int) $this->query()->where('user_id', $user->id)->where('created_at', '>=', $since)->sum('amount');
     }
 
-    /** Quantos usuários têm mais XP que o total informado (base da posição no ranking). */
     public function countUsersWithTotalAbove(int $total): int
     {
         return $this->query()

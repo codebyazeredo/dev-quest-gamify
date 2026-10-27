@@ -90,7 +90,6 @@ class Task extends Model
             && $this->completed_at->gt($this->due_at);
     }
 
-    /** Ainda aberta e com o prazo já vencido. */
     public function isOverdue(): bool
     {
         return $this->completed_at === null
