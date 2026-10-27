@@ -93,6 +93,10 @@
             <span class="d-flex align-items-center gap-2">
                 <i class="bi {{ $priorityIcon }} fs-5 lh-1" title="Prioridade: {{ $task->priority->name }}" aria-label="Prioridade {{ $task->priority->name }}"></i>
                 <span class="count-pill" title="Pontuação da tarefa">{{ number_format($task->xpValue()) }} XP</span>
+
+                @if ($task->attachments_count)
+                    <span class="small text-body-secondary" title="{{ $task->attachments_count }} {{ $task->attachments_count === 1 ? 'anexo' : 'anexos' }}"><i class="bi bi-paperclip" aria-hidden="true"></i> {{ $task->attachments_count }}</span>
+                @endif
             </span>
 
             <span class="d-flex align-items-center gap-2">

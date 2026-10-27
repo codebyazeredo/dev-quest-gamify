@@ -36,6 +36,7 @@ class BoardRepository extends Repository
     {
         return $board->load([
             'columns.tasks' => fn ($query) => $query->whereNull('archived_at')
+                ->withCount('attachments')
                 ->with(['category', 'priority', 'assignedTo.person', 'taskEvents']),
         ]);
     }
@@ -45,6 +46,7 @@ class BoardRepository extends Repository
         return Task::query()
             ->where('board_id', $board->id)
             ->whereNotNull('archived_at')
+            ->withCount('attachments')
             ->with(['category', 'priority', 'assignedTo.person', 'taskEvents'])
             ->orderByDesc('archived_at')
             ->get();

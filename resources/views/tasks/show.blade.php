@@ -67,6 +67,8 @@
                     </x-card>
                 @endif
 
+                @include('tasks.partials.attachments')
+
                 @if ($task->status === \App\Enums\TaskStatus::TESTING)
                     <x-card variant="highlight">
                         <h2 class="h6 mb-3"><i class="bi bi-clipboard2-check me-1" aria-hidden="true"></i> Revisão de teste</h2>

@@ -4,6 +4,7 @@ import './kanban.js';
 import './theme.js';
 import './sidebar.js';
 import './clipboard.js';
+import { attachmentUploader } from './attachments.js';
 import { challengesTable } from './challenges-table.js';
 import { clientsTable } from './clients-table.js';
 import { crudTable } from './crud-table.js';
@@ -25,6 +26,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('rolesTable', rolesTable);
     window.Alpine.data('peopleTable', peopleTable);
     window.Alpine.data('challengesTable', challengesTable);
+    window.Alpine.data('attachmentUploader', attachmentUploader);
     window.Alpine.data('clientsTable', clientsTable);
     window.Alpine.data('ticketsTable', ticketsTable);
     window.Alpine.data('ticketPage', ticketPage);
