@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="offcanvas-body d-flex flex-column px-3 pb-3 pt-0 overflow-y-auto h-100">
-                    <a href="{{ route('boards.index') }}" class="d-block text-body text-decoration-none sidebar-brand">
+                    <a href="{{ route('boards.index') }}" class="text-body text-decoration-none sidebar-brand">
                         <span class="d-block fw-semibold text-truncate">{{ $appSettings->displayName() }}</span>
                         <span class="d-block small text-body-secondary text-truncate">Gestão gamificada</span>
                     </a>
@@ -109,33 +109,33 @@
                     </nav>
 
                     <div class="border-top pt-3 mt-3">
-                        @can('accessAdminPanel', \App\Models\User::class)
-                            <a href="{{ route('admin.index') }}" title="Configurações" class="nav-link {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
-                                <i class="bi bi-gear" aria-hidden="true"></i>
-                                <span class="sidebar-label">Configurações</span>
-                            </a>
-                        @endcan
-
-                        <form method="POST" action="{{ route('logout') }}" class="d-lg-none">
+                        <form method="POST" action="{{ route('logout') }}" class="d-lg-none mb-2">
                             @csrf
                             <button type="submit" class="nav-link w-100 border-0 bg-transparent"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair</button>
                         </form>
 
-                        <x-footer class="mt-3" />
+                        <div class="sidebar-footer">
+                            @can('accessAdminPanel', \App\Models\User::class)
+                                <a href="{{ route('admin.index') }}" class="sidebar-settings {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" title="Configurações" aria-label="Configurações" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
+                                    <i class="bi bi-gear" aria-hidden="true"></i>
+                                </a>
+                            @endcan
+
+                            <x-footer />
+                        </div>
                     </div>
                 </div>
               </div>
             </aside>
 
             <div class="d-flex flex-column flex-grow-1 min-w-0">
-                <header class="app-topbar d-flex align-items-center gap-2 px-3 px-lg-4 border-bottom bg-body flex-shrink-0">
+                <header class="app-topbar d-flex align-items-center gap-2 pe-3 ps-3 ps-lg-0 pe-lg-4 border-bottom bg-body flex-shrink-0">
                     <button type="button" class="btn btn-ghost btn-icon d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar" aria-controls="app-sidebar" aria-label="Abrir menu">
                         <i class="bi bi-list fs-4" aria-hidden="true"></i>
                     </button>
-                    <button type="button" class="btn btn-ghost btn-icon d-none d-lg-inline-flex" data-sidebar-toggle aria-label="Recolher ou expandir menu" data-bs-toggle="tooltip" data-bs-title="Recolher/expandir menu">
-                        <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+                    <button type="button" class="sidebar-toggle d-none d-lg-inline-flex" data-sidebar-toggle aria-label="Recolher ou expandir menu">
+                        <i class="bi bi-list fs-4" aria-hidden="true"></i>
                     </button>
-                    <span class="topbar-divider d-none d-lg-block" aria-hidden="true"></span>
                     @stack('page-title')
 
                     <div class="ms-auto d-flex align-items-center gap-1">

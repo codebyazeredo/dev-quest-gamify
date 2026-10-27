@@ -1,7 +1,19 @@
 @props(['title', 'subtitle' => null, 'back' => null, 'backLabel' => 'Voltar'])
 
 @push('page-title')
-    <h1 class="fs-5 fw-semibold mb-0 text-truncate">{{ $title }}</h1>
+    <div class="min-w-0 lh-sm">
+        <h1 class="fs-6 fw-semibold mb-0 text-truncate">{{ $title }}</h1>
+
+        @if ($subtitle)
+            <div class="small text-body-secondary text-truncate">
+                @if ($subtitle instanceof \Illuminate\View\ComponentSlot)
+                    {!! $subtitle !!}
+                @else
+                    {{ $subtitle }}
+                @endif
+            </div>
+        @endif
+    </div>
 @endpush
 
 <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-3 mb-3">
@@ -13,16 +25,6 @@
                     <li class="breadcrumb-item active text-truncate" aria-current="page">{{ $title }}</li>
                 </ol>
             </nav>
-        @endif
-
-        @if ($subtitle)
-            <div class="small text-body-secondary">
-                @if ($subtitle instanceof \Illuminate\View\ComponentSlot)
-                    {!! $subtitle !!}
-                @else
-                    {{ $subtitle }}
-                @endif
-            </div>
         @endif
     </div>
 
