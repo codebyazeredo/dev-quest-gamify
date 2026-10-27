@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Person;
+use App\Models\Country;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AddressFactory extends Factory
@@ -10,12 +10,17 @@ class AddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'person_id' => Person::factory(),
+            'country_id' => Country::factory(),
             'cep' => fake()->numerify('#####-###'),
             'logradouro' => fake()->streetName(),
             'numero' => (string) fake()->numberBetween(1, 9999),
+            'complemento' => null,
+            'bairro' => fake()->citySuffix(),
             'cidade' => fake()->city(),
             'estado' => fake()->randomElement(['SP', 'RJ', 'MG', 'RS', 'PR', 'BA']),
+            'referencia' => null,
+            'latitude' => null,
+            'longitude' => null,
         ];
     }
 }

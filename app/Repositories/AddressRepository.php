@@ -11,8 +11,15 @@ class AddressRepository extends Repository
         return Address::class;
     }
 
-    public function updateOrCreateForPerson(int $personId, array $attributes): Address
+    /** Reaproveita o endereço que tenha exatamente estes dados; `$extra` só vale na criação. */
+    public function firstOrCreateShared(array $identity, array $extra = []): Address
     {
-        return Address::updateOrCreate(['person_id' => $personId], $attributes);
+        return Address::firstOrCreate($identity, $extra);
+    }
+
+    /** Ao incluir um novo dono de endereço (ex.: clientes), acrescente a relação dele aqui. */
+    public function deleteIfUnused(int $addressId): void
+    {
+        Address::query()->whereKey($addressId)->whereDoesntHave('people')->delete();
     }
 }
