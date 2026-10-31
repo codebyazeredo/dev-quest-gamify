@@ -4,20 +4,16 @@ namespace App\Http\Requests\Concerns;
 
 trait ValidatesAttachments
 {
-    private const MAX_FILES = 10;
-
-    private const MAX_SIZE_KB = 10240;
-
-    private const ALLOWED_TYPES = 'jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,zip';
-
     /** @return array<string, array<int, string>> */
     protected function attachmentRules(bool $required): array
     {
+        $maxFiles = config('attachments.max_files');
+
         return [
             'files' => $required
-                ? ['required', 'array', 'min:1', 'max:'.self::MAX_FILES]
-                : ['nullable', 'array', 'max:'.self::MAX_FILES],
-            'files.*' => ['file', 'max:'.self::MAX_SIZE_KB, 'mimes:'.self::ALLOWED_TYPES],
+                ? ['required', 'array', 'min:1', 'max:'.$maxFiles]
+                : ['nullable', 'array', 'max:'.$maxFiles],
+            'files.*' => ['file', 'max:'.config('attachments.max_size_kb'), 'mimes:'.implode(',', config('attachments.extensions'))],
         ];
     }
 
@@ -30,10 +26,12 @@ trait ValidatesAttachments
     /** @return array<string, string> */
     protected function attachmentMessages(): array
     {
+        $maxSizeMb = config('attachments.max_size_kb') / 1024;
+
         return [
-            'files.*.mimes' => 'O :attribute deve ser imagem, PDF, documento do Office, texto, CSV ou ZIP.',
-            'files.*.max' => 'O :attribute não pode ter mais de 10 MB.',
-            'files.max' => 'Envie no máximo '.self::MAX_FILES.' anexos por vez.',
+            'files.*.mimes' => 'O :attribute deve ser imagem, vídeo, PDF, documento do Office, texto, CSV ou ZIP.',
+            'files.*.max' => "O :attribute não pode ter mais de {$maxSizeMb} MB.",
+            'files.max' => 'Envie no máximo '.config('attachments.max_files').' anexos por vez.',
         ];
     }
 }

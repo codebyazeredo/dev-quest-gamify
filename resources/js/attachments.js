@@ -1,20 +1,9 @@
+import { addFiles, selectedFiles } from './file-input';
 import { pageActions } from './page-actions';
 
 export function attachmentUploader(taskId, canUpload) {
     return {
         ...pageActions(),
-
-        isDragging: false,
-
-        pickFiles(event) {
-            this.upload(Array.from(event.target.files));
-            event.target.value = '';
-        },
-
-        dropFiles(event) {
-            this.isDragging = false;
-            this.upload(Array.from(event.dataTransfer.files));
-        },
 
         pasteFiles(event) {
             const files = Array.from(event.clipboardData?.files ?? []);
@@ -23,10 +12,12 @@ export function attachmentUploader(taskId, canUpload) {
                 return;
             }
 
-            this.upload(files);
+            addFiles(this.$refs.picker, files);
         },
 
-        upload(files) {
+        upload() {
+            const files = selectedFiles(this.$refs.picker);
+
             if (!canUpload || files.length === 0) {
                 return null;
             }

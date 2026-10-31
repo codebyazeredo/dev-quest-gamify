@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'board_id', 'column_id', 'category_id', 'priority_id', 'assigned_to', 'created_by',
@@ -66,6 +67,11 @@ class Task extends Model
     }
 
     public function attachments(): HasMany
+    public function ticket(): HasOne
+    {
+        return $this->hasOne(Ticket::class);
+    }
+
     {
         return $this->hasMany(TaskAttachment::class)->latest();
     }

@@ -11,6 +11,8 @@ trait IsAttachment
 
     private const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+    private const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+
     private const SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 
     public function isImage(): bool
@@ -18,15 +20,21 @@ trait IsAttachment
         return in_array($this->mime_type, self::IMAGE_MIME_TYPES, true);
     }
 
+    public function isVideo(): bool
+    {
+        return in_array($this->mime_type, self::VIDEO_MIME_TYPES, true);
+    }
+
     public function canBeViewedInline(): bool
     {
-        return $this->isImage() || $this->mime_type === 'application/pdf';
+        return $this->isImage() || $this->isVideo() || $this->mime_type === 'application/pdf';
     }
 
     public function icon(): string
     {
         return match (true) {
             $this->isImage() => 'bi-file-earmark-image',
+            $this->isVideo() => 'bi-file-earmark-play',
             $this->mime_type === 'application/pdf' => 'bi-file-earmark-pdf',
             str_contains($this->mime_type, 'zip') => 'bi-file-earmark-zip',
             str_contains($this->mime_type, 'spreadsheet'), str_contains($this->mime_type, 'excel'), str_contains($this->mime_type, 'csv') => 'bi-file-earmark-spreadsheet',

@@ -17,6 +17,11 @@ class TicketPolicy
         return $this->isSupportStaff($user);
     }
 
+    public function viewAttachments(User $user, Ticket $ticket): bool
+    {
+        return $this->view($user, $ticket) || ($ticket->task !== null && $user->can('view', $ticket->task));
+    }
+
     public function update(User $user, Ticket $ticket): bool
     {
         return $this->isSupportStaff($user);

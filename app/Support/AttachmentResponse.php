@@ -5,11 +5,11 @@ namespace App\Support;
 use App\Models\TaskAttachment;
 use App\Models\TicketAttachment;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AttachmentResponse
 {
-    public static function make(TaskAttachment|TicketAttachment $attachment, bool $forceDownload = false): StreamedResponse
+    public static function make(TaskAttachment|TicketAttachment $attachment, bool $forceDownload = false): Response
     {
         $disk = Storage::disk(StoredFile::DISK);
 
@@ -18,7 +18,7 @@ class AttachmentResponse
         $headers = ['Content-Type' => $attachment->mime_type, 'X-Content-Type-Options' => 'nosniff'];
 
         if ($attachment->canBeViewedInline() && ! $forceDownload) {
-            return $disk->response($attachment->path, $attachment->original_name, $headers);
+            return response()->file($disk->path($attachment->path), $headers)->setContentDisposition('inline', $attachment->original_name);
         }
 
         return $disk->download($attachment->path, $attachment->original_name, $headers);

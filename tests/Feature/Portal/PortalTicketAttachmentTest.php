@@ -96,6 +96,7 @@ class PortalTicketAttachmentTest extends TestCase
 
         $this->signedIn(Client::factory()->create())->get(route('portal.attachments.show', $attachment))->assertNotFound();
 
+        $this->flushSession();
         $this->get(route('portal.attachments.show', $attachment))->assertRedirect(route('portal.login'));
     }
 }

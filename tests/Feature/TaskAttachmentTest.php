@@ -6,6 +6,9 @@ use App\Models\Board;
 use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\TaskAttachment;
+use App\Models\Ticket;
+use App\Models\TicketAttachment;
+use App\Models\TicketMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -69,7 +72,7 @@ class TaskAttachmentTest extends TestCase
             ->assertJsonValidationErrors('files.0');
 
         $this->actingAs($developer)
-            ->postJson($url, ['files' => [UploadedFile::fake()->create('grande.pdf', 10241, 'application/pdf')]])
+            ->postJson($url, ['files' => [UploadedFile::fake()->create('grande.pdf', config('attachments.max_size_kb') + 1, 'application/pdf')]])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('files.0');
 
@@ -118,6 +121,31 @@ class TaskAttachmentTest extends TestCase
         $this->actingAs($developer)->get(route('attachments.show', [$image, 'download' => 1]))
             ->assertOk()
             ->assertHeader('Content-Disposition', 'attachment; filename='.$image->original_name);
+    }
+
+    public function test_task_shows_and_serves_attachments_of_its_ticket_and_replies(): void
+    {
+        $developer = User::factory()->developer()->create();
+        $task = Task::factory()->create();
+        $ticket = Ticket::factory()->create(['task_id' => $task->id]);
+        $message = TicketMessage::create(['ticket_id' => $ticket->id, 'user_id' => null, 'body' => 'Segue o print do erro.']);
+
+        $opening = TicketAttachment::factory()->for($ticket)->create(['original_name' => 'abertura.png']);
+        $reply = TicketAttachment::factory()->for($ticket)->create(['ticket_message_id' => $message->id, 'original_name' => 'resposta.png']);
+        Storage::disk(TicketAttachment::DISK)->put($opening->path, 'conteudo');
+        Storage::disk(TicketAttachment::DISK)->put($reply->path, 'conteudo');
+
+        $this->actingAs($developer)->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee('Anexos do chamado #'.$ticket->id)
+            ->assertSee('abertura.png')
+            ->assertSee('resposta.png');
+
+        $this->actingAs($developer)->get(route('ticket-attachments.show', $opening))->assertOk();
+        $this->actingAs($developer)->get(route('ticket-attachments.show', $reply))->assertOk();
+
+        $unlinked = TicketAttachment::factory()->create();
+        $this->actingAs($developer)->get(route('ticket-attachments.show', $unlinked))->assertForbidden();
     }
 
     public function test_guests_cannot_download_and_missing_files_return_not_found(): void

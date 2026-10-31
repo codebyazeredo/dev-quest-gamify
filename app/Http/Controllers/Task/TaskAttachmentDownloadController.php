@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\TaskAttachment;
 use App\Support\AttachmentResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class TaskAttachmentDownloadController extends Controller
 {
-    public function show(Request $request, TaskAttachment $attachment): StreamedResponse
+    public function show(Request $request, TaskAttachment $attachment): Response
     {
         $this->authorize('view', $attachment);
 

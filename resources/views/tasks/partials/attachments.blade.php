@@ -2,30 +2,14 @@
     $canUpload = auth()->user()->can('create', [\App\Models\TaskAttachment::class, $task]);
 @endphp
 
-<div class="card" x-data="attachmentUploader({{ $task->id }}, @js($canUpload))" x-on:paste.window="pasteFiles($event)">
-    <div class="card-header bg-body fw-semibold d-flex align-items-center justify-content-between">
-        <span><i class="bi bi-paperclip me-1" aria-hidden="true"></i> Anexos <x-badge>{{ $task->attachments->count() }}</x-badge></span>
-    </div>
-
+<div x-data="attachmentUploader({{ $task->id }}, @js($canUpload))" x-on:paste.window="pasteFiles($event)">
     @if ($canUpload)
-        <div class="p-3 pb-0">
-            <div
-                class="attachment-dropzone"
-                x-bind:class="{ 'is-dragging': isDragging, 'is-busy': isBusy }"
-                x-on:dragover.prevent="isDragging = true"
-                x-on:dragleave.prevent="isDragging = false"
-                x-on:drop.prevent="dropFiles($event)"
-                x-on:click="$refs.picker.click()"
-                x-on:keydown.enter.prevent="$refs.picker.click()"
-                role="button"
-                tabindex="0"
-            >
-                <i class="bi bi-cloud-arrow-up fs-4" aria-hidden="true"></i>
-                <span class="fw-medium" x-text="isBusy ? 'Enviando...' : 'Arraste arquivos, clique para escolher ou cole uma imagem (Ctrl+V)'"></span>
-                <span class="small text-body-secondary">Imagens, PDF, documentos, planilhas, texto e ZIP · até 10 MB cada</span>
-                <input type="file" multiple hidden x-ref="picker" x-on:change="pickFiles($event)">
-            </div>
+        <div class="p-3 border-bottom">
+            <x-file-input x-ref="picker" aria-label="Anexos" />
             <div class="text-danger small mt-2" x-show="firstError('files') || firstError('files.0')" x-cloak x-text="firstError('files') || firstError('files.0')"></div>
+            <div class="text-end mt-2">
+                <x-button type="button" x-on:click="upload" x-bind:disabled="isBusy"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i> Enviar anexos</x-button>
+            </div>
         </div>
     @endif
 

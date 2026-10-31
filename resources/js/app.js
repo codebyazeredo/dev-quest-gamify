@@ -5,6 +5,7 @@ import './theme.js';
 import './sidebar.js';
 import './clipboard.js';
 import { attachmentUploader } from './attachments.js';
+import './file-input.js';
 import { challengesTable } from './challenges-table.js';
 import { clientsTable } from './clients-table.js';
 import { crudTable } from './crud-table.js';

@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\TicketAttachment;
 use App\Support\AttachmentResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class TicketAttachmentDownloadController extends Controller
 {
-    public function show(Request $request, TicketAttachment $attachment): StreamedResponse
+    public function show(Request $request, TicketAttachment $attachment): Response
     {
         $this->authorize('view', $attachment->ticket);
 
