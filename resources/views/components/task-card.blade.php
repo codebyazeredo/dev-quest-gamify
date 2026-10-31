@@ -97,6 +97,10 @@
                 <i class="bi {{ $priorityIcon }} fs-5 lh-1" title="Prioridade: {{ $task->priority->name }}" aria-label="Prioridade {{ $task->priority->name }}"></i>
                 <span class="count-pill" title="Pontuação da tarefa">{{ number_format($task->xpValue()) }} XP</span>
 
+                @if ($task->checklist_items_count)
+                    <span class="small {{ $task->checklist_done_count === $task->checklist_items_count ? 'text-success' : 'text-body-secondary' }}" title="Checklist: {{ $task->checklist_done_count }} de {{ $task->checklist_items_count }} concluídos"><i class="bi bi-check2-square" aria-hidden="true"></i> {{ $task->checklist_done_count }}/{{ $task->checklist_items_count }}</span>
+                @endif
+
                 @if ($task->attachments_count)
                     <span class="small text-body-secondary" title="{{ $task->attachments_count }} {{ $task->attachments_count === 1 ? 'anexo' : 'anexos' }}"><i class="bi bi-paperclip" aria-hidden="true"></i> {{ $task->attachments_count }}</span>
                 @endif

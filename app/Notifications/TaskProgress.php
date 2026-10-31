@@ -6,7 +6,7 @@ use Illuminate\Notifications\Notification;
 
 class TaskProgress extends Notification
 {
-    /** @param  string  $kind  assigned|moved|testing|approved|rejected|done */
+    /** @param  string  $kind  assigned|moved|testing|approved|rejected|done|commented|reminder */
     public function __construct(
         private int $taskId,
         private string $taskTitle,

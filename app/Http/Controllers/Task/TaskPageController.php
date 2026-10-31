@@ -23,7 +23,7 @@ class TaskPageController extends Controller
     {
         $this->authorize('view', $task);
 
-        $task->load('attachments.user');
+        $task->load(['attachments.user', 'comments.user', 'checklistItems', 'ticket.client', 'ticket.attachments', 'ticket.messages.user', 'ticket.messages.attachments']);
 
         return view('tasks.show', [
             ...$this->details->detailsFor($task, $request->user()),

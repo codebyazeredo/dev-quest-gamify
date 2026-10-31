@@ -41,9 +41,19 @@ class BoardRepository extends Repository
     {
         return $board->load([
             'columns.tasks' => fn ($query) => $query->whereNull('archived_at')
-                ->withCount('attachments')
+                ->withCount($this->taskCardCounts())
                 ->with(['category', 'priority', 'assignedTo.person', 'taskEvents']),
         ]);
+    }
+
+    /** @return array<int|string, mixed> */
+    private function taskCardCounts(): array
+    {
+        return [
+            'attachments',
+            'checklistItems',
+            'checklistItems as checklist_done_count' => fn ($query) => $query->whereNotNull('completed_at'),
+        ];
     }
 
     public function archivedTasks(Board $board): Collection
@@ -51,7 +61,7 @@ class BoardRepository extends Repository
         return Task::query()
             ->where('board_id', $board->id)
             ->whereNotNull('archived_at')
-            ->withCount('attachments')
+            ->withCount($this->taskCardCounts())
             ->with(['category', 'priority', 'assignedTo.person', 'taskEvents'])
             ->orderByDesc('archived_at')
             ->get();

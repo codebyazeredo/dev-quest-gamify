@@ -19,6 +19,8 @@ use App\Http\Controllers\Gamification\TitleSelectionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Task\TaskAttachmentController;
+use App\Http\Controllers\Task\TaskChecklistItemController;
+use App\Http\Controllers\Task\TaskCommentController;
 use App\Http\Controllers\Task\TaskController;
 use App\Http\Controllers\Ticket\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +59,11 @@ Route::post('tasks/{task}/homologation', [TaskController::class, 'markHomologati
 Route::post('tasks/{task}/deploy', [TaskController::class, 'markDeployed'])->name('tasks.deploy');
 Route::post('tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
 Route::delete('attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('attachments.destroy');
+Route::post('tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+Route::delete('comments/{comment}', [TaskCommentController::class, 'destroy'])->name('comments.destroy');
+Route::post('tasks/{task}/checklist', [TaskChecklistItemController::class, 'store'])->name('tasks.checklist.store');
+Route::post('checklist/{item}/toggle', [TaskChecklistItemController::class, 'toggle'])->name('checklist.toggle');
+Route::delete('checklist/{item}', [TaskChecklistItemController::class, 'destroy'])->name('checklist.destroy');
 Route::post('tasks/{task}/archive', [TaskController::class, 'archive'])->name('tasks.archive');
 Route::post('tasks/{task}/unarchive', [TaskController::class, 'unarchive'])->name('tasks.unarchive');
 

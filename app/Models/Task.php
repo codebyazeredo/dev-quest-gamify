@@ -77,6 +77,16 @@ class Task extends Model
     }
 
     public function taskEvents(): HasMany
+    public function checklistItems(): HasMany
+    {
+        return $this->hasMany(TaskChecklistItem::class)->oldest('id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class)->oldest();
+    }
+
     {
         return $this->hasMany(TaskEvent::class)->orderBy('occurred_at');
     }

@@ -41,37 +41,6 @@
 
         <div class="row g-4">
             <div class="col-lg-8 vstack gap-4">
-                <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-2">Descrição</h2>
-                    <p class="mb-0" style="white-space: pre-line;">{{ $task->description ?: 'Sem descrição.' }}</p>
-                </x-card>
-
-                @if ($task->branch_name || $task->pull_request_url)
-                    <x-card>
-                        <h2 class="h6 text-body-secondary text-uppercase mb-2">Git</h2>
-                        <div class="d-flex flex-wrap align-items-center gap-3">
-                            @if ($task->branch_name)
-                                <span class="d-inline-flex align-items-center gap-1">
-                                    <code><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</code>
-                                    <x-icon-button icon="clipboard" label="Copiar branch" data-copy="{{ $task->branch_name }}" data-copy-label="Branch copiada" class="btn-icon-sm" />
-                                </span>
-                            @endif
-
-                            @if ($task->pull_request_url)
-                                <span class="d-inline-flex align-items-center gap-1">
-                                    <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
-                                    @if ($task->pull_request_state)
-                                        <span class="badge text-bg-{{ $task->pull_request_state->badgeVariant() }}">{{ $task->pull_request_state->label() }}</span>
-                                    @endif
-                                    <x-icon-button icon="clipboard" label="Copiar link do pull request" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn-icon-sm" />
-                                </span>
-                            @endif
-                        </div>
-                    </x-card>
-                @endif
-
-                @include('tasks.partials.attachments')
-
                 @if ($task->status === \App\Enums\TaskStatus::TESTING)
                     <x-card variant="highlight">
                         <h2 class="h6 mb-3"><i class="bi bi-clipboard2-check me-1" aria-hidden="true"></i> Revisão de teste</h2>
@@ -105,6 +74,38 @@
                     </x-card>
                 @endif
 
+                <x-card>
+                    <h2 class="h6 mb-2">Descrição</h2>
+                    <p class="mb-0" style="white-space: pre-line;">{{ $task->description ?: 'Sem descrição.' }}</p>
+                </x-card>
+
+                @if ($task->branch_name || $task->pull_request_url)
+                    <x-card>
+                        <h2 class="h6 fw-semibold mb-2">Git</h2>
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            @if ($task->branch_name)
+                                <span class="d-inline-flex align-items-center gap-1">
+                                    <code><i class="bi bi-git" aria-hidden="true"></i> {{ $task->branch_name }}</code>
+                                    <x-icon-button icon="clipboard" label="Copiar branch" data-copy="{{ $task->branch_name }}" data-copy-label="Branch copiada" class="btn-icon-sm" />
+                                </span>
+                            @endif
+
+                            @if ($task->pull_request_url)
+                                <span class="d-inline-flex align-items-center gap-1">
+                                    <a href="{{ $task->pull_request_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir pull request</a>
+                                    @if ($task->pull_request_state)
+                                        <span class="badge text-bg-{{ $task->pull_request_state->badgeVariant() }}">{{ $task->pull_request_state->label() }}</span>
+                                    @endif
+                                    <x-icon-button icon="clipboard" label="Copiar link do pull request" data-copy="{{ $task->pull_request_url }}" data-copy-label="Link copiado" class="btn-icon-sm" />
+                                </span>
+                            @endif
+                        </div>
+                    </x-card>
+                @endif
+
+
+                @include('tasks.partials.checklist')
+
                 @if ((auth()->user()->can('markHomologationCompleted', $task) && ! $hasHomologation) || (auth()->user()->can('markDeployed', $task) && ! $hasDeployed))
                     <div class="d-flex flex-wrap gap-2">
                         @can('markHomologationCompleted', $task)
@@ -125,57 +126,92 @@
                     </div>
                 @endif
 
-                <div class="card">
-                    <div class="card-header bg-body fw-semibold"><i class="bi bi-clock-history me-1" aria-hidden="true"></i> Histórico</div>
-                    <ul class="list-group list-group-flush">
-                        @foreach ($task->taskEvents as $event)
-                            <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
-                                <span class="small">
-                                    <span class="fw-medium">{{ $event->user->name }}</span>
-                                    <span class="text-body-secondary">&middot; {{ $event->type->label() }} &middot; {{ $event->occurred_at->format('d/m/Y H:i') }}</span>
-                                </span>
+                @php
+                    $ticketAttachmentCount = $task->ticket ? $task->ticket->attachments->count() + $task->ticket->messages->sum(fn ($message) => $message->attachments->count()) : 0;
+                @endphp
 
-                                @if ($event->xpTransaction)
-                                    <x-xp-badge :amount="$event->xpTransaction->amount" />
+                <div class="card" data-tab-hash>
+                    <div class="card-header bg-transparent pb-0 border-bottom-0">
+                        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link active" id="task-tab-comments-button" data-bs-toggle="tab" data-bs-target="#task-tab-comments" role="tab" aria-controls="task-tab-comments" aria-selected="true">
+                                    Comentários <x-badge>{{ $task->comments->count() }}</x-badge>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link" id="task-tab-attachments-button" data-bs-toggle="tab" data-bs-target="#task-tab-attachments" role="tab" aria-controls="task-tab-attachments" aria-selected="false">
+                                    Anexos <x-badge>{{ $task->attachments->count() + $ticketAttachmentCount }}</x-badge>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button type="button" class="nav-link" id="task-tab-history-button" data-bs-toggle="tab" data-bs-target="#task-tab-history" role="tab" aria-controls="task-tab-history" aria-selected="false">
+                                    Histórico <x-badge>{{ $task->taskEvents->count() + $task->movements->count() }}</x-badge>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="task-tab-comments" role="tabpanel" aria-labelledby="task-tab-comments-button" tabindex="0">
+                            @include('tasks.partials.comments')
+                        </div>
+
+                        <div class="tab-pane fade" id="task-tab-attachments" role="tabpanel" aria-labelledby="task-tab-attachments-button" tabindex="0">
+                            @include('tasks.partials.attachments')
+                            @include('tasks.partials.ticket-attachments')
+                        </div>
+
+                        <div class="tab-pane fade" id="task-tab-history" role="tabpanel" aria-labelledby="task-tab-history-button" tabindex="0">
+                            <h3 class="h6 px-3 pt-3 mb-0"><i class="bi bi-clock-history me-1" aria-hidden="true"></i> Pontuação e eventos</h3>
+                            <ul class="list-group list-group-flush">
+                                @foreach ($task->taskEvents as $event)
+                                    <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+                                        <span class="small">
+                                            <span class="fw-medium">{{ $event->user->name }}</span>
+                                            <span class="text-body-secondary">&middot; {{ $event->type->label() }} &middot; {{ $event->occurred_at->format('d/m/Y H:i') }}</span>
+                                        </span>
+
+                                        @if ($event->xpTransaction)
+                                            <x-xp-badge :amount="$event->xpTransaction->amount" />
+                                        @endif
+                                    </li>
+                                @endforeach
+
+                                @if ($completionBonus)
+                                    <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+                                        <span class="small text-body-secondary">Tarefa concluída &middot; pontuação base concedida</span>
+                                        <x-xp-badge :amount="$completionBonus->amount" />
+                                    </li>
                                 @endif
-                            </li>
-                        @endforeach
 
-                        @if ($completionBonus)
-                            <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
-                                <span class="small text-body-secondary">Tarefa concluída &middot; pontuação base concedida</span>
-                                <x-xp-badge :amount="$completionBonus->amount" />
-                            </li>
-                        @endif
-
-                        @if ($task->taskEvents->isEmpty() && ! $completionBonus)
-                            <li class="list-group-item small text-body-secondary">Nenhuma atividade ainda.</li>
-                        @endif
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <div class="card-header bg-body fw-semibold"><i class="bi bi-arrow-left-right me-1" aria-hidden="true"></i> Movimentações</div>
-                    <ul class="list-group list-group-flush">
-                        @forelse ($task->movements as $movement)
-                            <li class="list-group-item">
-                                <span class="small">
-                                    <span class="fw-medium">{{ $movement->user->name }}</span>
-                                    <span class="text-body-secondary">moveu de</span>
-                                    <x-badge>{{ $movement->fromColumn?->name ?? '—' }}</x-badge>
-                                    <span class="text-body-secondary">para</span>
-                                    <x-badge color="primary">{{ $movement->toColumn->name }}</x-badge>
-                                    <span class="text-body-secondary">&middot; {{ $movement->created_at->format('d/m/Y H:i') }}</span>
-                                </span>
-
-                                @if ($movement->note)
-                                    <p class="small text-body-secondary mt-1 mb-0">{{ $movement->note }}</p>
+                                @if ($task->taskEvents->isEmpty() && ! $completionBonus)
+                                    <li class="list-group-item small text-body-secondary">Nenhuma atividade ainda.</li>
                                 @endif
-                            </li>
-                        @empty
-                            <li class="list-group-item small text-body-secondary">Nenhuma movimentação registrada ainda.</li>
-                        @endforelse
-                    </ul>
+                            </ul>
+
+                            <h3 class="h6 px-3 pt-3 mb-0 border-top mt-3"><i class="bi bi-arrow-left-right me-1" aria-hidden="true"></i> Movimentações</h3>
+                            <ul class="list-group list-group-flush">
+                                @forelse ($task->movements as $movement)
+                                    <li class="list-group-item">
+                                        <span class="small">
+                                            <span class="fw-medium">{{ $movement->user->name }}</span>
+                                            <span class="text-body-secondary">moveu de</span>
+                                            <x-badge>{{ $movement->fromColumn?->name ?? '—' }}</x-badge>
+                                            <span class="text-body-secondary">para</span>
+                                            <x-badge color="primary">{{ $movement->toColumn->name }}</x-badge>
+                                            <span class="text-body-secondary">&middot; {{ $movement->created_at->format('d/m/Y H:i') }}</span>
+                                        </span>
+
+                                        @if ($movement->note)
+                                            <p class="small text-body-secondary mt-1 mb-0">{{ $movement->note }}</p>
+                                        @endif
+                                    </li>
+                                @empty
+                                    <li class="list-group-item small text-body-secondary">Nenhuma movimentação registrada ainda.</li>
+                                @endforelse
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -214,7 +250,7 @@
                 </div>
 
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-3">Responsável</h2>
+                    <h2 class="h6 fw-semibold mb-3">Responsável</h2>
 
                     @if ($task->assignedTo)
                         <div class="d-flex align-items-center gap-3">

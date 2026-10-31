@@ -3,6 +3,7 @@ import { Tooltip } from 'bootstrap';
 import './kanban.js';
 import './theme.js';
 import './sidebar.js';
+import './tab-hash.js';
 import './clipboard.js';
 import { attachmentUploader } from './attachments.js';
 import './file-input.js';
@@ -21,6 +22,8 @@ import { taskModal } from './task-modal.js';
 import { ticketPage } from './ticket-page.js';
 import { ticketsTable } from './tickets-table.js';
 import { taskPage } from './task-page.js';
+import { taskComments } from './task-comments.js';
+import { taskChecklist } from './task-checklist.js';
 
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('crudTable', crudTable);
@@ -28,6 +31,8 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('peopleTable', peopleTable);
     window.Alpine.data('challengesTable', challengesTable);
     window.Alpine.data('attachmentUploader', attachmentUploader);
+    window.Alpine.data('taskComments', taskComments);
+    window.Alpine.data('taskChecklist', taskChecklist);
     window.Alpine.data('clientsTable', clientsTable);
     window.Alpine.data('ticketsTable', ticketsTable);
     window.Alpine.data('ticketPage', ticketPage);
