@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app :fluid="true">
     <div
         class="d-flex flex-column flex-grow-1 min-h-0"
         x-data="modalForm"

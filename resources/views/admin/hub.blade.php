@@ -3,8 +3,10 @@
         <x-page-header title="Configurações" subtitle="Gerencie pessoas, regras de pontuação e a identidade do sistema." />
 
         @foreach ($sections as $section)
+            @continue($section['label'] === 'Visão geral')
+
             <section class="mb-4">
-                <h2 class="h6 text-body-secondary text-uppercase mb-3">{{ $section['label'] }}</h2>
+                <h2 class="h6 fw-semibold mb-3">{{ $section['label'] }}</h2>
 
                 <div class="row g-3">
                     @foreach ($section['items'] as $item)

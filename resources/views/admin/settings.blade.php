@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div x-data="settingsForm(@js($setting))">
-        <x-page-header title="Identidade da empresa" subtitle="Nome, logo e cor principal exibidos para todos os usuários." :back="route('admin.index')" backLabel="Configurações" />
+        <x-page-header title="Identidade da empresa" subtitle="Nome, logo e cor principal exibidos para todos os usuários." />
 
         <form x-on:submit.prevent="save">
             <div class="row g-4">
@@ -73,7 +73,7 @@
                         <div class="text-danger small mt-1" x-text="firstError('primary_color')"></div>
 
                         <div class="theme-preview border rounded-3 p-3 mt-4 bg-body-tertiary" x-bind:style="themePreviewStyle()">
-                            <p class="small text-body-secondary text-uppercase fw-semibold mb-3">Pré-visualização</p>
+                            <p class="small text-body-secondary fw-semibold mb-3">Pré-visualização</p>
 
                             <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                                 <button type="button" class="btn btn-primary">Botão primário</button>

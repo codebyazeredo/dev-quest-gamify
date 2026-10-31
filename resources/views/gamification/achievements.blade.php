@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div>
-        <x-page-header title="Conquistas" subtitle="Desbloqueie conquistas cumprindo metas e ganhe XP extra." :back="route('dashboard')" backLabel="Minha conta" />
+        <x-page-header title="Conquistas" subtitle="Desbloqueie conquistas cumprindo metas e ganhe XP extra." />
 
         <div class="row g-3">
             @foreach ($achievements as $row)

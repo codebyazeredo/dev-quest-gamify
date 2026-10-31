@@ -4,7 +4,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Usuários" subtitle="Contas de acesso ao sistema." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Usuários" subtitle="Contas de acesso ao sistema.">
             <x-icon-button :href="route('admin.people')" icon="person-vcard" label="Gerenciar pessoas" />
 
             @can('create', \App\Models\User::class)
@@ -57,7 +57,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Usuário" size="lg">
+            <x-modal title="Usuário" :verbs="true" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <template x-if="! editingRow">
                         <x-form-select name="person_id" label="Pessoa" placeholder="Selecione uma pessoa cadastrada">
@@ -77,9 +77,13 @@
                     <x-form-input name="email" label="E-mail" type="email" />
 
                     <div class="form-grid form-grid-2">
-                        <x-form-input name="password" label="Senha" type="password" autocomplete="new-password" hint="Na edição, deixe em branco para manter a senha atual." />
+                        <x-form-input name="password" label="Senha" type="password" autocomplete="new-password" />
                         <x-form-input name="password_confirmation" label="Confirmar senha" type="password" autocomplete="new-password" />
                     </div>
+
+                    <template x-if="editingRow">
+                        <div class="form-text mt-n2">Deixe a senha em branco para manter a atual.</div>
+                    </template>
 
                     <div>
                         <span class="form-label fw-medium small d-block mb-1">Roles</span>

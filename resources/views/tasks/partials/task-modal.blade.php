@@ -4,7 +4,7 @@
     x-on:close-modal="close"
 >
     <template x-if="isOpen">
-        <x-modal title="Tarefa" size="lg">
+        <x-modal title="Tarefa" :verbs="true" size="lg">
             <form x-on:submit.prevent="save" class="vstack gap-3">
                 <x-form-input name="title" label="Título" placeholder="O que precisa ser feito?" required autofocus />
                 <x-form-textarea name="description" label="Descrição" rows="4" placeholder="Contexto, critérios de aceite, links úteis..." />

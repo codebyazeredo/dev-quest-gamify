@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div x-data="challengesTable" x-init="load()" x-on:close-modal="closeModal">
-        <x-page-header title="Desafios" subtitle="Metas por período com recompensa em XP e títulos." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Desafios" subtitle="Metas por período com recompensa em XP e títulos.">
             @can('create', \App\Models\Challenge::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Novo desafio</x-button>
             @endcan
@@ -78,7 +78,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Desafio" size="lg">
+            <x-modal title="Desafio" :verbs="true" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <div class="row g-3">
                         <div class="col-sm-7"><x-form-input name="name" label="Nome" autofocus /></div>

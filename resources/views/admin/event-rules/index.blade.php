@@ -4,7 +4,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Regras de XP" subtitle="Pontuação por evento da tarefa." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Regras de XP" subtitle="Pontuação por evento da tarefa.">
             @can('create', \App\Models\TaskEventRule::class)
                 <x-button x-show="rows.some((row) => ! row.configured)" x-cloak x-on:click="openCreate"><x-icon name="plus" /> Nova regra</x-button>
             @endcan

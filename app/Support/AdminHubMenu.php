@@ -39,7 +39,7 @@ class AdminHubMenu
             [
                 'label' => 'Sistema',
                 'items' => [
-                    ['route' => 'admin.settings', 'label' => 'Configurações', 'description' => 'Nome e logo da empresa.', 'icon' => 'gear'],
+                    ['route' => 'admin.settings', 'label' => 'Identidade da empresa', 'description' => 'Nome, logo e cor principal.', 'icon' => 'gear'],
                 ],
             ],
         ];

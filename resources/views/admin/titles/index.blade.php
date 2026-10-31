@@ -8,7 +8,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Títulos" subtitle="Títulos desbloqueáveis por conquistas e desafios." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Títulos" subtitle="Títulos desbloqueáveis por conquistas e desafios.">
             @can('create', \App\Models\Title::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Novo título</x-button>
             @endcan
@@ -72,7 +72,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Título" size="lg">
+            <x-modal title="Título" :verbs="true" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" autofocus />
                     <x-form-textarea name="description" label="Descrição" rows="2" />

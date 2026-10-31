@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div x-data="rolesTable" x-init="load()" x-on:close-modal="closeModal">
-        <x-page-header title="Roles & permissões" subtitle="Marque o que cada papel pode fazer." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Roles & permissões" subtitle="Marque o que cada papel pode fazer.">
             <x-button x-on:click="openCreate"><x-icon name="plus" /> Novo role</x-button>
         </x-page-header>
 

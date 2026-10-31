@@ -8,7 +8,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Conquistas" subtitle="Condições, recompensas e títulos das conquistas." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Conquistas" subtitle="Condições, recompensas e títulos das conquistas.">
             @can('create', \App\Models\Achievement::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Nova conquista</x-button>
             @endcan
@@ -77,7 +77,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Conquista" size="lg">
+            <x-modal title="Conquista" :verbs="true" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" autofocus />
                     <x-form-icon-picker :icons="$icons" />

@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div x-data="peopleTable" x-init="load()" x-on:close-modal="closeModal">
-        <x-page-header title="Pessoas" subtitle="Dados cadastrais da equipe." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Pessoas" subtitle="Dados cadastrais da equipe.">
             @can('create', \App\Models\Person::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Nova pessoa</x-button>
             @endcan
@@ -51,7 +51,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Pessoa" size="lg">
+            <x-modal title="Pessoa" :verbs="true" size="lg">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <div class="row g-3">
                         <div class="col-12"><x-form-input name="nome" label="Nome" autofocus /></div>

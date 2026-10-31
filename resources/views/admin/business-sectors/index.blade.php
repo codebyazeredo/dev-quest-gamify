@@ -4,7 +4,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Ramos de atuação" subtitle="Segmentos de mercado dos clientes." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Ramos de atuação" subtitle="Segmentos de mercado dos clientes.">
             @can('create', \App\Models\BusinessSector::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Novo ramo</x-button>
             @endcan
@@ -40,7 +40,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Ramo de atuação">
+            <x-modal title="Ramo de atuação" :verbs="true">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" autofocus />
                     <x-form-actions create-label="Criar ramo" />

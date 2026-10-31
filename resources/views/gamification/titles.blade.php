@@ -1,8 +1,8 @@
 <x-layouts.app>
     <div x-data="pageActions">
-        <x-page-header title="Títulos" subtitle="Escolha o título exibido no seu perfil e veja como desbloquear os próximos." :back="route('dashboard')" backLabel="Minha conta" />
+        <x-page-header title="Títulos" subtitle="Escolha o título exibido no seu perfil e veja como desbloquear os próximos." />
 
-        <h2 class="h6 text-body-secondary text-uppercase mb-3">Desbloqueados</h2>
+        <h2 class="h6 fw-semibold mb-3">Desbloqueados</h2>
 
         @if ($unlocked->isEmpty())
             <div class="text-center text-body-secondary py-5">
@@ -19,7 +19,7 @@
                                     <x-icon-chip :icon="$title->icon" color="warning" />
                                     <div class="min-w-0">
                                         <div class="fw-semibold text-truncate">{{ $title->name }}</div>
-                                        <div class="small text-body-secondary text-truncate">{{ $title->unlockRuleDescription() }}</div>
+                                        <div class="small text-body-secondary">{{ $title->unlockRuleDescription() }}</div>
                                     </div>
                                 </div>
 
@@ -36,7 +36,7 @@
         @endif
 
         @if ($locked->isNotEmpty())
-            <h2 class="h6 text-body-secondary text-uppercase mt-5 mb-3">Para desbloquear</h2>
+            <h2 class="h6 fw-semibold mt-5 mb-3">Para desbloquear</h2>
 
             <div class="row g-3">
                 @foreach ($locked as $title)

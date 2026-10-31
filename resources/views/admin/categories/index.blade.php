@@ -4,7 +4,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Categorias" subtitle="Tipos de tarefa e as cores exibidas no Kanban." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Categorias" subtitle="Tipos de tarefa e as cores exibidas no Kanban.">
             @can('create', \App\Models\TaskCategory::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Nova categoria</x-button>
             @endcan
@@ -47,7 +47,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Categoria">
+            <x-modal title="Categoria" :verbs="true">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <div>
                         <label for="name" class="form-label fw-medium small mb-1">Nome</label>

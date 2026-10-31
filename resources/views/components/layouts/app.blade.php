@@ -1,3 +1,4 @@
+@props(['title' => null, 'fluid' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -8,28 +9,38 @@
         @php
             $appSettings = \App\Models\AppSetting::current();
             $currentUser = auth()->user();
+            $isAdminSettingsPage = request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard', 'admin.index');
+
             $navigation = [
-                'Geral' => [
+                'Início' => [
+                    ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Minha conta', 'icon' => 'bi-house-door'],
+                ],
+                'Trabalho' => [
                     ['route' => 'boards.index', 'active' => 'boards.*', 'label' => 'Quadros', 'icon' => 'bi-kanban'],
-                    ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Minha conta', 'icon' => 'bi-person-circle'],
                 ],
                 'Gamificação' => [
                     ['route' => 'challenges', 'active' => 'challenges', 'label' => 'Desafios', 'icon' => 'bi-flag'],
                     ['route' => 'achievements', 'active' => 'achievements', 'label' => 'Conquistas', 'icon' => 'bi-award'],
+                    ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
+                    ['route' => 'ranking', 'active' => 'ranking', 'label' => 'Ranking', 'icon' => 'bi-trophy'],
+                    ['route' => 'checkin', 'active' => 'checkin', 'label' => 'Check-in', 'icon' => 'bi-fire'],
                 ],
             ];
 
             $userMenuLinks = [
-                ['route' => 'checkin', 'active' => 'checkin', 'label' => 'Check-in', 'icon' => 'bi-fire'],
-                ['route' => 'titles', 'active' => 'titles', 'label' => 'Títulos', 'icon' => 'bi-patch-check'],
+                ['route' => 'profile', 'active' => 'profile', 'label' => 'Meu perfil', 'icon' => 'bi-person-gear'],
+                ['route' => 'security', 'active' => 'security', 'label' => 'Segurança', 'icon' => 'bi-shield-lock'],
             ];
 
             if ($currentUser->can('viewAny', \App\Models\Ticket::class)) {
-                $navigation['Geral'][] = ['route' => 'tickets.index', 'active' => 'tickets.*', 'label' => 'Chamados', 'icon' => 'bi-headset'];
+                $navigation['Trabalho'][] = ['route' => 'tickets.index', 'active' => 'tickets.*', 'label' => 'Chamados', 'icon' => 'bi-headset'];
             }
 
             if ($currentUser->isAdmin()) {
-                $navigation['Geral'][] = ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Painel administrativo', 'icon' => 'bi-speedometer2'];
+                $navigation['Administração'] = [
+                    ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Painel administrativo', 'icon' => 'bi-speedometer2'],
+                    ['route' => 'admin.index', 'active' => $isAdminSettingsPage ? 'admin.*' : 'admin.index', 'label' => 'Configurações', 'icon' => 'bi-gear'],
+                ];
             }
         @endphp
 
@@ -105,19 +116,20 @@
 
                     <nav class="flex-grow-1">
                         @foreach ($navigation as $heading => $items)
-                            <div class="sidebar-heading"><span class="sidebar-label">{{ $heading }}</span></div>
-                            <ul class="nav flex-column gap-1">
-                                @foreach ($items as $item)
-                                    <li>
-                                        <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}" class="nav-link {{ request()->routeIs($item['active']) ? 'active' : '' }}" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
-                                            <i class="bi {{ $item['icon'] }}" aria-hidden="true"></i>
-                                            <span class="sidebar-label">{{ $item['label'] }}</span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
+                            <div class="sidebar-group">
+                                <div class="sidebar-heading"><span class="sidebar-label">{{ $heading }}</span></div>
+                                <ul class="nav flex-column gap-1">
+                                    @foreach ($items as $item)
+                                        <li>
+                                            <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}" class="nav-link {{ request()->routeIs($item['active']) ? 'active' : '' }}" @if (request()->routeIs($item['active'])) aria-current="page" @endif>
+                                                <i class="bi {{ $item['icon'] }}" aria-hidden="true"></i>
+                                                <span class="sidebar-label">{{ $item['label'] }}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         @endforeach
-
                     </nav>
 
                     <div class="border-top pt-3 mt-3">
@@ -134,12 +146,6 @@
 
                         <div class="sidebar-footer">
                             <x-footer class="justify-content-start" />
-
-                            @can('accessAdminPanel', \App\Models\User::class)
-                                <a href="{{ route('admin.index') }}" class="sidebar-settings {{ request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard') ? 'active' : '' }}" title="Configurações" aria-label="Configurações" @if (request()->routeIs('admin.*') && ! request()->routeIs('admin.dashboard')) aria-current="page" @endif>
-                                    <i class="bi bi-gear" aria-hidden="true"></i>
-                                </a>
-                            @endcan
                         </div>
                     </div>
                 </div>
@@ -167,7 +173,16 @@
                 </header>
 
                 <main class="flex-grow-1 min-h-0 overflow-auto d-flex flex-column px-3 px-lg-4 py-3 py-lg-4">
-                    {{ $slot }}
+                    <div class="app-container {{ $fluid ? 'app-container--fluid' : '' }}">
+                        @if ($isAdminSettingsPage)
+                            <div class="admin-shell">
+                                <x-admin-nav />
+                                <div class="min-w-0">{{ $slot }}</div>
+                            </div>
+                        @else
+                            {{ $slot }}
+                        @endif
+                    </div>
                 </main>
             </div>
         </div>

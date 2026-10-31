@@ -3,8 +3,12 @@
 @php
     $hex = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : \App\Models\AppSetting::DEFAULT_PRIMARY_COLOR;
     [$red, $green, $blue] = sscanf(ltrim($hex, '#'), '%02x%02x%02x');
-    $isLight = ($red * 299 + $green * 587 + $blue * 114) / 1000 > 165;
-    $contrast = $isLight ? '#212529' : '#ffffff';
+    $linear = fn (int $channel): float => ($channel / 255) <= 0.03928 ? ($channel / 255) / 12.92 : ((($channel / 255) + 0.055) / 1.055) ** 2.4;
+    $luminance = 0.2126 * $linear($red) + 0.7152 * $linear($green) + 0.0722 * $linear($blue);
+    $darkTextLuminance = 0.017;
+    $whiteContrast = 1.05 / ($luminance + 0.05);
+    $darkContrast = ($luminance + 0.05) / ($darkTextLuminance + 0.05);
+    $contrast = $whiteContrast >= $darkContrast ? '#ffffff' : '#212529';
 @endphp
 
 <style>

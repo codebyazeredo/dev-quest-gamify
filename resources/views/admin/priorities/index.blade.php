@@ -4,7 +4,7 @@
         x-init="load()"
         x-on:close-modal="closeModal"
     >
-        <x-page-header title="Gravidade" subtitle="Multiplicadores de pontuação por prioridade." :back="route('admin.index')" backLabel="Configurações">
+        <x-page-header title="Gravidade" subtitle="Multiplicadores de pontuação por prioridade.">
             @can('create', \App\Models\TaskPriority::class)
                 <x-button x-on:click="openCreate"><x-icon name="plus" /> Nova gravidade</x-button>
             @endcan
@@ -40,7 +40,7 @@
         </div>
 
         <template x-if="isModalOpen">
-            <x-modal title="Gravidade">
+            <x-modal title="Gravidade" :verbs="true">
                 <form x-on:submit.prevent="save" class="vstack gap-3">
                     <x-form-input name="name" label="Nome" autofocus />
                     <x-form-input name="multiplier" label="Multiplicador de XP" type="number" min="0" step="0.01" />

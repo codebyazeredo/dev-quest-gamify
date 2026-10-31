@@ -12,7 +12,7 @@
             <div class="col-lg-8 col-xl-6">
                 <x-card padding="p-4">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h2 class="h5 mb-0 text-capitalize">{{ $monthLabel }}</h2>
+                        <h2 class="h5 mb-0">{{ $monthLabel }}</h2>
 
                         <div class="d-flex align-items-center gap-1" role="group" aria-label="Navegar entre meses">
                             <a href="{{ route('checkin', ['month' => $previousMonth]) }}" title="Mês anterior" aria-label="Mês anterior" class="btn btn-ghost btn-icon btn-icon-sm">
