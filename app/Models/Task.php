@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 #[Fillable([
     'board_id', 'column_id', 'category_id', 'priority_id', 'assigned_to', 'created_by',
     'title', 'description', 'branch_name', 'pull_request_url', 'pull_request_state', 'status', 'position',
-    'base_points', 'priority_multiplier', 'due_at',
+    'base_points', 'priority_multiplier', 'due_at', 'due_reminder_sent_at',
     'rejection_reason', 'rejected_at', 'approved_by',
     'started_at', 'completed_at', 'archived_at',
 ])]
@@ -29,6 +29,7 @@ class Task extends Model
             'pull_request_state' => PullRequestState::class,
             'priority_multiplier' => 'decimal:2',
             'due_at' => 'datetime',
+            'due_reminder_sent_at' => 'datetime',
             'rejected_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',

@@ -31,6 +31,18 @@ class TaskRepository extends Repository
             ->first();
     }
 
+    /** @return Collection<int, Task> */
+    public function assignedDueBeforeWithoutReminder(CarbonInterface $limit): Collection
+    {
+        return $this->active()
+            ->whereNotNull('assigned_to')
+            ->whereNull('completed_at')
+            ->whereNull('due_reminder_sent_at')
+            ->where('due_at', '<=', $limit)
+            ->with('assignedTo')
+            ->get();
+    }
+
     public function countInColumn(int $columnId): int
     {
         return $this->query()->where('column_id', $columnId)->count();

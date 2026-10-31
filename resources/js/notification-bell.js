@@ -10,6 +10,7 @@ const KINDS = {
     rejected: { icon: 'bi-x-circle', color: 'danger' },
     done: { icon: 'bi-flag', color: 'success' },
     commented: { icon: 'bi-chat-left-text', color: 'info' },
+    reminder: { icon: 'bi-alarm', color: 'warning' },
 };
 
 export function notificationBell() {
