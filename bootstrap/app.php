@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function (): void {
-            Route::middleware(['web', 'auth', AttachPendingToasts::class])
+            Route::middleware(['web', 'auth', 'throttle:120,1', AttachPendingToasts::class])
                 ->prefix('api')
                 ->name('api.')
                 ->group(base_path('routes/api.php'));

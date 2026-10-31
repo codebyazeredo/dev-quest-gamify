@@ -6,6 +6,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,6 +24,7 @@ class ApiExceptionRenderer
         $exceptions->render(fn (AuthorizationException $e, Request $request) => $this->respond($request, $e->getMessage() ?: 'Você não tem permissão para executar esta ação.', 403));
         $exceptions->render(fn (ModelNotFoundException $e, Request $request) => $this->respond($request, 'O registro solicitado não foi encontrado.', 404));
         $exceptions->render(fn (NotFoundHttpException $e, Request $request) => $this->respond($request, 'O recurso solicitado não existe.', 404));
+        $exceptions->render(fn (ThrottleRequestsException $e, Request $request) => $this->respond($request, 'Muitas requisições em pouco tempo. Aguarde alguns instantes e tente novamente.', 429));
     }
 
     private function respond(Request $request, string $message, int $status): ?JsonResponse
