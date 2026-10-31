@@ -30,6 +30,7 @@ use App\Http\Controllers\Task\TaskAttachmentDownloadController;
 use App\Http\Controllers\Task\TaskPageController;
 use App\Http\Controllers\Profile\EmailPreferenceController;
 use App\Http\Controllers\Profile\ProfilePageController;
+use App\Http\Controllers\Profile\TwoFactorSettingsController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
 use App\Http\Controllers\Ticket\TicketPageController;
 use App\Http\Middleware\EnsurePortalClient;
@@ -48,6 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/boards', [BoardPageController::class, 'index'])->name('boards.index');
     Route::get('/boards/{board}', [BoardPageController::class, 'show'])->name('boards.show');
     Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
+    Route::get('/seguranca', [TwoFactorSettingsController::class, 'show'])->name('security');
+    Route::post('/seguranca/2fa', [TwoFactorSettingsController::class, 'enable'])->name('security.two-factor.enable');
+    Route::post('/seguranca/2fa/confirmar', [TwoFactorSettingsController::class, 'confirm'])->middleware('throttle:10,1')->name('security.two-factor.confirm');
+    Route::delete('/seguranca/2fa', [TwoFactorSettingsController::class, 'disable'])->middleware('throttle:5,1')->name('security.two-factor.disable');
     Route::get('/tasks/{task}', [TaskPageController::class, 'show'])->name('tasks.show');
     Route::put('/preferencias/email', [EmailPreferenceController::class, 'update'])->name('preferences.email');
     Route::get('/attachments/{attachment}', [TaskAttachmentDownloadController::class, 'show'])->name('attachments.show');

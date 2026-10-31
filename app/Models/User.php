@@ -13,8 +13,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'person_id', 'selected_title_id'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'person_id', 'selected_title_id', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at', 'email_notifications'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     use HasFactory, HasRoles, Notifiable;
@@ -26,7 +26,16 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
+            'email_notifications' => 'boolean',
         ];
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
     }
 
     protected function photoUrl(): Attribute
@@ -66,6 +75,11 @@ class User extends Authenticatable
     public function isSuporte(): bool
     {
         return $this->hasRole('suporte');
+    }
+
+    public function isSupportStaff(): bool
+    {
+        return $this->isAdmin() || $this->isProductOwner() || $this->isSuporte();
     }
 
     public function person(): BelongsTo

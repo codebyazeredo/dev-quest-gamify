@@ -19,7 +19,19 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request, BoardService $boards): RedirectResponse
     {
-        $request->authenticate();
+        $user = $request->authenticate();
+
+        if ($user->hasTwoFactorEnabled()) {
+            $request->session()->put(TwoFactorChallengeController::SESSION_KEY, [
+                'user_id' => $user->id,
+                'remember' => $request->boolean('remember'),
+                'expires_at' => now()->addMinutes(TwoFactorChallengeController::CHALLENGE_MINUTES)->timestamp,
+            ]);
+
+            return redirect()->route('two-factor.challenge');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
 
         $request->session()->regenerate();
 
