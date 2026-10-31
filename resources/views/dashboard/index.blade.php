@@ -1,12 +1,12 @@
 <x-layouts.app>
-    <div x-data="profileModal" x-on:close-modal="close">
+    <div>
         <div class="card mb-4 overflow-hidden">
             <div class="bg-primary" style="height: 0.375rem;"></div>
             <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center gap-4">
                 <x-avatar :user="auth()->user()" size="xl" />
 
                 <div class="flex-grow-1 min-w-0">
-                    <p class="small text-uppercase fw-semibold text-body-secondary mb-1">Minha conta</p>
+                    <p class="small fw-semibold text-body-secondary mb-1">Minha conta</p>
                     <h1 class="h3 mb-1 text-truncate">{{ auth()->user()->name }}</h1>
                     <p class="mb-0 d-flex align-items-center gap-2 text-body-secondary">
                         @if ($selectedTitle)
@@ -21,7 +21,7 @@
                 <div class="d-flex flex-wrap gap-2">
                     <x-icon-button :href="route('achievements')" icon="award" label="Conquistas" />
                     <x-icon-button :href="route('titles')" icon="patch-check" label="Títulos" />
-                    <x-icon-button x-on:click="openProfile" icon="pencil-square" label="Editar meus dados" variant="primary" />
+                    <x-icon-button :href="route('profile')" icon="pencil-square" label="Editar meus dados" variant="primary" />
                 </div>
             </div>
         </div>
@@ -101,54 +101,5 @@
                 <x-stat-tile icon="fire" color="danger" label="Dias seguidos de check-in" :value="$currentStreak" />
             </div>
         </div>
-
-        <template x-if="isOpen">
-            <x-modal title="Editar meus dados" size="lg">
-                <form x-on:submit.prevent="save" class="vstack gap-3">
-                    <div class="row g-3">
-                        <div class="col-12"><x-form-input name="nome" label="Nome" autofocus /></div>
-                        <div class="col-sm-6"><x-form-input name="cpf" label="CPF" placeholder="00000000000" /></div>
-                        <div class="col-sm-6"><x-form-input name="rg" label="RG" /></div>
-                        <div class="col-sm-6"><x-form-input name="nascimento" label="Nascimento" type="date" /></div>
-                        <div class="col-sm-6">
-                            <x-form-select name="sexo" label="Sexo" placeholder="Selecione">
-                                <template x-for="gender in genders" :key="gender.value">
-                                    <option x-bind:value="gender.value" x-text="gender.label"></option>
-                                </template>
-                            </x-form-select>
-                        </div>
-                        <div class="col-sm-6"><x-form-input name="email" label="E-mail de contato" type="email" /></div>
-                        <div class="col-sm-6"><x-form-input name="telefone1" label="Telefone 1" /></div>
-                        <div class="col-sm-6"><x-form-input name="telefone2" label="Telefone 2" /></div>
-
-                        <div class="col-12">
-                            <label for="foto" class="form-label fw-medium small mb-1">Foto</label>
-
-                            <div class="d-flex align-items-center gap-3">
-                                <template x-if="photoPreview()"><img x-bind:src="photoPreview()" alt="" class="avatar avatar-lg"></template>
-                                <input type="file" id="foto" accept="image/*" x-on:change="pickFile($event, 'foto')" x-bind:class="{ 'is-invalid': firstError('foto') }" class="form-control">
-                            </div>
-                            <div class="text-danger small mt-1" x-text="firstError('foto')"></div>
-                        </div>
-                    </div>
-
-                    <x-form-address />
-
-                    <h3 class="h6 border-top pt-3 mb-0">Acesso</h3>
-
-                    <div class="row g-3">
-                        <div class="col-sm-6"><x-form-input name="login_email" label="E-mail de login" type="email" /></div>
-                        <div class="col-sm-6 d-none d-sm-block"></div>
-                        <div class="col-sm-6"><x-form-input name="password" label="Nova senha" type="password" autocomplete="new-password" placeholder="Deixe em branco para manter" /></div>
-                        <div class="col-sm-6"><x-form-input name="password_confirmation" label="Confirmar nova senha" type="password" autocomplete="new-password" /></div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <x-button variant="secondary" x-on:click="close">Cancelar</x-button>
-                        <x-button type="submit" x-bind:disabled="isSaving">Salvar alterações</x-button>
-                    </div>
-                </form>
-            </x-modal>
-        </template>
     </div>
 </x-layouts.app>

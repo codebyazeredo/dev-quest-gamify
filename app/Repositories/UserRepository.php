@@ -42,7 +42,13 @@ class UserRepository extends Repository
 
     public function allForAssignment(): Collection
     {
-        return $this->query()->with('selectedTitle')->get();
+        return $this->query()->with('selectedTitle')->withSum('xpTransactions as total_xp', 'amount')->get();
+    }
+
+    /** @return Collection<int, User> */
+    public function supportStaff(): Collection
+    {
+        return User::role(['admin', 'product_owner', 'suporte'])->with('person')->orderBy('name')->get();
     }
 
     public function withRole(string $role): Collection

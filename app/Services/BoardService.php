@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Board;
 use App\Models\User;
 use App\Repositories\BoardRepository;
-use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -14,7 +13,7 @@ class BoardService
     public function __construct(
         private BoardRepository $boards,
         private BoardColumnService $columns,
-        private UserRepository $users,
+        private AssignableUserService $assignableUsers,
     ) {}
 
     public function listFor(User $user): Collection
@@ -33,7 +32,7 @@ class BoardService
 
     public function assignableUsersFor(User $user): Collection
     {
-        return $user->isAdmin() || $user->isProductOwner() ? $this->users->allForAssignment() : new Collection;
+        return $user->isAdmin() || $user->isProductOwner() ? $this->assignableUsers->all() : new Collection;
     }
 
     public function create(array $data, bool $withDefaultColumns): Board

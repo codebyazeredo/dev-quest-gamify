@@ -1,10 +1,17 @@
 @props(['progress'])
 
-<x-card>
+<x-card class="level-hero">
     @if ($progress['participatesInLeveling'])
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <x-level-badge :level="$progress['currentLevel']->level" />
-            <span class="small text-body-secondary">{{ number_format($progress['totalXp']) }} XP total</span>
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="level-ring level-tier-{{ \App\Models\Level::tierOf($progress['currentLevel']->level) }}">
+                <small>NÍVEL</small>
+                <strong>{{ $progress['currentLevel']->level }}</strong>
+            </span>
+
+            <div>
+                <p class="fw-semibold fs-5 mb-0">{{ number_format($progress['totalXp']) }} XP</p>
+                <p class="small text-body-secondary mb-0">acumulados no total</p>
+            </div>
         </div>
 
         @if ($progress['nextLevel'])

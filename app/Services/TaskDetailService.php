@@ -6,14 +6,13 @@ use App\Enums\TaskEventType;
 use App\Models\Task;
 use App\Models\User;
 use App\Repositories\TaskRepository;
-use App\Repositories\UserRepository;
 use App\Repositories\XpTransactionRepository;
 
 class TaskDetailService
 {
     public function __construct(
         private TaskRepository $tasks,
-        private UserRepository $users,
+        private AssignableUserService $assignableUsers,
         private XpTransactionRepository $xpTransactions,
     ) {}
 
@@ -24,7 +23,7 @@ class TaskDetailService
 
         return [
             'task' => $task,
-            'developers' => $viewer->isAdmin() ? $this->users->allForAssignment() : collect(),
+            'developers' => $viewer->isAdmin() ? $this->assignableUsers->all() : collect(),
             'completionBonus' => $this->xpTransactions->findTaskCompletionBonus($task),
             'hasHomologation' => $this->hasEvent($task, TaskEventType::HOMOLOGATION_COMPLETED),
             'hasDeployed' => $this->hasEvent($task, TaskEventType::DEPLOYED),

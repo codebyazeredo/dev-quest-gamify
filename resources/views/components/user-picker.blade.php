@@ -7,6 +7,9 @@
         'initials' => $u->initials(),
         'photo' => $u->person?->foto_path ? \Illuminate\Support\Facades\Storage::url($u->person->foto_path) : null,
         'title' => $u->selectedTitle?->name,
+        'level' => $u->level,
+        'levelTier' => $u->level_tier,
+        'podium' => $u->podium_rank,
     ])->values();
 @endphp
 
@@ -53,10 +56,18 @@
                 <template x-if="!option.photo">
                     <span class="avatar text-bg-primary" x-text="option.initials"></span>
                 </template>
-                <span class="min-w-0">
+                <span class="min-w-0 flex-grow-1">
                     <span class="d-block fw-medium text-truncate" x-text="option.name"></span>
                     <template x-if="option.title">
                         <span class="d-block small text-warning-emphasis text-truncate" x-text="option.title"></span>
+                    </template>
+                </span>
+                <span class="ms-auto d-flex align-items-center gap-2 flex-shrink-0">
+                    <template x-if="option.podium">
+                        <i class="bi bi-trophy-fill rank-trophy" :class="`rank-trophy-${option.podium}`" :title="`${option.podium}º lugar`"></i>
+                    </template>
+                    <template x-if="option.level">
+                        <span class="level-pill" :class="`level-tier-${option.levelTier}`">Nível <span class="level-pill-number" x-text="option.level"></span></span>
                     </template>
                 </span>
             </button>

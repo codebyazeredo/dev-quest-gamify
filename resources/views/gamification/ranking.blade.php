@@ -37,17 +37,12 @@
             @forelse ($users as $index => $user)
                 @php
                     $rank = $users->firstItem() + $index;
-                    $medalColor = match ($rank) {
-                        1 => 'warning',
-                        2 => 'secondary',
-                        3 => 'danger',
-                        default => null,
-                    };
+                    $hasPodium = $rank <= 3 &&($user->total_xp ?? 0) > 0;
                 @endphp
-                <tr class="{{ $user->id === auth()->id() ? 'table-primary fw-semibold' : '' }}">
+                <tr class="{{ $user->id === auth()->id() ? 'table-primary fw-semibold' : '' }} {{ $hasPodium ? "ranking-row-podium-{$rank}" : '' }}">
                     <td class="ps-4">
-                        @if ($medalColor)
-                            <x-icon-chip icon="medal" :color="$medalColor" size="sm" />
+                        @if ($hasPodium)
+                            <span class="fs-4"><x-rank-medal :rank="$rank" /></span>
                         @else
                             <span class="text-body-secondary ps-2">{{ $rank }}º</span>
                         @endif
