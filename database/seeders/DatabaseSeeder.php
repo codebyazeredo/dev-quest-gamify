@@ -15,8 +15,9 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             CountrySeeder::class,
             BusinessSectorSeeder::class,
-            UserSeeder::class,
             LevelSeeder::class,
+            CompanySeeder::class,
+            UserSeeder::class,
             BoardSeeder::class,
             BoardColumnSeeder::class,
             TaskCategorySeeder::class,
@@ -25,8 +26,9 @@ class DatabaseSeeder extends Seeder
             AchievementSeeder::class,
             ChallengeSeeder::class,
             TitleSeeder::class,
-            DemoDataSeeder::class,
             ClientSeeder::class,
+            DemoDataSeeder::class,
+            TicketSeeder::class,
         ]);
     }
 }

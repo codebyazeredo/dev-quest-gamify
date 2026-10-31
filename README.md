@@ -47,57 +47,53 @@ Outros pontos relevantes:
 
 ## Requisitos
 
-- PHP 8.3 ou superior, com as extensões exigidas pelo Laravel 13
+- PHP 8.3 ou superior, com as extensões exigidas pelo Laravel 13 (incluindo `pdo_mysql`)
 - Composer 2
-- Node.js 22 e npm
-- MySQL 8 (ou compatível)
-- Docker Desktop, caso opte pelo ambiente containerizado
+- Node.js 22 ou superior e npm
+- Docker Desktop (ou Docker Engine com Compose v2), para MySQL, Redis e Mailpit
 
-## Instalação (ambiente local, sem Docker)
+## Instalação
+
+A aplicação roda direto na máquina; o Docker sobe apenas a infraestrutura (MySQL 8.4, Redis e Mailpit). Isso evita a lentidão de montar o código em um container, principalmente no Windows.
 
 ```bash
-composer install
 cp .env.example .env
-php artisan key:generate
-```
-
-Configure `DB_*` no `.env` apontando para um MySQL acessível localmente e crie o banco de dados definido em `DB_DATABASE`. Em seguida:
-
-```bash
-php artisan migrate --seed
+docker compose up -d mysql redis mailpit
+composer install
 npm install
+php artisan migrate --seed
 npm run build
 ```
 
-Para desenvolvimento com hot reload, servidor HTTP e worker de fila juntos:
+O `.env.example` já vem configurado para essa infraestrutura, com MySQL `root`/`root`, banco `dev_quest_gamify` e as portas deslocadas. Se precisar de outra `APP_KEY`, rode `php artisan key:generate`.
+
+Para desenvolvimento, com servidor HTTP, worker de fila e Vite (hot reload) juntos:
 
 ```bash
 composer dev
 ```
 
-Esse comando sobe `php artisan serve`, `php artisan queue:listen` e `npm run dev` em paralelo.
+Acessos:
 
-Alternativamente, `composer setup` executa instalação de dependências, geração de key, migrations e build de assets em um único passo (idempotente, útil para primeira configuração).
+- Aplicação: `http://localhost:8000`
+- Mailpit: `http://localhost:8026`
+- MySQL (DBeaver, etc.): `localhost:3307`, usuário `root`, senha `root`
 
-## Instalação (Docker / Laravel Sail)
-
-O projeto já inclui `compose.yaml` com os serviços `laravel.test` (PHP 8.3), `mysql`, `redis` e `mailpit`.
+Comandos úteis:
 
 ```bash
-docker compose up -d
-docker compose exec laravel.test composer install
-docker compose exec laravel.test php artisan key:generate
-docker compose exec laravel.test php artisan migrate --seed
-docker compose exec laravel.test npm install
-docker compose exec laravel.test npm run build
+php artisan test
+docker compose stop
+docker compose down -v
 ```
+
+`docker compose down -v` remove também o volume do MySQL e recria o banco do zero.
 
 Observações:
 
-- O wrapper `./vendor/bin/sail` (script bash) só reconhece macOS, Linux e WSL2. Em Windows fora do WSL2 (por exemplo Git Bash), ele falha com `Unsupported operating system` — use `docker compose ...` diretamente, como acima, ou rode dentro do WSL2 para ter os atalhos `sail artisan`, `sail composer`, etc.
-- O `.env` usado pelo Docker aponta para os hostnames internos do compose (`DB_HOST=mysql`, `REDIS_HOST=redis`, `MAIL_HOST=mailpit`). Ele não funciona para rodar a aplicação fora dos containers; para isso, ajuste esses valores de volta para `127.0.0.1`.
-- As portas expostas por padrão neste projeto foram deslocadas das portas padrão do Sail (`APP_PORT=8080`, `FORWARD_DB_PORT=3307`, `FORWARD_REDIS_PORT=6380`, `FORWARD_MAILPIT_PORT=1026`, `FORWARD_MAILPIT_DASHBOARD_PORT=8026`) para não colidir com serviços já rodando na máquina (ex.: MySQL local na 3306). Ajuste essas variáveis no `.env` se não houver conflito no seu ambiente.
-- Aplicação acessível em `http://localhost:8080` (ou na porta configurada em `APP_PORT`). Mailpit em `http://localhost:8026`.
+- As portas da infraestrutura foram deslocadas das padrão (`FORWARD_DB_PORT=3307`, `FORWARD_REDIS_PORT=6380`, `FORWARD_MAILPIT_PORT=1026`, `FORWARD_MAILPIT_DASHBOARD_PORT=8026`) para não colidir com serviços locais. Ao alterar uma delas no `.env`, ajuste também `DB_PORT`, `REDIS_PORT` ou `MAIL_PORT`.
+- Os testes usam SQLite em memória (`phpunit.xml`) e não dependem do MySQL.
+- O `compose.yaml` também define o serviço `app` (Laravel Sail, PHP 8.3 + Node 22) para quem não tem PHP instalado: `docker compose up -d --build` e `docker compose exec app <comando>`. Em Windows isso é bem mais lento por causa do bind mount.
 
 ## Variáveis de ambiente relevantes
 
@@ -105,25 +101,25 @@ Além do padrão do Laravel, vale destacar:
 
 | Variável | Descrição |
 |---|---|
-| `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Conexão MySQL. Em Docker, `DB_HOST=mysql`. |
-| `REDIS_HOST` | `redis` em Docker, `127.0.0.1` em ambiente local. |
+| `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Conexão MySQL. Padrão: `127.0.0.1:3307`, `root`/`root` (container publicado no host). |
+| `REDIS_HOST` | `127.0.0.1` (container publicado na porta `6380`). |
 | `QUEUE_CONNECTION` | `database` por padrão; há jobs de gamificação processados via fila. |
 | `SESSION_DRIVER`, `CACHE_STORE` | `database` por padrão. |
 
-O arquivo `.env.example` reflete a configuração padrão para desenvolvimento local (fora de containers).
+O arquivo `.env.example` reflete a configuração padrão para desenvolvimento com a infraestrutura em Docker.
 
 ## Seeders
 
-`php artisan migrate --seed` executa `DatabaseSeeder`, que popula:
+`php artisan migrate --seed` executa `DatabaseSeeder`, que monta o cenário de uma empresa fictícia, a **RotaMax Sistemas**, fabricante de um TMS (sistema de gestão de transporte):
 
-- Roles e permissions (`admin`, `product_owner`, `dev`, `tester`, `suporte`) via `RoleSeeder`
-- Níveis de XP, categorias e prioridades de tarefa
-- Regras de eventos de tarefa (pontuação)
-- Conquistas, desafios (semana, mês, encerrado e agendado) e títulos desbloqueados por conquista, por desafio específico ou por quantidade de desafios
-- 5 quadros (um inativo) com colunas padrão
-- Usuários de exemplo (`UserSeeder`) e dados de demonstração (`DemoDataSeeder`): cerca de 20 usuários de todas as roles, ~140 tarefas distribuídas pelos quadros (concluídas, arquivadas, em andamento, reprovadas e atrasadas), histórico de XP dos últimos dias, check-ins com sequências, progresso de desafios e títulos já desbloqueados
+- Configuração: roles e permissions, níveis de XP, categorias, prioridades, regras de XP, conquistas, desafios e títulos.
+- Equipe (8 pessoas): 1 admin (Ricardo), 1 product owner (Camila), 3 desenvolvedores de senioridades diferentes (Rafael, sênior; Lucas, pleno; Thiago, júnior), 1 testadora (Patrícia) e 2 do suporte (Mariana e Diego).
+- 2 quadros: **TMS Core** e **Integrações e Plataforma**, com cerca de 55 tarefas em todas as etapas, histórico de XP, check-ins, comentários e checklists.
+- 23 clientes (transportadoras, embarcadores, operadores logísticos) e cerca de 58 chamados com respostas, notas internas, chamados convertidos em tarefa, aguardando cliente, em andamento e com prazo vencido.
 
-Todos os usuários de exemplo usam a senha `password` (ex.: `admin@devquestgamify.test`, `dev@devquestgamify.test`).
+Contas de exemplo, todas com a senha `password`: `admin@`, `po@`, `dev@` (pleno), `tester@` e `suporte@` + `devquestgamify.test`; os outros são `rafael.monteiro@`, `thiago.barros@` e `diego.martins@`. O portal do cliente aceita o CNPJ e o e-mail de qualquer cliente cadastrado (e-mail no formato `operacoes@<empresa>.test`).
+
+O `DemoDataSeeder` reproduz o fluxo real das tarefas com data retroativa, por isso o seed completo leva alguns minutos no MySQL em Docker (no SQLite em memória dos testes leva segundos). Os dados ficam em `database/seeders/Data/TmsScenario.php` e `TicketSeeder.php`.
 
 ## Testes e qualidade de código
 
@@ -138,7 +134,7 @@ Os testes usam SQLite em memória (`phpunit.xml`), independente do banco configu
 
 Ao escrever testes que envolvem o Kanban, defina `status` explicitamente nas factories de `Task`. `TaskFactory` não deriva o status a partir da coluna, e testes que fazem apenas o *move* de uma tarefa entre colunas podem ficar com um status inconsistente com a coluna se `status` não for fixado.
 
-O CI (`.github/workflows/tests.yml`) roda `composer setup` seguido de `composer ci:check` em cada push/PR para `main`.
+O CI (`.github/workflows/tests.yml`, com SQLite) roda `composer setup` seguido de `composer ci:check` em cada push/PR para `main`.
 
 ## Estrutura de pastas
 

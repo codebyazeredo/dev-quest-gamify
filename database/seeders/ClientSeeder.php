@@ -2,171 +2,86 @@
 
 namespace Database\Seeders;
 
-use App\Enums\TicketStatus;
 use App\Models\BusinessSector;
 use App\Models\Client;
-use App\Models\Task;
-use App\Models\Ticket;
-use App\Models\User;
 use App\Services\AddressService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
 
+/**
+ * Carteira de clientes do TMS: transportadoras, embarcadores (indústria e distribuição),
+ * operadores logísticos e empresas de entrega. A ordem da lista é usada pelo TicketSeeder.
+ */
 class ClientSeeder extends Seeder
 {
-    private const CLIENTS = [
-        [
-            'cnpj' => '11222333000181',
-            'razao_social' => 'Mercado Bom Preço Ltda',
-            'email' => 'ti@bompreco.test',
-            'sector' => 'Varejo e Comércio',
-            'address' => ['cep' => '01310-100', 'logradouro' => 'Avenida Paulista', 'numero' => '1578', 'bairro' => 'Bela Vista', 'cidade' => 'São Paulo', 'estado' => 'SP'],
-        ],
-        [
-            'cnpj' => '22845566000157',
-            'razao_social' => 'Clínica Vida Plena S.A.',
-            'email' => 'contato@vidaplena.test',
-            'sector' => 'Saúde',
-            'address' => ['cep' => '30130-010', 'logradouro' => 'Rua da Bahia', 'numero' => '1148', 'complemento' => 'Sala 302', 'bairro' => 'Centro', 'cidade' => 'Belo Horizonte', 'estado' => 'MG'],
-        ],
-        [
-            'cnpj' => '33456789000149',
-            'razao_social' => 'Colégio Horizonte Educacional',
-            'email' => 'secretaria@horizonte.test',
-            'sector' => 'Educação',
-            'address' => ['cep' => '80010-000', 'logradouro' => 'Rua XV de Novembro', 'numero' => '700', 'bairro' => 'Centro', 'cidade' => 'Curitiba', 'estado' => 'PR'],
-        ],
-        [
-            'cnpj' => '44567890000193',
-            'razao_social' => 'TransRápido Logística',
-            'email' => 'operacoes@transrapido.test',
-            'sector' => 'Logística e Transporte',
-            'address' => ['cep' => '90010-150', 'logradouro' => 'Avenida Borges de Medeiros', 'numero' => '2244', 'referencia' => 'Próximo à Usina do Gasômetro', 'bairro' => 'Praia de Belas', 'cidade' => 'Porto Alegre', 'estado' => 'RS'],
-        ],
-        [
-            'cnpj' => '55678901000129',
-            'razao_social' => 'Fazenda Três Lagoas Agro',
-            'email' => 'administrativo@treslagoas.test',
-            'sector' => 'Agronegócio',
-            'address' => ['cep' => '50030-230', 'logradouro' => 'Avenida Conde da Boa Vista', 'numero' => '800', 'bairro' => 'Boa Vista', 'cidade' => 'Recife', 'estado' => 'PE'],
-        ],
-        [
-            'cnpj' => '66789012000155',
-            'razao_social' => 'Banco Digital Aurora',
-            'email' => 'suporte@aurora.test',
-            'sector' => 'Serviços Financeiros',
-            'address' => ['cep' => '01310-100', 'logradouro' => 'Avenida Paulista', 'numero' => '1578', 'complemento' => '12º andar', 'bairro' => 'Bela Vista', 'cidade' => 'São Paulo', 'estado' => 'SP'],
-        ],
-    ];
+    private const TRANSPORT = 'Logística e Transporte';
 
-    private const TICKETS = [
-        [
-            'client' => 0,
-            'title' => 'Erro ao fechar o caixa no fim do dia',
-            'description' => "Ao fechar o caixa aparece a mensagem 'Falha ao consolidar vendas' e o relatório não é gerado.\nAcontece desde segunda-feira em todas as lojas.",
-            'status' => TicketStatus::IN_PROGRESS,
-            'daysAgo' => 6,
-            'linkedTask' => true,
-            'messages' => [
-                [false, 'Segue o print do erro. Acontece principalmente depois das 18h.'],
-                [true, 'Obrigado pelo aviso! Já reproduzimos o problema e abrimos uma tarefa para a correção.'],
-            ],
-        ],
-        [
-            'client' => 1,
-            'title' => 'Solicitação de novo relatório de agendamentos',
-            'description' => 'Precisamos de um relatório mensal com o total de consultas por especialidade e por médico.',
-            'status' => TicketStatus::OPEN,
-            'daysAgo' => 3,
-            'messages' => [],
-        ],
-        [
-            'client' => 2,
-            'title' => 'Não consigo redefinir a senha de um professor',
-            'description' => 'O e-mail de redefinição não chega para o professor Carlos. Já conferimos a caixa de spam.',
-            'status' => TicketStatus::RESOLVED,
-            'daysAgo' => 12,
-            'messages' => [
-                [true, 'O e-mail cadastrado estava com um erro de digitação. Corrigimos e reenviamos o link.'],
-                [false, 'Perfeito, ele conseguiu acessar. Obrigado!'],
-            ],
-        ],
-        [
-            'client' => 3,
-            'title' => 'Rastreamento não atualiza a posição das entregas',
-            'description' => 'As entregas ficam paradas na mesma posição por horas, mesmo com o motorista em movimento.',
-            'status' => TicketStatus::OPEN,
-            'daysAgo' => 1,
-            'messages' => [
-                [true, 'Pode nos informar o modelo do aparelho usado pelos motoristas?'],
-            ],
-        ],
-        [
-            'client' => 4,
-            'title' => 'Dúvida sobre exportação de dados da safra',
-            'description' => 'Como exportar o histórico da safra 2025 em planilha para enviar ao contador?',
-            'status' => TicketStatus::RESOLVED,
-            'daysAgo' => 20,
-            'messages' => [
-                [true, 'Na tela de Safras, use o botão Exportar no canto superior direito e escolha o formato XLSX.'],
-            ],
-        ],
-        [
-            'client' => 5,
-            'title' => 'Lentidão na tela de extrato',
-            'description' => 'O extrato com mais de 90 dias leva mais de 30 segundos para carregar.',
-            'status' => TicketStatus::OPEN,
-            'daysAgo' => 0,
-            'messages' => [],
-        ],
+    private const CLIENTS = [
+        ['Translog Rodoviário Ltda', 'translog', self::TRANSPORT, ['80250-104', 'Rua Comendador Araújo', '482', 'Batel', 'Curitiba', 'PR']],
+        ['Expresso Serra Azul Transportes', 'serraazul', self::TRANSPORT, ['95020-470', 'Rua Sinimbu', '1960', 'Centro', 'Caxias do Sul', 'RS']],
+        ['Rodonorte Cargas S.A.', 'rodonorte', self::TRANSPORT, ['74115-030', 'Avenida T-4', '1195', 'Setor Bueno', 'Goiânia', 'GO']],
+        ['TransCerrado Logística', 'transcerrado', self::TRANSPORT, ['38400-100', 'Avenida Afonso Pena', '2230', 'Centro', 'Uberlândia', 'MG']],
+        ['Via Sul Transportes e Logística', 'viasul', self::TRANSPORT, ['89201-001', 'Rua Blumenau', '350', 'Centro', 'Joinville', 'SC']],
+        ['Frota Brasil Transportes', 'frotabrasil', self::TRANSPORT, ['13015-904', 'Avenida Francisco Glicério', '1100', 'Centro', 'Campinas', 'SP']],
+        ['Cargo Nordeste Express', 'cargonordeste', self::TRANSPORT, ['51021-040', 'Avenida Engenheiro Domingos Ferreira', '2589', 'Boa Viagem', 'Recife', 'PE']],
+        ['Transportadora Boa Viagem', 'boaviagem', self::TRANSPORT, ['41820-021', 'Avenida Tancredo Neves', '1632', 'Caminho das Árvores', 'Salvador', 'BA']],
+        ['Rápido Pantanal Transportes', 'pantanal', self::TRANSPORT, ['79002-970', 'Avenida Afonso Pena', '2700', 'Centro', 'Campo Grande', 'MS']],
+        ['Amazônia Fluvial Logística', 'amazoniafluvial', self::TRANSPORT, ['69020-030', 'Avenida Eduardo Ribeiro', '520', 'Centro', 'Manaus', 'AM']],
+        ['Bebidas Vale Verde Indústria', 'valeverde', 'Indústria', ['14020-260', 'Avenida Presidente Vargas', '2121', 'Jardim América', 'Ribeirão Preto', 'SP']],
+        ['Móveis Nobre Indústria', 'moveisnobre', 'Indústria', ['95700-000', 'Rua Marechal Deodoro', '705', 'Centro', 'Bento Gonçalves', 'RS']],
+        ['Agro Safra Grãos S.A.', 'agrosafra', 'Agronegócio', ['78005-300', 'Avenida Getúlio Vargas', '1300', 'Araés', 'Cuiabá', 'MT']],
+        ['Distribuidora Sol Nascente Alimentos', 'solnascente', 'Alimentação', ['60115-221', 'Avenida Desembargador Moreira', '2120', 'Aldeota', 'Fortaleza', 'CE']],
+        ['Cerâmica Pedra Viva', 'pedraviva', 'Indústria', ['88801-500', 'Rua Marechal Deodoro', '215', 'Centro', 'Criciúma', 'SC']],
+        ['Laticínios Campo Belo', 'campobelo', 'Alimentação', ['36010-011', 'Avenida Barão do Rio Branco', '2540', 'Centro', 'Juiz de Fora', 'MG']],
+        ['LogiHub Operações Logísticas', 'logihub', self::TRANSPORT, ['07190-100', 'Rodovia Presidente Dutra', '1500', 'Cumbica', 'Guarulhos', 'SP']],
+        ['Armazéns Gerais Porto Seco', 'portoseco', self::TRANSPORT, ['88301-100', 'Rua Hercílio Luz', '940', 'Centro', 'Itajaí', 'SC']],
+        ['Fulfillment Express Brasil', 'fulfillmentexpress', 'Varejo e Comércio', ['06454-000', 'Alameda Rio Negro', '503', 'Alphaville', 'Barueri', 'SP']],
+        ['Entrega Ágil Courier', 'entregaagil', self::TRANSPORT, ['30140-071', 'Avenida do Contorno', '4520', 'Funcionários', 'Belo Horizonte', 'MG']],
+        ['Moto Rápido Entregas', 'motorapido', self::TRANSPORT, ['01310-200', 'Alameda Santos', '1400', 'Cerqueira César', 'São Paulo', 'SP']],
+        ['Vida Farma Distribuidora de Medicamentos', 'vidafarma', 'Saúde', ['74210-010', 'Avenida 85', '1200', 'Setor Marista', 'Goiânia', 'GO']],
+        ['Aço Forte Distribuição Siderúrgica', 'acoforte', 'Indústria', ['27255-250', 'Avenida Paulo de Frontin', '480', 'Aterrado', 'Volta Redonda', 'RJ']],
     ];
 
     public function run(): void
     {
         $addresses = app(AddressService::class);
 
-        $clients = collect(self::CLIENTS)->map(fn (array $data) => Client::updateOrCreate(
-            ['cnpj' => $data['cnpj']],
-            [
-                'razao_social' => $data['razao_social'],
-                'email' => $data['email'],
-                'is_active' => true,
-                'business_sector_id' => BusinessSector::where('name', $data['sector'])->value('id'),
-                'address_id' => $addresses->resolve($data['address'])->id,
-            ],
-        ));
-
-        if (! Ticket::query()->exists()) {
-            $this->seedTickets($clients);
+        foreach (self::CLIENTS as $index => [$name, $domain, $sector, [$cep, $street, $number, $district, $city, $state]]) {
+            Client::updateOrCreate(
+                ['cnpj' => $this->validCnpj(12345000 + $index * 7919)],
+                [
+                    'razao_social' => $name,
+                    'email' => "operacoes@{$domain}.test",
+                    'is_active' => true,
+                    'business_sector_id' => BusinessSector::where('name', $sector)->value('id'),
+                    'address_id' => $addresses->resolve([
+                        'cep' => $cep,
+                        'logradouro' => $street,
+                        'numero' => $number,
+                        'bairro' => $district,
+                        'cidade' => $city,
+                        'estado' => $state,
+                    ])->id,
+                ],
+            );
         }
     }
 
-    /** @param  Collection<int, Client>  $clients */
-    private function seedTickets(Collection $clients): void
+    /** CNPJ matriz (filial 0001) com dígitos verificadores calculados a partir da base de 8 dígitos. */
+    private function validCnpj(int $root): string
     {
-        $support = User::query()->whereHas('roles', fn ($query) => $query->where('name', 'suporte'))->first();
-        $task = Task::query()->orderBy('id')->first();
+        $digits = str_pad((string) $root, 8, '0', STR_PAD_LEFT).'0001';
 
-        foreach (self::TICKETS as $data) {
-            $ticket = Ticket::create([
-                'client_id' => $clients[$data['client']]->id,
-                'task_id' => ($data['linkedTask'] ?? false) ? $task?->id : null,
-                'title' => $data['title'],
-                'description' => $data['description'],
-                'status' => $data['status'],
-            ]);
+        foreach ([[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2], [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]] as $weights) {
+            $sum = 0;
 
-            $ticket->forceFill(['created_at' => now()->subDays($data['daysAgo'])])->save();
-
-            foreach ($data['messages'] as $index => [$fromStaff, $body]) {
-                if ($fromStaff && $support === null) {
-                    continue;
-                }
-
-                $ticket->messages()->create(['user_id' => $fromStaff ? $support->id : null, 'body' => $body])
-                    ->forceFill(['created_at' => now()->subDays($data['daysAgo'])->addHours($index + 1)])
-                    ->save();
+            foreach ($weights as $position => $weight) {
+                $sum += (int) $digits[$position] * $weight;
             }
+
+            $remainder = $sum % 11;
+            $digits .= (string) ($remainder < 2 ? 0 : 11 - $remainder);
         }
+
+        return $digits;
     }
 }

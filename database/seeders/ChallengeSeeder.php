@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\ChallengeType;
 use App\Models\Challenge;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Seeder;
 
 class ChallengeSeeder extends Seeder
@@ -98,7 +99,7 @@ class ChallengeSeeder extends Seeder
         }
     }
 
-    /** @return array{0: \Carbon\CarbonInterface, 1: \Carbon\CarbonInterface} */
+    /** @return array{0: CarbonInterface, 1: CarbonInterface} */
     private function windowFor(string $window): array
     {
         return match ($window) {

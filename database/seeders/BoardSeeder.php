@@ -10,11 +10,18 @@ class BoardSeeder extends Seeder
     public function run(): void
     {
         $boards = [
-            ['name' => 'Sistema Principal', 'description' => 'Board padrão para desenvolvimento do sistema.', 'is_active' => true],
-            ['name' => 'Aplicativo Mobile', 'description' => 'Aplicativo para iOS e Android usado pelos clientes.', 'is_active' => true],
-            ['name' => 'Portal do Cliente', 'description' => 'Área logada onde os clientes acompanham seus pedidos.', 'is_active' => true],
-            ['name' => 'Infraestrutura e DevOps', 'description' => 'Pipelines, monitoramento, backups e melhorias de ambiente.', 'is_active' => true],
-            ['name' => 'Projeto Legado', 'description' => 'Sistema antigo em manutenção mínima.', 'is_active' => false],
+            [
+                'name' => 'TMS Core',
+                'description' => 'Cotação e tabelas de frete, roteirização, cargas, faturamento e relatórios do TMS.',
+                'github_repository' => 'rotamax/tms-core',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Integrações e Plataforma',
+                'description' => 'SEFAZ (CT-e e MDF-e), ERPs, rastreamento, app do motorista, API e infraestrutura.',
+                'github_repository' => 'rotamax/tms-integracoes',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($boards as $board) {
