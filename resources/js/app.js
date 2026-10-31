@@ -14,7 +14,7 @@ import { modalForm } from './modal-form.js';
 import { notificationBell } from './notification-bell.js';
 import { pageActions, showStashedToasts } from './page-actions.js';
 import { peopleTable } from './people-table.js';
-import { profileModal } from './profile-modal.js';
+import { profilePage } from './profile-page.js';
 import { rolesTable } from './roles-table.js';
 import { settingsForm } from './settings-form.js';
 import { taskModal } from './task-modal.js';
@@ -38,7 +38,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('modalForm', modalForm);
     window.Alpine.data('taskModal', taskModal);
     window.Alpine.data('taskPage', taskPage);
-    window.Alpine.data('profileModal', profileModal);
+    window.Alpine.data('profilePage', profilePage);
 });
 
 document.addEventListener('alpine:initialized', showStashedToasts);

@@ -1,14 +1,14 @@
 import { api } from './api';
 import { modalForm } from './modal-form';
 
-export function profileModal() {
+export function profilePage() {
     return {
         ...modalForm(),
 
         genders: [],
         extra: { countries: [] },
 
-        async openProfile() {
+        async init() {
             const payload = await api.get('/api/me/profile');
 
             this.genders = payload.genders;

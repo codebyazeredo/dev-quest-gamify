@@ -28,6 +28,7 @@ use App\Http\Controllers\Portal\PortalTicketController;
 use App\Http\Controllers\Profile\DashboardPageController;
 use App\Http\Controllers\Task\TaskAttachmentDownloadController;
 use App\Http\Controllers\Task\TaskPageController;
+use App\Http\Controllers\Profile\ProfilePageController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
 use App\Http\Controllers\Ticket\TicketPageController;
 use App\Http\Middleware\EnsurePortalClient;
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
     Route::get('/tasks/{task}', [TaskPageController::class, 'show'])->name('tasks.show');
     Route::get('/attachments/{attachment}', [TaskAttachmentDownloadController::class, 'show'])->name('attachments.show');
+    Route::get('/meu-perfil', [ProfilePageController::class, 'show'])->name('profile');
     Route::get('/tickets', [TicketPageController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/attachments/{attachment}', [TicketAttachmentDownloadController::class, 'show'])->whereNumber('attachment')->name('ticket-attachments.show');
     Route::get('/tickets/{ticket}', [TicketPageController::class, 'show'])->name('tickets.show');

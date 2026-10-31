@@ -23,7 +23,7 @@ class ProfileService
         return $this->people->findWithAddressOrFail((int) $user->person_id);
     }
 
-    /** @param  array<string, mixed>  $data  dados validados de pessoa, endereço e acesso (login_email, password) */
+    /** @param  array<string, mixed>  $data  dados validados de pessoa, endereço e senha; os e-mails não são alteráveis pelo próprio usuário */
     public function update(User $user, array $data, ?UploadedFile $photo): Person
     {
         return DB::transaction(function () use ($user, $data, $photo) {
@@ -39,7 +39,6 @@ class ProfileService
                 'rg' => $data['rg'] ?? null,
                 'nascimento' => $data['nascimento'],
                 'sexo' => $data['sexo'],
-                'email' => $data['email'],
                 'telefone1' => $data['telefone1'],
                 'telefone2' => $data['telefone2'] ?? null,
                 'foto_path' => $photo !== null ? $this->replacePhoto($person, $photo) : $person->foto_path,
@@ -50,7 +49,6 @@ class ProfileService
 
             $this->users->update($user, array_filter([
                 'name' => $data['nome'],
-                'email' => $data['login_email'],
                 'password' => $data['password'] ?? null,
             ], fn ($value) => $value !== null));
 

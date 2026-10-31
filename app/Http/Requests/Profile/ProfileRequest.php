@@ -25,12 +25,10 @@ class ProfileRequest extends FormRequest
             'rg' => ['nullable', 'string', 'max:20', Rule::unique('people', 'rg')->ignore($person)],
             'nascimento' => ['required', 'date'],
             'sexo' => ['required', Rule::enum(Gender::class)],
-            'email' => ['required', 'email', 'max:255'],
             'telefone1' => ['required', 'string', 'max:20'],
             'telefone2' => ['nullable', 'string', 'max:20'],
             'foto' => ['nullable', 'image', 'max:2048'],
             ...$this->addressRules(required: $person?->address_id !== null),
-            'login_email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ];
     }
@@ -38,6 +36,6 @@ class ProfileRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['login_email' => 'e-mail de acesso', 'password' => 'senha', ...$this->addressAttributes()];
+        return ['password' => 'senha', ...$this->addressAttributes()];
     }
 }
