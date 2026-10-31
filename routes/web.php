@@ -28,11 +28,11 @@ use App\Http\Controllers\Portal\PortalAttachmentController;
 use App\Http\Controllers\Portal\PortalAuthController;
 use App\Http\Controllers\Portal\PortalTicketController;
 use App\Http\Controllers\Profile\DashboardPageController;
-use App\Http\Controllers\Task\TaskAttachmentDownloadController;
-use App\Http\Controllers\Task\TaskPageController;
 use App\Http\Controllers\Profile\EmailPreferenceController;
 use App\Http\Controllers\Profile\ProfilePageController;
 use App\Http\Controllers\Profile\TwoFactorSettingsController;
+use App\Http\Controllers\Task\TaskAttachmentDownloadController;
+use App\Http\Controllers\Task\TaskPageController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
 use App\Http\Controllers\Ticket\TicketExportController;
 use App\Http\Controllers\Ticket\TicketPageController;
@@ -49,17 +49,17 @@ Route::post('/webhooks/github', GithubWebhookController::class)
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardPageController::class, 'index'])->name('dashboard');
-    Route::get('/boards', [BoardPageController::class, 'index'])->name('boards.index');
-    Route::get('/boards/{board}', [BoardPageController::class, 'show'])->name('boards.show');
-    Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
+    Route::get('/meu-perfil', [ProfilePageController::class, 'show'])->name('profile');
     Route::get('/seguranca', [TwoFactorSettingsController::class, 'show'])->name('security');
+    Route::put('/preferencias/email', [EmailPreferenceController::class, 'update'])->name('preferences.email');
     Route::post('/seguranca/2fa', [TwoFactorSettingsController::class, 'enable'])->name('security.two-factor.enable');
     Route::post('/seguranca/2fa/confirmar', [TwoFactorSettingsController::class, 'confirm'])->middleware('throttle:10,1')->name('security.two-factor.confirm');
     Route::delete('/seguranca/2fa', [TwoFactorSettingsController::class, 'disable'])->middleware('throttle:5,1')->name('security.two-factor.disable');
+    Route::get('/boards', [BoardPageController::class, 'index'])->name('boards.index');
+    Route::get('/boards/{board}', [BoardPageController::class, 'show'])->name('boards.show');
+    Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
     Route::get('/tasks/{task}', [TaskPageController::class, 'show'])->name('tasks.show');
-    Route::put('/preferencias/email', [EmailPreferenceController::class, 'update'])->name('preferences.email');
     Route::get('/attachments/{attachment}', [TaskAttachmentDownloadController::class, 'show'])->name('attachments.show');
-    Route::get('/meu-perfil', [ProfilePageController::class, 'show'])->name('profile');
     Route::get('/tickets', [TicketPageController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/export', TicketExportController::class)->name('tickets.export');
     Route::get('/tickets/attachments/{attachment}', [TicketAttachmentDownloadController::class, 'show'])->whereNumber('attachment')->name('ticket-attachments.show');
@@ -74,10 +74,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminHubPageController::class, 'index'])->name('admin.index');
     Route::get('/dashboard', [AdminDashboardPageController::class, 'index'])->name('admin.dashboard');
-    Route::get('/users', [UserPageController::class, 'index'])->name('admin.users');
-    Route::get('/people', [PersonPageController::class, 'index'])->name('admin.people');
     Route::get('/xp-audit', [XpAuditPageController::class, 'index'])->name('admin.xp-audit');
     Route::get('/xp-audit/export', XpAuditExportController::class)->name('admin.xp-audit.export');
+    Route::get('/users', [UserPageController::class, 'index'])->name('admin.users');
+    Route::get('/people', [PersonPageController::class, 'index'])->name('admin.people');
     Route::get('/clients', [ClientPageController::class, 'index'])->name('admin.clients');
     Route::get('/business-sectors', [BusinessSectorPageController::class, 'index'])->name('admin.business-sectors');
     Route::get('/roles', [RolePageController::class, 'index'])->name('admin.roles');
