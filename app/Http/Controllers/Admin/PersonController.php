@@ -8,8 +8,8 @@ use App\Http\Requests\Admin\PersonRequest;
 use App\Http\Requests\PaginatedListRequest;
 use App\Http\Resources\PersonResource;
 use App\Models\Person;
-use App\Services\Admin\PersonService;
 use App\Services\AddressService;
+use App\Services\Admin\PersonService;
 use Illuminate\Http\JsonResponse;
 
 class PersonController extends Controller
