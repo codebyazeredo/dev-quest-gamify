@@ -18,7 +18,7 @@ class TicketPageController extends Controller
     {
         $this->authorize('viewAny', Ticket::class);
 
-        return view('tickets.index');
+        return view('tickets.index', ['staff' => $this->tickets->assignableStaff()]);
     }
 
     public function show(Ticket $ticket): View
@@ -31,6 +31,7 @@ class TicketPageController extends Controller
             'attachments',
             'messages.attachments',
             'messages.user',
+            'assignedTo',
             'task.column',
             'task.assignedTo',
             'task.board.columns',
@@ -40,6 +41,8 @@ class TicketPageController extends Controller
 
         return view('tickets.show', [
             'ticket' => $ticket,
+            'staff' => $this->tickets->assignableStaff(),
+            'otherTickets' => $this->tickets->otherTicketsOf($ticket),
             'progress' => $this->tickets->progressFor($ticket),
             'boards' => $boards->map(fn (Board $board) => [
                 'id' => $board->id,

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -15,6 +16,8 @@ class TicketFactory extends Factory
             'title' => fake()->sentence(4),
             'description' => fake()->paragraph(),
             'status' => TicketStatus::OPEN,
+            'priority' => TicketPriority::NORMAL,
+            'due_at' => now()->addHours(TicketPriority::NORMAL->slaHours()),
         ];
     }
 }

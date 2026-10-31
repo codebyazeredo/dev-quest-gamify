@@ -12,7 +12,11 @@ class TicketAttachmentDownloadController extends Controller
 {
     public function show(Request $request, TicketAttachment $attachment): Response
     {
-        $this->authorize('view', $attachment->ticket);
+        $this->authorize('viewAttachments', $attachment->ticket);
+
+        if ($attachment->message?->is_internal) {
+            $this->authorize('view', $attachment->ticket);
+        }
 
         return AttachmentResponse::make($attachment, $request->boolean('download'));
     }

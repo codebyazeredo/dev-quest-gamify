@@ -29,6 +29,6 @@ class TicketPolicy
 
     private function isSupportStaff(User $user): bool
     {
-        return $user->isAdmin() || $user->isProductOwner() || $user->isSuporte();
+        return $user->isSupportStaff();
     }
 }

@@ -32,7 +32,7 @@ class PortalTicketProgressTest extends TestCase
         return [$client, Ticket::factory()->for($client)->create(['task_id' => $task->id])];
     }
 
-    private function view(Client $client, Ticket $ticket)
+    private function viewTicket(Client $client, Ticket $ticket)
     {
         return $this->withSession([EnsurePortalClient::SESSION_KEY => $client->id])->get(route('portal.tickets.show', $ticket));
     }
@@ -41,7 +41,7 @@ class PortalTicketProgressTest extends TestCase
     {
         [$client, $ticket] = $this->ticketWithTask();
 
-        $this->view($client, $ticket)
+        $this->viewTicket($client, $ticket)
             ->assertOk()
             ->assertSee('Andamento da solicitação')
             ->assertSee('Em andamento')
@@ -60,7 +60,7 @@ class PortalTicketProgressTest extends TestCase
             'branch_name' => 'feature/segredo-interno',
         ]);
 
-        $this->view($client, $ticket)
+        $this->viewTicket($client, $ticket)
             ->assertSee('Marina Souza')
             ->assertSee(now()->addWeek()->format('d/m/Y'))
             ->assertDontSee('Título interno da tarefa')
@@ -71,7 +71,7 @@ class PortalTicketProgressTest extends TestCase
     {
         [$client, $ticket] = $this->ticketWithTask(['completed_at' => now()], 3);
 
-        $this->view($client, $ticket)
+        $this->viewTicket($client, $ticket)
             ->assertSee('Concluída')
             ->assertSee('100%');
     }
@@ -81,7 +81,7 @@ class PortalTicketProgressTest extends TestCase
         $client = Client::factory()->create();
         $ticket = Ticket::factory()->for($client)->create();
 
-        $this->view($client, $ticket)
+        $this->viewTicket($client, $ticket)
             ->assertOk()
             ->assertDontSee('Andamento da solicitação');
     }

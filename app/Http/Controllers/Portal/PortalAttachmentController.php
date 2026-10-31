@@ -13,6 +13,7 @@ class PortalAttachmentController extends Controller
     public function show(Request $request, TicketAttachment $attachment): Response
     {
         abort_unless($attachment->ticket->client_id === $request->attributes->get('portal_client')->id, 404);
+        abort_if($attachment->message?->is_internal, 404);
 
         return AttachmentResponse::make($attachment, $request->boolean('download'));
     }

@@ -1,17 +1,35 @@
 <x-layouts.app>
     <div x-data="ticketPage({{ $ticket->id }}, @js($boards), @js($ticket->title))">
-        <x-page-header :title="'Chamado #'.$ticket->id.' · '.$ticket->title" :subtitle="$ticket->client->razao_social" :back="route('tickets.index')" backLabel="Chamados">
+        <x-page-header :title="'Chamado #'.$ticket->id.' · '.$ticket->title" :subtitle="$ticket->client->razao_social" :back="route('tickets.index')" backLabel="Chamados" />
+
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
             <select x-on:change="changeStatus($event.target.value)" class="form-select form-select-sm w-auto" aria-label="Situação do chamado">
                 @foreach (\App\Enums\TicketStatus::cases() as $status)
                     <option value="{{ $status->value }}" @selected($ticket->status === $status)>{{ $status->label() }}</option>
                 @endforeach
             </select>
-        </x-page-header>
+
+            <select x-on:change="changePriority($event.target.value)" class="form-select form-select-sm w-auto" aria-label="Prioridade do chamado">
+                @foreach (\App\Enums\TicketPriority::cases() as $priority)
+                    <option value="{{ $priority->value }}" @selected($ticket->priority === $priority)>Prioridade: {{ $priority->label() }}</option>
+                @endforeach
+            </select>
+            <select x-on:change="changeAssignee($event.target.value)" class="form-select form-select-sm w-auto" aria-label="Responsável pelo chamado">
+                <option value="">Sem responsável</option>
+                @foreach ($staff as $member)
+                    <option value="{{ $member->id }}" @selected($ticket->assigned_to === $member->id)>{{ $member->name }}</option>
+                @endforeach
+            </select>
+
+            @if ($ticket->assigned_to !== auth()->id())
+                <x-button type="button" class="btn-sm" x-on:click="claim"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i> Assumir</x-button>
+            @endif
+        </div>
 
         <div class="row g-4">
             <div class="col-lg-8 vstack gap-4">
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-2">Descrição</h2>
+                    <h2 class="h6 fw-semibold mb-2">Descrição</h2>
                     <p class="mb-0" style="white-space: pre-line;">{{ $ticket->description }}</p>
                     <x-attachment-chips :attachments="$ticket->attachments" route="ticket-attachments.show" />
                 </x-card>
@@ -20,10 +38,14 @@
                     <div class="card-header bg-body fw-semibold"><i class="bi bi-chat-dots me-1" aria-hidden="true"></i> Conversa</div>
                     <ul class="list-group list-group-flush">
                         @forelse ($ticket->messages as $message)
-                            <li class="list-group-item">
+                            <li class="list-group-item {{ $message->is_internal ? 'bg-warning-subtle' : '' }}">
                                 <div class="small mb-1">
                                     <span class="fw-medium">{{ $message->isFromStaff() ? $message->user->name : $ticket->client->razao_social }}</span>
-                                    <x-badge :color="$message->isFromStaff() ? 'primary' : 'secondary'">{{ $message->isFromStaff() ? 'Equipe' : 'Cliente' }}</x-badge>
+                                    @if ($message->is_internal)
+                                        <x-badge color="warning"><i class="bi bi-eye-slash" aria-hidden="true"></i> Nota interna</x-badge>
+                                    @else
+                                        <x-badge :color="$message->isFromStaff() ? 'primary' : 'secondary'">{{ $message->isFromStaff() ? 'Equipe' : 'Cliente' }}</x-badge>
+                                    @endif
                                     <span class="text-body-secondary">&middot; {{ $message->created_at->format('d/m/Y H:i') }}</span>
                                 </div>
                                 <div style="white-space: pre-line;">{{ $message->body }}</div>
@@ -34,24 +56,30 @@
                         @endforelse
                     </ul>
 
-                    <form x-on:submit.prevent="reply" class="card-footer bg-body vstack gap-2">
-                        <label for="reply-body" class="form-label fw-medium mb-0">Responder ao cliente</label>
+                    <form x-on:submit.prevent="reply" class="card-footer vstack gap-2" x-bind:class="replyMode === 'internal' ? 'bg-warning-subtle' : 'bg-body'">
+                        <div class="btn-group btn-group-sm align-self-start" role="group" aria-label="Tipo de mensagem">
+                            <button type="button" class="btn" x-bind:class="replyMode === 'public' ? 'btn-primary' : 'btn-outline-secondary'" x-on:click="replyMode = 'public'"><i class="bi bi-send" aria-hidden="true"></i> Responder ao cliente</button>
+                            <button type="button" class="btn" x-bind:class="replyMode === 'internal' ? 'btn-warning' : 'btn-outline-secondary'" x-on:click="replyMode = 'internal'"><i class="bi bi-eye-slash" aria-hidden="true"></i> Nota interna</button>
+                        </div>
+                        <p class="small text-body-secondary mb-0" x-show="replyMode === 'internal'" x-cloak>Visível só para a equipe de suporte. O cliente não recebe e-mail nem vê esta nota.</p>
+
+                        <label for="reply-body" class="visually-hidden">Mensagem</label>
                         <textarea id="reply-body" x-model="replyBody" x-bind:class="{ 'is-invalid': firstError('body') }" class="form-control" rows="3" required></textarea>
                         <div class="invalid-feedback" x-text="firstError('body')"></div>
 
                         <div>
-                            <input type="file" multiple x-on:change="pickReplyFiles" x-bind:class="{ 'is-invalid': firstError('files') || firstError('files.0') }" class="form-control" aria-label="Anexos">
-                            <div class="invalid-feedback" x-text="firstError('files') || firstError('files.0')"></div>
+                            <x-file-input x-ref="replyFiles" aria-label="Anexos" />
+                            <div class="text-danger small mt-1" x-show="firstError('files') || firstError('files.0')" x-cloak x-text="firstError('files') || firstError('files.0')"></div>
                         </div>
 
-                        <div class="text-end"><x-button type="submit" x-bind:disabled="isBusy"><i class="bi bi-send" aria-hidden="true"></i> Enviar resposta</x-button></div>
+                        <div class="text-end"><x-button type="submit" x-bind:disabled="isBusy"><i class="bi" x-bind:class="replyMode === 'internal' ? 'bi-eye-slash' : 'bi-send'" aria-hidden="true"></i> <span x-text="replyMode === 'internal' ? 'Salvar nota interna' : 'Enviar resposta'"></span></x-button></div>
                     </form>
                 </div>
             </div>
 
             <div class="col-lg-4 vstack gap-4">
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-2">Cliente</h2>
+                    <h2 class="h6 fw-semibold mb-2">Cliente</h2>
                     <div class="fw-semibold">{{ $ticket->client->razao_social }}</div>
                     <div class="small text-body-secondary">{{ $ticket->client->formatted_cnpj }}</div>
                     @if ($ticket->client->businessSector)
@@ -64,13 +92,40 @@
                 </x-card>
 
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-2">Situação</h2>
+                    <h2 class="h6 fw-semibold mb-2">Situação</h2>
                     <x-badge :color="$ticket->status->color()">{{ $ticket->status->label() }}</x-badge>
-                    <div class="small text-body-secondary mt-2">Aberto em {{ $ticket->created_at->format('d/m/Y H:i') }}</div>
+                    <x-badge :color="$ticket->priority->color()">{{ $ticket->priority->label() }}</x-badge>
+                    <div class="small mt-2"><i class="bi bi-person me-1" aria-hidden="true"></i> {{ $ticket->assignedTo?->name ?? 'Sem responsável' }}</div>
+                    <div class="small text-body-secondary mt-1">Aberto em {{ $ticket->created_at->format('d/m/Y H:i') }}</div>
+                    <div class="small text-body-secondary mt-1">
+                        1ª resposta: {{ $ticket->first_responded_at ? $ticket->first_responded_at->format('d/m/Y H:i').' ('.$ticket->created_at->locale('pt_BR')->diffForHumans($ticket->first_responded_at, ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]).')' : 'ainda sem resposta' }}
+                    </div>
+                    @if ($ticket->due_at)
+                        <div class="small mt-1 {{ $ticket->isOverdue() ? 'text-danger fw-medium' : 'text-body-secondary' }}">
+                            Prazo de resposta: {{ $ticket->due_at->format('d/m/Y H:i') }}
+                            @if ($ticket->isOverdue())
+                                <x-badge color="danger">Vencido</x-badge>
+                            @endif
+                        </div>
+                    @endif
                 </x-card>
 
+                @if ($otherTickets->isNotEmpty())
+                    <x-card>
+                        <h2 class="h6 fw-semibold mb-2">Outros chamados do cliente</h2>
+                        <ul class="list-unstyled mb-0 vstack gap-2">
+                            @foreach ($otherTickets as $other)
+                                <li class="d-flex align-items-center justify-content-between gap-2">
+                                    <a href="{{ route('tickets.show', $other) }}" class="text-body text-decoration-none text-truncate">#{{ $other->id }} · {{ $other->title }}</a>
+                                    <x-badge :color="$other->status->color()">{{ $other->status->label() }}</x-badge>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </x-card>
+                @endif
+
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-3">Tarefa vinculada</h2>
+                    <h2 class="h6 fw-semibold mb-3">Tarefa vinculada</h2>
 
                     @if ($ticket->task)
                         <a href="{{ route('tasks.show', $ticket->task) }}" class="d-block text-decoration-none mb-3"><i class="bi bi-kanban me-1" aria-hidden="true"></i> DQ-{{ $ticket->task->id }} · {{ $ticket->task->title }}</a>

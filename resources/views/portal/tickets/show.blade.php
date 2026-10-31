@@ -8,7 +8,7 @@
 
     <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
         <h1 class="h4 mb-0">{{ $ticket->title }}</h1>
-        <x-badge :color="$ticket->status->color()">{{ $ticket->status->label() }}</x-badge>
+        <x-badge :color="$ticket->status->color()">{{ $ticket->status->portalLabel() }}</x-badge>
     </div>
 
     <div class="row g-4">
@@ -45,7 +45,7 @@
                     @error('body') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                     <div>
-                        <input type="file" name="files[]" multiple class="form-control @if ($errors->has('files') || $errors->has('files.*')) is-invalid @endif" aria-label="Anexos">
+                        <x-file-input aria-label="Anexos" />
                         @foreach (collect($errors->get('files'))->merge(collect($errors->get('files.*'))->flatten())->unique() as $message)
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @endforeach
@@ -59,7 +59,7 @@
         @if ($progress)
             <div class="col-lg-4">
                 <x-card>
-                    <h2 class="h6 text-body-secondary text-uppercase mb-3"><i class="bi bi-kanban me-1" aria-hidden="true"></i> Andamento da solicitação</h2>
+                    <h2 class="h6 fw-semibold mb-3"><i class="bi bi-kanban me-1" aria-hidden="true"></i> Andamento da solicitação</h2>
                     <x-ticket-progress :progress="$progress" />
                 </x-card>
             </div>

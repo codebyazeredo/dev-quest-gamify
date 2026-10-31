@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Enums\TicketStatus;
 use App\Models\Board;
-use App\Models\BusinessSector;
 use App\Models\BoardColumn;
+use App\Models\BusinessSector;
 use App\Models\Client;
 use App\Models\Task;
 use App\Models\TaskCategory;
@@ -30,6 +30,11 @@ class TicketManagementTest extends TestCase
         Ticket::factory()->create(['title' => 'Resolvido B', 'status' => TicketStatus::RESOLVED]);
 
         $this->actingAs($support)->getJson(route('api.tickets.index'))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Aberto A');
+
+        $this->actingAs($support)->getJson(route('api.tickets.index', ['view' => 'all']))
             ->assertOk()
             ->assertJsonCount(2, 'data');
 

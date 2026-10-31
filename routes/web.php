@@ -34,6 +34,7 @@ use App\Http\Controllers\Profile\EmailPreferenceController;
 use App\Http\Controllers\Profile\ProfilePageController;
 use App\Http\Controllers\Profile\TwoFactorSettingsController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
+use App\Http\Controllers\Ticket\TicketExportController;
 use App\Http\Controllers\Ticket\TicketPageController;
 use App\Http\Middleware\EnsurePortalClient;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -60,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/attachments/{attachment}', [TaskAttachmentDownloadController::class, 'show'])->name('attachments.show');
     Route::get('/meu-perfil', [ProfilePageController::class, 'show'])->name('profile');
     Route::get('/tickets', [TicketPageController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/export', TicketExportController::class)->name('tickets.export');
     Route::get('/tickets/attachments/{attachment}', [TicketAttachmentDownloadController::class, 'show'])->whereNumber('attachment')->name('ticket-attachments.show');
     Route::get('/tickets/{ticket}', [TicketPageController::class, 'show'])->name('tickets.show');
     Route::get('/ranking', [RankingPageController::class, 'index'])->name('ranking');

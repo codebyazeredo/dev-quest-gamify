@@ -69,6 +69,9 @@ Route::post('tasks/{task}/unarchive', [TaskController::class, 'unarchive'])->nam
 
 Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
 Route::put('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.status');
+Route::put('tickets/{ticket}/priority', [TicketController::class, 'updatePriority'])->name('tickets.priority');
+Route::put('tickets/{ticket}/assignee', [TicketController::class, 'updateAssignee'])->name('tickets.assignee');
+Route::post('tickets/{ticket}/claim', [TicketController::class, 'claim'])->name('tickets.claim');
 Route::post('tickets/{ticket}/messages', [TicketController::class, 'reply'])->name('tickets.reply');
 Route::post('tickets/{ticket}/task', [TicketController::class, 'convertToTask'])->name('tickets.task');
 

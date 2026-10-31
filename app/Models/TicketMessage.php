@@ -7,9 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['ticket_id', 'user_id', 'body'])]
+#[Fillable(['ticket_id', 'user_id', 'body', 'is_internal'])]
 class TicketMessage extends Model
 {
+    protected function casts(): array
+    {
+        return ['is_internal' => 'boolean'];
+    }
+
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
