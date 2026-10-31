@@ -18,6 +18,11 @@ class ProfileService
         private UserRepository $users,
     ) {}
 
+    public function updateEmailPreference(User $user, bool $receiveEmails): void
+    {
+        $this->users->update($user, ['email_notifications' => $receiveEmails]);
+    }
+
     public function personOf(User $user): Person
     {
         return $this->people->findWithAddressOrFail((int) $user->person_id);

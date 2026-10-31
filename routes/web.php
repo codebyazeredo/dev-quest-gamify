@@ -28,6 +28,7 @@ use App\Http\Controllers\Portal\PortalTicketController;
 use App\Http\Controllers\Profile\DashboardPageController;
 use App\Http\Controllers\Task\TaskAttachmentDownloadController;
 use App\Http\Controllers\Task\TaskPageController;
+use App\Http\Controllers\Profile\EmailPreferenceController;
 use App\Http\Controllers\Profile\ProfilePageController;
 use App\Http\Controllers\Ticket\TicketAttachmentDownloadController;
 use App\Http\Controllers\Ticket\TicketPageController;
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/boards/{board}', [BoardPageController::class, 'show'])->name('boards.show');
     Route::get('/boards/{board}/archive', [BoardPageController::class, 'archive'])->name('boards.archive');
     Route::get('/tasks/{task}', [TaskPageController::class, 'show'])->name('tasks.show');
+    Route::put('/preferencias/email', [EmailPreferenceController::class, 'update'])->name('preferences.email');
     Route::get('/attachments/{attachment}', [TaskAttachmentDownloadController::class, 'show'])->name('attachments.show');
     Route::get('/meu-perfil', [ProfilePageController::class, 'show'])->name('profile');
     Route::get('/tickets', [TicketPageController::class, 'index'])->name('tickets.index');
