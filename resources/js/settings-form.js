@@ -1,4 +1,5 @@
 import { api, ApiError } from './api';
+import { stashToasts, toastsOf } from './page-actions';
 
 const DARK_TEXT = '#212529';
 const LIGHT_TEXT = '#ffffff';
@@ -62,17 +63,18 @@ export function settingsForm(initial) {
             }
 
             try {
-                const payload = await api.put('/api/settings', body);
-                this.savedLogoUrl = payload.data.logo_url;
-                this.form.logo = null;
+                const payload = await api.put('/api/settings', body, { silent: true });
+
+                stashToasts(toastsOf(payload));
+                window.location.reload();
             } catch (error) {
+                this.isSaving = false;
+
                 if (!(error instanceof ApiError && error.status === 422)) {
                     throw error;
                 }
 
                 this.errors = error.errors ?? {};
-            } finally {
-                this.isSaving = false;
             }
         },
 
