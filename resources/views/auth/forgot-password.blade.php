@@ -1,8 +1,6 @@
-<x-layouts.guest :title="__('Esqueci minha senha')">
-    <h1 class="h5 text-center mb-1">Esqueceu sua senha?</h1>
-    <p class="text-body-secondary text-center mb-4">
-        Informe seu e-mail e enviaremos um link para redefinir sua senha.
-    </p>
+<x-layouts.auth :title="__('Esqueci minha senha')">
+    <h1 class="auth-title">Esqueceu sua senha?</h1>
+    <p class="auth-lead">Informe seu e-mail e enviaremos um link para redefinir sua senha.</p>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
@@ -22,10 +20,8 @@
             <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control" required autofocus>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Enviar link de redefinição</button>
+        <button type="submit" class="btn btn-primary w-100 auth-submit">Enviar link de redefinição</button>
     </form>
 
-    <p class="small mt-4 mb-0">
-        <a href="{{ route('login') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar para o login</a>
-    </p>
-</x-layouts.guest>
+    <p class="auth-alt"><a href="{{ route('login') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar para o login</a></p>
+</x-layouts.auth>

@@ -1,0 +1,680 @@
+/* Telas de autenticação: painel animado à esquerda, formulário à direita.
+   Toda cor deriva de --bs-primary, a cor configurada em Configurações > Identidade da empresa.
+   Eixo único no painel: marca, título e quadro alinham à esquerda. */
+
+.auth-split {
+    --quest-loop: 16s;
+    --quest-pad: 0.875rem;
+    --quest-colpad: 0.625rem;
+    --quest-gap: 0.75rem;
+    --quest-slot: 6.25rem;
+    --quest-base: color-mix(in srgb, var(--bs-primary) 42%, #04060a);
+    --quest-base-deep: color-mix(in srgb, var(--bs-primary) 30%, #020305);
+    --quest-light: color-mix(in srgb, var(--bs-primary) 55%, white);
+    --quest-surface: rgba(255, 255, 255, 0.96);
+
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    background: var(--bs-body-bg);
+}
+
+@media (min-width: 992px) {
+    .auth-split {
+        grid-template-columns: minmax(0, 1fr) clamp(30rem, 44vw, 44rem);
+        grid-template-rows: 1fr;
+    }
+}
+
+/* Painel */
+
+.quest-panel {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(155deg, var(--quest-base) 0%, var(--quest-base-deep) 100%);
+}
+
+.quest-panel::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    z-index: -1;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1.5px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(ellipse at 30% 40%, #000 20%, transparent 70%);
+    animation: quest-drift 70s linear infinite;
+}
+
+@media (min-width: 992px) {
+    .quest-panel {
+        gap: 0;
+        padding: 2.5rem clamp(2.5rem, 5vw, 4.5rem) 3rem;
+    }
+}
+
+.quest-orb {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.5;
+}
+
+.quest-orb--a {
+    top: -8rem;
+    left: -6rem;
+    width: 26rem;
+    height: 26rem;
+    background: var(--bs-primary);
+    animation: quest-float-a 22s ease-in-out infinite alternate;
+}
+
+.quest-orb--b {
+    right: -8rem;
+    bottom: -10rem;
+    width: 28rem;
+    height: 28rem;
+    background: var(--quest-light);
+    opacity: 0.3;
+    animation: quest-float-b 28s ease-in-out infinite alternate;
+}
+
+.quest-brand {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 0.625rem;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.quest-logo {
+    display: inline-flex;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.quest-logo img {
+    display: block;
+    width: auto;
+    height: max(2.75rem, calc(var(--quest-logo-h, 4rem) * 0.55));
+    max-width: min(100%, 22rem);
+}
+
+@media (min-width: 992px) {
+    .quest-logo {
+        padding: 0.5rem 1rem;
+    }
+
+    .quest-logo img {
+        height: var(--quest-logo-h, 4rem);
+    }
+}
+
+.quest-brand .bi {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 1.15rem;
+}
+
+/* Título e frases que alternam */
+
+.quest-hero {
+    margin-top: 0.5rem;
+}
+
+@media (min-width: 992px) {
+    .quest-hero {
+        margin-top: clamp(2.5rem, 9vh, 6rem);
+    }
+}
+
+.quest-headline {
+    max-width: 16ch;
+    margin: 0 0 0.75rem;
+    font-size: 1.625rem;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+}
+
+@media (min-width: 992px) {
+    .quest-headline {
+        margin-bottom: 1.25rem;
+        font-size: clamp(2.5rem, 3.6vw, 3.75rem);
+    }
+}
+
+.quest-sublines {
+    position: relative;
+    min-height: 2.75rem;
+}
+
+@media (min-width: 992px) {
+    .quest-sublines {
+        min-height: 3.5rem;
+    }
+}
+
+.quest-subline {
+    position: absolute;
+    inset: 0 0 auto 0;
+    max-width: 30rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.82);
+    opacity: 0;
+    animation: quest-subline var(--quest-loop) ease-in-out infinite;
+    animation-delay: calc(var(--i) * var(--quest-loop) / 4);
+}
+
+@media (min-width: 992px) {
+    .quest-subline {
+        font-size: 1.1875rem;
+    }
+}
+
+/* Palco: quadro e barra de XP (só em telas largas) */
+
+.quest-stage {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .quest-stage {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 40rem;
+        margin-top: auto;
+        padding-top: 2.5rem;
+    }
+}
+
+.quest-board {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--quest-gap);
+    padding: var(--quest-pad);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+}
+
+.quest-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: var(--quest-colpad);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.quest-col-title {
+    height: 1.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.quest-slot {
+    display: block;
+    height: var(--quest-slot);
+    border: 1.5px dashed rgba(255, 255, 255, 0.26);
+    border-radius: 0.625rem;
+}
+
+.quest-slot--origin {
+    border-color: transparent;
+}
+
+.quest-ghost {
+    display: block;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.quest-ghost--short {
+    width: 68%;
+    height: 1.5rem;
+}
+
+.quest-card {
+    position: absolute;
+    top: calc(var(--quest-pad) + var(--quest-colpad) + 2rem);
+    left: calc(var(--quest-pad) + var(--quest-colpad));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.4rem;
+    width: calc((100% - 2 * var(--quest-pad) - 2 * var(--quest-gap)) / 3 - 2 * var(--quest-colpad));
+    min-height: var(--quest-slot);
+    padding: 0.7rem 0.75rem;
+    border-radius: 0.625rem;
+    color: #172b4d;
+    background: var(--quest-surface);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+    animation: quest-card var(--quest-loop) ease-in-out infinite;
+    will-change: transform;
+}
+
+.quest-tag {
+    align-self: flex-start;
+    padding: 0.05rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--app-primary-contrast, #fff);
+    background: var(--bs-primary);
+}
+
+.quest-card-title {
+    font-size: 0.875rem;
+    line-height: 1.25;
+}
+
+.quest-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quest-chip {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--bs-primary) 65%, black);
+    background: color-mix(in srgb, var(--bs-primary) 16%, white);
+}
+
+.quest-check {
+    font-size: 1.125rem;
+    color: #1f9d55;
+    opacity: 0;
+    animation: quest-check var(--quest-loop) ease-in-out infinite;
+}
+
+.quest-xp-pop {
+    position: absolute;
+    top: 0.5rem;
+    right: 1.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--bs-primary) 45%, black);
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: quest-xp-pop var(--quest-loop) ease-out infinite;
+}
+
+.quest-level {
+    position: relative;
+    padding: 1rem 1.125rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.quest-level-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.quest-level-label {
+    position: relative;
+    display: inline-block;
+    min-width: 5rem;
+    height: 1.375rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.quest-lv {
+    position: absolute;
+    inset: 0;
+    white-space: nowrap;
+}
+
+.quest-lv--before {
+    animation: quest-lv-before var(--quest-loop) steps(1, end) infinite;
+}
+
+.quest-lv--after {
+    opacity: 0;
+    animation: quest-lv-after var(--quest-loop) ease-out infinite;
+}
+
+.quest-bar {
+    height: 0.75rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.quest-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--quest-light), #fff);
+    animation: quest-bar var(--quest-loop) ease-in-out infinite;
+}
+
+.quest-spark {
+    position: absolute;
+    top: 40%;
+    right: 3rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    animation: quest-burst var(--quest-loop) ease-out infinite;
+}
+
+.quest-spark:nth-of-type(odd) {
+    background: var(--quest-light);
+}
+
+/* Formulário */
+
+.auth-theme {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+
+.auth-main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.5rem 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .auth-main {
+        padding: 3rem 2.5rem 2rem;
+    }
+}
+
+.auth-form-wrap {
+    width: 100%;
+    max-width: 26rem;
+    margin-block: auto;
+}
+
+.auth-title {
+    margin-bottom: 0.375rem;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+}
+
+.auth-lead {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: var(--bs-secondary-color);
+}
+
+.auth-form-wrap .form-label {
+    margin-bottom: 0.375rem !important;
+    font-size: 0.875rem;
+}
+
+.auth-form-wrap .form-control,
+.auth-form-wrap .input-group-text,
+.auth-form-wrap .input-group .btn {
+    padding-block: 0.8rem;
+    font-size: 1rem;
+}
+
+.auth-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-block: 0.9rem;
+    border-radius: 0.625rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 10px 24px -10px var(--bs-primary);
+}
+
+.auth-submit .bi {
+    transition: transform 0.15s ease;
+}
+
+.auth-submit:hover .bi {
+    transform: translateX(0.25rem);
+}
+
+.auth-alt {
+    margin: 1.5rem 0 0;
+    font-size: 0.9375rem;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+/* Rodapé fixo do produto: independe da identidade configurada pela empresa */
+
+.auth-footer {
+    width: 100%;
+    max-width: 26rem;
+    margin-top: 1.5rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--bs-border-color);
+    text-align: center;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    color: var(--bs-secondary-color);
+}
+
+.auth-footer p {
+    margin: 0;
+}
+
+.auth-footer-product strong {
+    font-weight: 600;
+    color: var(--bs-body-color);
+}
+
+.auth-footer-credit {
+    margin-top: 0.125rem !important;
+}
+
+.auth-footer .app-footer-brand {
+    font-weight: 600;
+    color: var(--bs-body-color);
+}
+
+.auth-footer .app-footer-brand strong {
+    color: var(--bs-primary);
+}
+
+/* Movimento */
+
+@keyframes quest-drift {
+    to { transform: translate(24px, 24px); }
+}
+
+@keyframes quest-float-a {
+    to { transform: translate(8rem, 5rem) scale(1.15); }
+}
+
+@keyframes quest-float-b {
+    to { transform: translate(-7rem, -4rem) scale(1.1); }
+}
+
+@keyframes quest-card {
+    0%, 6% { transform: translateX(0) scale(1) rotate(0); opacity: 1; }
+    10% { transform: translateX(0) scale(1.05) rotate(-2deg); }
+    22%, 26% { transform: translateX(calc(100% + 2 * var(--quest-colpad) + var(--quest-gap))) scale(1.05) rotate(-2deg); }
+    38% { transform: translateX(calc(2 * (100% + 2 * var(--quest-colpad) + var(--quest-gap)))) scale(1.05) rotate(2deg); }
+    44%, 90% { transform: translateX(calc(2 * (100% + 2 * var(--quest-colpad) + var(--quest-gap)))) scale(1) rotate(0); opacity: 1; }
+    94% { transform: translateX(calc(2 * (100% + 2 * var(--quest-colpad) + var(--quest-gap)))) scale(1) rotate(0); opacity: 0; }
+    95% { transform: translateX(0) scale(1) rotate(0); opacity: 0; }
+    100% { transform: translateX(0) scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes quest-check {
+    0%, 44% { opacity: 0; transform: scale(0.4); }
+    48%, 92% { opacity: 1; transform: scale(1); }
+    94%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes quest-xp-pop {
+    0%, 45% { opacity: 0; transform: translateY(0.75rem) scale(0.8); }
+    50% { opacity: 1; transform: translateY(0) scale(1); }
+    62% { opacity: 1; transform: translateY(-0.5rem) scale(1); }
+    68%, 100% { opacity: 0; transform: translateY(-1.5rem) scale(1); }
+}
+
+@keyframes quest-bar {
+    0%, 44% { width: 18%; }
+    60% { width: 100%; }
+    92% { width: 100%; }
+    98%, 100% { width: 18%; }
+}
+
+@keyframes quest-lv-before {
+    0%, 59% { opacity: 1; }
+    60%, 97% { opacity: 0; }
+    98%, 100% { opacity: 1; }
+}
+
+@keyframes quest-lv-after {
+    0%, 59% { opacity: 0; transform: scale(0.9); }
+    63% { opacity: 1; transform: scale(1.2); }
+    68%, 92% { opacity: 1; transform: scale(1); }
+    97%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes quest-burst {
+    0%, 59% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+    61% { opacity: 1; }
+    72%, 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1); }
+}
+
+@keyframes quest-subline {
+    0% { opacity: 0; transform: translateY(0.5rem); }
+    4%, 25% { opacity: 1; transform: translateY(0); }
+    29%, 100% { opacity: 0; transform: translateY(-0.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-panel::before,
+    .quest-orb,
+    .quest-card,
+    .quest-check,
+    .quest-xp-pop,
+    .quest-bar-fill,
+    .quest-lv,
+    .quest-spark,
+    .quest-subline {
+        animation: none;
+    }
+
+    .quest-card { transform: translateX(calc(2 * (100% + 2 * var(--quest-colpad) + var(--quest-gap)))); }
+    .quest-check { opacity: 1; }
+    .quest-bar-fill { width: 100%; }
+    .quest-lv--before { opacity: 0; }
+    .quest-lv--after { opacity: 1; }
+    .quest-subline:first-child { opacity: 1; }
+}
+
+/* Sem rolagem: em telas baixas o conteúdo se compacta em etapas. */
+
+@media (min-width: 992px) and (max-height: 900px) {
+    .quest-logo img {
+        height: min(var(--quest-logo-h, 4rem), 8rem);
+    }
+
+    .quest-hero {
+        margin-top: 1.5rem;
+    }
+
+    .quest-stage {
+        padding-top: 1.5rem;
+    }
+
+    .quest-headline {
+        margin-bottom: 0.75rem;
+        font-size: clamp(2.25rem, 3.2vw, 3.25rem);
+    }
+
+    .auth-main {
+        padding-block: 1.5rem 1rem;
+    }
+}
+
+@media (min-width: 992px) and (max-height: 780px) {
+    .quest-logo img {
+        height: min(var(--quest-logo-h, 4rem), 5rem);
+    }
+
+    .quest-ghost {
+        display: none;
+    }
+
+    .quest-slot {
+        height: 5rem;
+    }
+
+    .auth-split {
+        --quest-slot: 5rem;
+    }
+
+    .auth-title {
+        font-size: 1.75rem;
+    }
+
+    .auth-lead,
+    .auth-form-wrap .vstack {
+        margin-bottom: 1rem;
+        gap: 0.75rem !important;
+    }
+}
+
+@media (min-width: 992px) and (max-height: 660px) {
+    .quest-logo img {
+        height: min(var(--quest-logo-h, 4rem), 4rem);
+    }
+
+    .quest-stage {
+        display: none;
+    }
+
+    .quest-hero {
+        margin-block: auto;
+    }
+}

@@ -1,5 +1,6 @@
-<x-layouts.guest :title="__('Redefinir senha')">
-    <h1 class="h5 text-center mb-4">Redefinir senha</h1>
+<x-layouts.auth :title="__('Redefinir senha')">
+    <h1 class="auth-title">Redefinir senha</h1>
+    <p class="auth-lead">Defina uma nova senha para acessar sua conta.</p>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
@@ -31,6 +32,6 @@
             <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Redefinir senha</button>
+        <button type="submit" class="btn btn-primary w-100 auth-submit">Redefinir senha</button>
     </form>
-</x-layouts.guest>
+</x-layouts.auth>

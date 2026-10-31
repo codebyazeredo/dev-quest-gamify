@@ -26,11 +26,7 @@
             <div class="text-center mb-4">
                 @if ($appSettings->logoUrl())
                     @php
-                        $logoHeight = match ($appSettings->logo_size) {
-                            \App\Enums\LogoSize::SMALL => '3rem',
-                            \App\Enums\LogoSize::MEDIUM => '5rem',
-                            \App\Enums\LogoSize::LARGE => '7rem',
-                        };
+                        $logoHeight = $appSettings->logo_size->loginHeightRem().'rem';
                     @endphp
                     <img src="{{ $appSettings->logoUrl() }}" alt="{{ $appSettings->displayName() }}" style="height: {{ $logoHeight }}; max-width: 100%; width: auto;">
                 @else

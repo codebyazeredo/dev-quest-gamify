@@ -1,6 +1,6 @@
-<x-layouts.guest :title="__('Entrar')">
-    <h1 class="h5 text-center mb-1">Entrar na plataforma</h1>
-    <p class="text-body-secondary text-center mb-4">Use seu e-mail e senha para continuar.</p>
+<x-layouts.auth :title="__('Entrar')">
+    <h1 class="auth-title">Bem-vindo de volta</h1>
+    <p class="auth-lead">Acesse sua conta para continuar.</p>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
@@ -28,7 +28,7 @@
             <div class="input-group">
                 <span class="input-group-text"><x-icon name="lock" /></span>
                 <input :type="show ? 'text' : 'password'" id="password" name="password" class="form-control" required autocomplete="current-password" placeholder="sua senha">
-                <button type="button" @click="show = !show" title="Mostrar/ocultar senha" aria-label="Mostrar/ocultar senha" class="btn btn-outline-secondary">
+                <button type="button" @click="show = !show" title="Mostrar ou ocultar senha" aria-label="Mostrar ou ocultar senha" class="btn btn-outline-secondary">
                     <span x-show="!show"><x-icon name="eye" /></span>
                     <span x-show="show" x-cloak><x-icon name="eye-off" /></span>
                 </button>
@@ -44,6 +44,8 @@
             <a href="{{ route('password.request') }}">Esqueceu sua senha?</a>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Entrar</button>
+        <button type="submit" class="btn btn-primary w-100 auth-submit">Entrar <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </form>
-</x-layouts.guest>
+
+    <p class="auth-alt">É cliente? <a href="{{ route('portal.login') }}">Acesse o portal de chamados</a></p>
+</x-layouts.auth>

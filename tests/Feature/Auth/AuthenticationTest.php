@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\AppSetting;
 use App\Models\Level;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +17,26 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertOk();
+    }
+
+    public function test_login_screen_shows_the_animated_panel_and_the_portal_link(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('quest-panel', false)
+            ->assertSee('data-theme-toggle', false)
+            ->assertSee('Desenvolvido por', false)
+            ->assertSee('Planeje, entregue e reconheça resultados.')
+            ->assertSee(route('portal.login'), false);
+    }
+
+    public function test_login_logo_height_follows_the_configured_size(): void
+    {
+        foreach (['small' => 4, 'medium' => 6, 'large' => 8] as $size => $rem) {
+            AppSetting::current()->update(['logo_size' => $size, 'logo_path' => 'logos/empresa.png']);
+
+            $this->get('/login')->assertOk()->assertSee("--quest-logo-h: {$rem}rem", false);
+        }
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
