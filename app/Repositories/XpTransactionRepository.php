@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\XpTransaction;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
 class XpTransactionRepository extends Repository
 {
@@ -53,6 +55,37 @@ class XpTransactionRepository extends Repository
     public function paginateLatestFor(User $user, int $perPage): LengthAwarePaginator
     {
         return $this->query()->where('user_id', $user->id)->latest()->paginate($perPage);
+    }
+
+    /** @param  array{user_id: ?int, source: ?int, from: ?string, to: ?string}  $filters */
+    public function paginateAudit(array $filters, int $perPage): LengthAwarePaginator
+    {
+        return $this->auditQuery($filters)->with('user')->latest()->latest('id')->paginate($perPage);
+    }
+
+    /**
+     * @param  array{user_id: ?int, source: ?int, from: ?string, to: ?string}  $filters
+     * @return LazyCollection<int, XpTransaction>
+     */
+    public function lazyAudit(array $filters): LazyCollection
+    {
+        return $this->auditQuery($filters)->with('user')->latest()->latest('id')->lazy();
+    }
+
+    /** @param  array{user_id: ?int, source: ?int, from: ?string, to: ?string}  $filters */
+    public function sumAudit(array $filters): int
+    {
+        return (int) $this->auditQuery($filters)->sum('amount');
+    }
+
+    /** @param  array{user_id: ?int, source: ?int, from: ?string, to: ?string}  $filters */
+    private function auditQuery(array $filters): Builder
+    {
+        return $this->query()
+            ->when($filters['user_id'], fn (Builder $query, int $userId) => $query->where('user_id', $userId))
+            ->when($filters['source'], fn (Builder $query, int $source) => $query->where('source_type', $source))
+            ->when($filters['from'], fn (Builder $query, string $from) => $query->whereDate('created_at', '>=', $from))
+            ->when($filters['to'], fn (Builder $query, string $to) => $query->whereDate('created_at', '<=', $to));
     }
 
     public function sumSince(CarbonInterface $since): int

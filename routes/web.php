@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\TaskCategoryPageController;
 use App\Http\Controllers\Admin\TaskPriorityPageController;
 use App\Http\Controllers\Admin\TitlePageController;
 use App\Http\Controllers\Admin\UserPageController;
+use App\Http\Controllers\Admin\XpAuditExportController;
+use App\Http\Controllers\Admin\XpAuditPageController;
 use App\Http\Controllers\Board\BoardPageController;
 use App\Http\Controllers\Gamification\CheckinPageController;
 use App\Http\Controllers\Gamification\RankingPageController;
@@ -72,6 +74,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardPageController::class, 'index'])->name('admin.dashboard');
     Route::get('/users', [UserPageController::class, 'index'])->name('admin.users');
     Route::get('/people', [PersonPageController::class, 'index'])->name('admin.people');
+    Route::get('/xp-audit', [XpAuditPageController::class, 'index'])->name('admin.xp-audit');
+    Route::get('/xp-audit/export', XpAuditExportController::class)->name('admin.xp-audit.export');
     Route::get('/clients', [ClientPageController::class, 'index'])->name('admin.clients');
     Route::get('/business-sectors', [BusinessSectorPageController::class, 'index'])->name('admin.business-sectors');
     Route::get('/roles', [RolePageController::class, 'index'])->name('admin.roles');

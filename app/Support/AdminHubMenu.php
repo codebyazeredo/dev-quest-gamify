@@ -32,6 +32,7 @@ class AdminHubMenu
                     ['route' => 'admin.priority-rules', 'label' => 'Gravidade', 'description' => 'Multiplicadores de prioridade.', 'icon' => 'alert'],
                     ['route' => 'admin.achievements', 'label' => 'Conquistas', 'description' => 'Condições e recompensas.', 'icon' => 'trophy'],
                     ['route' => 'admin.titles', 'label' => 'Títulos', 'description' => 'Títulos desbloqueáveis.', 'icon' => 'medal'],
+                    ['route' => 'admin.xp-audit', 'label' => 'Auditoria de XP', 'description' => 'Quem recebeu XP, quanto, por quê e quando.', 'icon' => 'bolt'],
                     ['route' => 'admin.challenges', 'label' => 'Desafios', 'description' => 'Metas por período.', 'icon' => 'flag'],
                 ],
             ],
