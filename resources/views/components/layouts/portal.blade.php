@@ -6,7 +6,7 @@
 
         @php $appSettings = \App\Models\AppSetting::current(); @endphp
 
-        <title>{{ $title ?? 'Portal do cliente' }} · {{ $appSettings->displayName() }}</title>
+        <title>{{ $title ?? 'Portal de Clientes' }} · {{ $appSettings->displayName() }}</title>
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any">
@@ -27,7 +27,7 @@
                 @else
                     <i class="bi bi-controller text-primary" aria-hidden="true"></i>
                 @endif
-                {{ $appSettings->displayName() }} <span class="text-body-secondary fw-normal d-none d-sm-inline">· Portal do cliente</span>
+                {{ $appSettings->displayName() }} <span class="text-body-secondary fw-normal d-none d-sm-inline">· Portal de Clientes</span>
             </a>
 
             @isset($client)

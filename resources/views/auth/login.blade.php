@@ -1,6 +1,9 @@
 <x-layouts.auth :title="__('Entrar')">
-    <h1 class="auth-title">Bem-vindo de volta</h1>
-    <p class="auth-lead">Acesse sua conta para continuar.</p>
+    <header class="auth-header">
+        <span class="auth-badge" aria-hidden="true"><i class="bi bi-person-lock"></i></span>
+        <h1 class="auth-title">Bem-vindo de volta</h1>
+        <p class="auth-lead">Entre com seu e-mail e senha para acessar o painel.</p>
+    </header>
 
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
@@ -47,5 +50,9 @@
         <button type="submit" class="btn btn-primary w-100 auth-submit">Entrar <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </form>
 
-    <p class="auth-alt">É cliente? <a href="{{ route('portal.login') }}">Acesse o portal de chamados</a></p>
+    <div class="auth-divider"><span>É cliente?</span></div>
+
+    <a href="{{ route('portal.login') }}" class="btn btn-outline-primary w-100 auth-secondary">
+        <i class="bi bi-building" aria-hidden="true"></i> Acesse o Portal de Clientes
+    </a>
 </x-layouts.auth>

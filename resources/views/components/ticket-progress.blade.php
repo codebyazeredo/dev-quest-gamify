@@ -7,7 +7,7 @@
     </div>
 
     <div class="progress" role="progressbar" aria-label="Andamento" aria-valuenow="{{ $progress['percent'] }}" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar {{ $progress['is_completed'] ? 'bg-success' : '' }}" style="width: {{ $progress['percent'] }}%"></div>
+        <div class="progress-bar portal-grow {{ $progress['is_completed'] ? 'bg-success' : '' }}" style="width: {{ $progress['percent'] }}%"></div>
     </div>
 
     <ol class="ticket-steps list-unstyled mt-3 mb-0">

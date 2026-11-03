@@ -49,13 +49,24 @@
     <div class="card">
         <ul class="list-group list-group-flush">
             @forelse ($tickets as $ticket)
-                <li class="list-group-item">
-                    <a href="{{ route('portal.tickets.show', $ticket) }}" class="d-flex align-items-center justify-content-between gap-3 text-body text-decoration-none">
-                        <span class="min-w-0">
+                @php
+                    $statusColor = $ticket->status->color();
+                    $statusIcon = match ($ticket->status) {
+                        \App\Enums\TicketStatus::OPEN => 'bi-envelope-open',
+                        \App\Enums\TicketStatus::IN_PROGRESS => 'bi-arrow-repeat',
+                        \App\Enums\TicketStatus::WAITING_CUSTOMER => 'bi-chat-left-text',
+                        \App\Enums\TicketStatus::RESOLVED => 'bi-check2-circle',
+                    };
+                @endphp
+                <li class="list-group-item p-0 portal-rise" style="--i: {{ $loop->index }}">
+                    <a href="{{ route('portal.tickets.show', $ticket) }}" class="portal-ticket">
+                        <span class="portal-ticket-icon bg-{{ $statusColor }}-subtle text-{{ $statusColor }}-emphasis"><i class="bi {{ $statusIcon }}" aria-hidden="true"></i></span>
+                        <span class="min-w-0 flex-grow-1">
                             <span class="d-block fw-medium text-truncate">#{{ $ticket->id }} · {{ $ticket->title }}</span>
                             <span class="d-block small text-body-secondary">Aberto em {{ $ticket->created_at->format('d/m/Y H:i') }}</span>
                         </span>
-                        <x-badge :color="$ticket->status->color()">{{ $ticket->status->portalLabel() }}</x-badge>
+                        <x-badge :color="$statusColor">{{ $ticket->status->portalLabel() }}</x-badge>
+                        <i class="bi bi-chevron-right portal-ticket-arrow" aria-hidden="true"></i>
                     </a>
                 </li>
             @empty

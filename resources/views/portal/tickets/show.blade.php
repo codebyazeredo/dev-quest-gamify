@@ -22,9 +22,9 @@
             <div class="card">
                 <div class="card-header bg-body fw-semibold"><i class="bi bi-chat-dots me-1" aria-hidden="true"></i> Conversa</div>
 
-                <ul class="list-group list-group-flush">
+                <div class="portal-thread">
                     @forelse ($ticket->messages as $message)
-                        <li class="list-group-item">
+                        <div class="portal-msg {{ $message->isFromStaff() ? 'portal-msg--staff' : 'portal-msg--client' }} portal-rise" style="--i: {{ $loop->index }}">
                             <div class="small mb-1">
                                 <span class="fw-medium">{{ $message->isFromStaff() ? $message->user->name : 'Você' }}</span>
                                 @if ($message->isFromStaff())<x-badge color="primary">Equipe</x-badge>@endif
@@ -32,11 +32,11 @@
                             </div>
                             <div style="white-space: pre-line;">{{ $message->body }}</div>
                             <x-attachment-chips :attachments="$message->attachments" route="portal.attachments.show" />
-                        </li>
+                        </div>
                     @empty
-                        <li class="list-group-item small text-body-secondary">Aguardando a primeira resposta da equipe.</li>
+                        <p class="small text-body-secondary text-center mb-0 py-2">Aguardando a primeira resposta da equipe.</p>
                     @endforelse
-                </ul>
+                </div>
 
                 <form method="POST" action="{{ route('portal.tickets.reply', $ticket) }}" enctype="multipart/form-data" class="card-footer bg-body vstack gap-2">
                     @csrf

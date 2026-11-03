@@ -201,8 +201,7 @@
         gap: 1rem;
         width: 100%;
         max-width: 40rem;
-        margin-top: auto;
-        padding-top: 2.5rem;
+        padding-top: 3rem;
     }
 }
 
@@ -386,6 +385,133 @@
     animation: quest-bar var(--quest-loop) ease-in-out infinite;
 }
 
+/* Painel do portal de clientes: reproduz "Meus chamados" e "Andamento da solicitação" */
+
+.quest-ticket {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.125rem 1.25rem 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+}
+
+.quest-ticket-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quest-ticket-title {
+    font-size: 1.125rem;
+    line-height: 1.25;
+}
+
+.quest-new {
+    padding: 0.2rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--bs-primary) 45%, black);
+    background: #fff;
+}
+
+.quest-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.quest-row-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-status,
+.quest-badge {
+    flex-shrink: 0;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.quest-status {
+    position: relative;
+    min-width: 6.5rem;
+    height: 1.375rem;
+    line-height: 1.375rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.quest-badge {
+    padding: 0.2rem 0.65rem;
+}
+
+.quest-badge--done {
+    color: #fff;
+    background: #1f9d55;
+}
+
+.quest-level-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.quest-level--steps .quest-bar-fill {
+    animation-name: quest-bar-steps;
+    animation-timing-function: step-end;
+}
+
+.quest-stepper {
+    position: relative;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.quest-stepper::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1.375rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.16);
+    animation: quest-cursor var(--quest-loop) step-end infinite;
+}
+
+.quest-stepper li {
+    position: relative;
+    height: 1.375rem;
+    padding-left: 1.75rem;
+    line-height: 1.375rem;
+}
+
+.quest-stepper li::before {
+    content: '';
+    position: absolute;
+    top: 0.4rem;
+    left: 0.5rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+}
+
 .quest-spark {
     position: absolute;
     top: 40%;
@@ -429,6 +555,26 @@
     width: 100%;
     max-width: 26rem;
     margin-block: auto;
+}
+
+.auth-header {
+    margin-bottom: 1.75rem;
+}
+
+.auth-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    border-radius: 0.875rem;
+    font-size: 1.375rem;
+    color: var(--bs-primary);
+    background: color-mix(in srgb, var(--bs-primary) 12%, transparent);
+}
+
+.auth-header .auth-lead {
+    margin-bottom: 0;
 }
 
 .auth-title {
@@ -478,11 +624,30 @@
     transform: translateX(0.25rem);
 }
 
-.auth-alt {
-    margin: 1.5rem 0 0;
-    font-size: 0.9375rem;
-    text-align: center;
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 1rem;
+    font-size: 0.8125rem;
     color: var(--bs-secondary-color);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.auth-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-block: 0.75rem;
+    border-radius: 0.625rem;
+    font-weight: 600;
 }
 
 /* Rodapé fixo do produto: independe da identidade configurada pela empresa */
@@ -585,6 +750,28 @@
     72%, 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1); }
 }
 
+@keyframes quest-cursor {
+    0% { transform: translateY(0); }
+    14% { transform: translateY(1.375rem); }
+    26% { transform: translateY(2.75rem); }
+    38% { transform: translateY(4.125rem); }
+    50% { transform: translateY(5.5rem); }
+    62% { transform: translateY(6.875rem); }
+    74%, 94% { transform: translateY(8.25rem); }
+    96%, 100% { transform: translateY(0); }
+}
+
+@keyframes quest-bar-steps {
+    0% { width: 14%; }
+    14% { width: 28%; }
+    26% { width: 43%; }
+    38% { width: 57%; }
+    50% { width: 71%; }
+    62% { width: 86%; }
+    74%, 94% { width: 100%; }
+    96%, 100% { width: 14%; }
+}
+
 @keyframes quest-subline {
     0% { opacity: 0; transform: translateY(0.5rem); }
     4%, 25% { opacity: 1; transform: translateY(0); }
@@ -599,6 +786,7 @@
     .quest-xp-pop,
     .quest-bar-fill,
     .quest-lv,
+    .quest-stepper::before,
     .quest-spark,
     .quest-subline {
         animation: none;
@@ -606,6 +794,7 @@
 
     .quest-card { transform: translateX(calc(2 * (100% + 2 * var(--quest-colpad) + var(--quest-gap)))); }
     .quest-check { opacity: 1; }
+    .quest-stepper::before { transform: translateY(8.25rem); }
     .quest-bar-fill { width: 100%; }
     .quest-lv--before { opacity: 0; }
     .quest-lv--after { opacity: 1; }

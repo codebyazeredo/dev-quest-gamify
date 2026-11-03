@@ -1,4 +1,4 @@
-@props(['title' => null])
+@props(['title' => null, 'portal' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -7,12 +7,33 @@
 
         @php
             $appSettings = \App\Models\AppSetting::current();
-            $sublines = [
-                'Organize as entregas em quadros e acompanhe o andamento em tempo real.',
-                'Reconheça resultados com pontos, níveis e conquistas.',
-                'Metas e desafios que mantêm o time engajado e alinhado.',
-                'Ranking e indicadores para decidir com mais clareza.',
-            ];
+            $panel = $portal
+                ? [
+                    'headline' => 'Seu suporte sempre ao seu alcance.',
+                    'sublines' => [
+                        'Abra chamados com anexos e acompanhe cada resposta da equipe.',
+                        'Veja o andamento da solicitação etapa por etapa.',
+                        'Responda e reabra o chamado quando precisar de mais ajuda.',
+                        'Todo o histórico de chamados da sua empresa em um só lugar.',
+                    ],
+                ]
+                : [
+                    'headline' => 'Planeje, entregue e reconheça resultados.',
+                    'sublines' => [
+                        'Organize as entregas em quadros e acompanhe o andamento em tempo real.',
+                        'Reconheça resultados com pontos, níveis e conquistas.',
+                        'Metas e desafios que mantêm o time engajado e alinhado.',
+                        'Ranking e indicadores para decidir com mais clareza.',
+                    ],
+                    'columns' => ['A fazer', 'Em andamento', 'Concluído'],
+                    'tag' => 'Bug',
+                    'cardTitle' => 'Corrigir cálculo de XP',
+                    'chip' => '50 XP',
+                    'pop' => '+50 XP',
+                    'levelBefore' => 'Nível 12',
+                    'levelAfter' => 'Nível 13',
+                    'levelCaption' => 'XP da semana',
+                ];
             $sparks = [[-3.2, -2.6], [-1.6, -3.4], [0.2, -3.8], [1.9, -3.3], [3.3, -2.4], [-2.6, -0.6], [2.8, -0.4], [0.4, -2]];
         @endphp
 
@@ -45,18 +66,50 @@
             </div>
 
             <div class="quest-hero">
-                <p class="quest-headline">Planeje, entregue e reconheça resultados.</p>
+                <p class="quest-headline">{{ $panel['headline'] }}</p>
 
                 <div class="quest-sublines" aria-hidden="true">
-                    @foreach ($sublines as $subline)
+                    @foreach ($panel['sublines'] as $subline)
                         <p class="quest-subline" style="--i: {{ $loop->index }};">{{ $subline }}</p>
                     @endforeach
                 </div>
             </div>
 
             <div class="quest-stage" aria-hidden="true">
+                @if ($portal)
+                    <div class="quest-ticket">
+                        <div class="quest-ticket-head">
+                            <strong class="quest-ticket-title">Meus chamados</strong>
+                            <span class="quest-new"><i class="bi bi-plus-lg"></i> Novo chamado</span>
+                        </div>
+
+                        <div class="quest-row">
+                            <span class="quest-row-title">#46 · Fatura consolidada mensal por centro de custo</span>
+                            <span class="quest-status">
+                                <span class="quest-lv quest-lv--before">Aberto</span>
+                                <span class="quest-lv quest-lv--after">Resolvido</span>
+                            </span>
+                        </div>
+                        <div class="quest-row">
+                            <span class="quest-row-title">#20 · Frete por tonelada com arredondamento diferente do contrato</span>
+                            <span class="quest-badge quest-badge--done">Resolvido</span>
+                        </div>
+                    </div>
+
+                    <div class="quest-level quest-level--steps">
+                        <div class="quest-level-head">
+                            <span class="quest-level-title"><i class="bi bi-kanban"></i> Andamento da solicitação</span>
+                        </div>
+                        <div class="quest-bar"><div class="quest-bar-fill"></div></div>
+                        <ol class="quest-stepper">
+                            @foreach (['Backlog', 'A Fazer', 'Em Andamento', 'Em Revisão', 'Em Teste', 'Aprovado', 'Concluído'] as $stepName)
+                                <li>{{ $stepName }}</li>
+                            @endforeach
+                        </ol>
+                    </div>
+                @else
                 <div class="quest-board">
-                    @foreach (['A fazer', 'Em andamento', 'Concluído'] as $columnTitle)
+                    @foreach ($panel['columns'] as $columnTitle)
                         <div class="quest-col">
                             <span class="quest-col-title">{{ $columnTitle }}</span>
                             <span class="quest-slot @if ($loop->first) quest-slot--origin @endif"></span>
@@ -66,24 +119,24 @@
                     @endforeach
 
                     <div class="quest-card">
-                        <span class="quest-tag">Bug</span>
-                        <strong class="quest-card-title">Corrigir cálculo de XP</strong>
+                        <span class="quest-tag">{{ $panel['tag'] }}</span>
+                        <strong class="quest-card-title">{{ $panel['cardTitle'] }}</strong>
                         <span class="quest-card-foot">
-                            <span class="quest-chip">50 XP</span>
+                            <span class="quest-chip">{{ $panel['chip'] }}</span>
                             <i class="bi bi-check-circle-fill quest-check"></i>
                         </span>
                     </div>
 
-                    <span class="quest-xp-pop">+50 XP</span>
+                    <span class="quest-xp-pop">{{ $panel['pop'] }}</span>
                 </div>
 
                 <div class="quest-level">
                     <div class="quest-level-head">
                         <span class="quest-level-label">
-                            <span class="quest-lv quest-lv--before">Nível 12</span>
-                            <span class="quest-lv quest-lv--after">Nível 13</span>
+                            <span class="quest-lv quest-lv--before">{{ $panel['levelBefore'] }}</span>
+                            <span class="quest-lv quest-lv--after">{{ $panel['levelAfter'] }}</span>
                         </span>
-                        <span>XP da semana</span>
+                        <span>{{ $panel['levelCaption'] }}</span>
                     </div>
                     <div class="quest-bar"><div class="quest-bar-fill"></div></div>
 
@@ -91,6 +144,7 @@
                         <span class="quest-spark" style="--x: {{ $x }}rem; --y: {{ $y }}rem;"></span>
                     @endforeach
                 </div>
+                @endif
             </div>
         </aside>
 
